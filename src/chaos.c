@@ -39,13 +39,13 @@ const enum GameMode badModes[] = {
 #define EFFECT_MAX 10
 static activeEffects = 0;
 
-void peril_sound() {
+static void peril_sound() {
     if (frameCount % 25 == 0) {
         sfx_play_sound(SOUND_PERIL);
     }
 }
 
-void pos_load() {
+static void pos_load() {
     static Vec3f saved_pos;
     if (frameCount % 30 == 20) {
         saved_pos = gPlayerStatus.pos;
@@ -54,7 +54,7 @@ void pos_load() {
     }
 }
 
-void levitate() {
+static void levitate() {
     if (gPlayerStatus.timeInAir == 0) {
         gPlayerStatus.pos.y += 5;
     }
@@ -71,86 +71,63 @@ void levitate() {
     }
 }
 
-void actor_magnet() {
+static void magnet_pos_step(Vec3f *pos, f32 speed) {
+    if (gPlayerStatus.pos.x - pos->x > speed) {
+        pos->x += speed;
+    } else if (gPlayerStatus.pos.x - pos->x < speed) {
+        pos->x -= speed;
+    }
+    if (gPlayerStatus.pos.y - pos->y > speed) {
+        pos->y += speed;
+    } else if (gPlayerStatus.pos.y - pos->y < speed) {
+        pos->y -= speed;
+    }
+    if (gPlayerStatus.pos.z - pos->z > speed) {
+        pos->z += speed;
+    } else if (gPlayerStatus.pos.z - pos->z < speed) {
+        pos->z -= speed;
+    }
+}
+
+static void actor_magnet() {
     for (u32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc != NULL) {
-            if (gPlayerStatus.pos.x - npc->pos.x > 2) {
-                npc->pos.x += 2;
-            } else if (gPlayerStatus.pos.x - npc->pos.x < 2) {
-                npc->pos.x -= 2;
-            }
-            if (gPlayerStatus.pos.y - npc->pos.y > 2) {
-                npc->pos.y += 2;
-            } else if (gPlayerStatus.pos.y - npc->pos.y < 2) {
-                npc->pos.y -= 2;
-            }
-            if (gPlayerStatus.pos.z - npc->pos.z > 2) {
-                npc->pos.z += 2;
-            } else if (gPlayerStatus.pos.z - npc->pos.z < 2) {
-                npc->pos.z -= 2;
-            }
+            magnet_pos_step(&npc->pos, 2);
         }
     }
     for (u32 i = 0; i < MAX_ENTITIES; i++) {
         Entity *entity = (*gCurrentEntityListPtr)[i];
         if (entity != NULL) {
-            if (gPlayerStatus.pos.x - entity->pos.x > 2) {
-                entity->pos.x += 2;
-            } else if (gPlayerStatus.pos.x - entity->pos.x < 2) {
-                entity->pos.x -= 2;
-            }
-            if (gPlayerStatus.pos.y - entity->pos.y > 2) {
-                entity->pos.y += 2;
-            } else if (gPlayerStatus.pos.y - entity->pos.y < 2) {
-                entity->pos.y -= 2;
-            }
-            if (gPlayerStatus.pos.z - entity->pos.z > 2) {
-                entity->pos.z += 2;
-            } else if (gPlayerStatus.pos.z - entity->pos.z < 2) {
-                entity->pos.z -= 2;
-            }
+            magnet_pos_step(&entity->pos, 2);
         }
     }
     for (u32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
         ItemEntity *entity = (gCurrentItemEntities)[i];
         if (entity != NULL) {
-            if (gPlayerStatus.pos.x - entity->pos.x > 2) {
-                entity->pos.x += 2;
-            } else if (gPlayerStatus.pos.x - entity->pos.x < 2) {
-                entity->pos.x -= 2;
-            }
-            if (gPlayerStatus.pos.y - entity->pos.y > 2) {
-                entity->pos.y += 2;
-            } else if (gPlayerStatus.pos.y - entity->pos.y < 2) {
-                entity->pos.y -= 2;
-            }
-            if (gPlayerStatus.pos.z - entity->pos.z > 2) {
-                entity->pos.z += 2;
-            } else if (gPlayerStatus.pos.z - entity->pos.z < 2) {
-                entity->pos.z -= 2;
-            }
+            magnet_pos_step(&entity->pos, 2);
         }
     }
 }
 
-void knockback() {
+static void knockback() {
     if (frameCount % 60 == 0) {
         set_action_state(ACTION_STATE_KNOCKBACK);
     }
 }
 
-void lava() {
+static void lava() {
     set_action_state(ACTION_STATE_HIT_LAVA);
 }
 
-void wide() {
+static void wide() {
     NpcList *npcList = gCurrentNpcListPtr;
     for (u32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*npcList)[i];
         if (npc != NULL) {
-            npc->scale.x = 4;
-            npc->scale.y = 0.5;
+            npc->scale.x *= 4;
+            npc->scale.z *= 4;
+            npc->scale.y *= 0.5;
         }
     }
 }
@@ -165,7 +142,7 @@ struct ChaosEffect effectData[CHAOS_END] = {
     {"Wide",            CHAOS_INSTANT,    0,  wide},
 };
 
-void draw_effect_list() {
+static void draw_effect_list() {
     char fmtBuf[128];
     u8 index = 0;
     for (u32 i = 0; i < CHAOS_END; i++) {
@@ -204,7 +181,6 @@ void update_chaos() {
             activeEffects++;
             effectData[i].func();
             effectTimers[i]--;
-
         }
     }
 }
