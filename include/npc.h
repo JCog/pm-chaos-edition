@@ -456,7 +456,7 @@ Npc* get_npc_unsafe(s32 npcID);
 /// @returns NULL if not found
 Npc* get_npc_safe(s32 npcID);
 
-NpcList* getNpcListPtr(void);
+extern NpcList* gCurrentNpcListPtr;
 
 void enable_npc_shadow(Npc* npc);
 

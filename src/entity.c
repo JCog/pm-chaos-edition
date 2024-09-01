@@ -527,10 +527,6 @@ void update_entity_inverse_rotation_matrix(Entity* entity) {
     entity->effectiveSize = sqrtf(((SQ(entity->aabb.x) + SQ(entity->aabb.z)) * 0.25f) + SQ(entity->aabb.y));
 }
 
-EntityList* getEntityListPtr(void) {
-    return gCurrentEntityListPtr;
-}
-
 Entity* get_entity_by_index(s32 index) {
     return (*gCurrentEntityListPtr)[index & 0xFFF];
 }

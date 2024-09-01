@@ -94,6 +94,7 @@ segments:
     - [auto, c, main_pre]
     - [auto, c, main]
     - [auto, c, main_loop]
+    - [auto, c, chaos]
     - [auto, c, background_gfx]
     - [auto, c, input]
     - [auto, c, rumble]

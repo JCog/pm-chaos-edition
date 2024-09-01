@@ -271,10 +271,6 @@ void clear_item_entity_data(void) {
 #endif
 }
 
-ItemEntity** getItemEntityListPtr(void) {
-    return gCurrentItemEntities;
-}
-
 void init_item_entity_list(void) {
     if (!gGameStatusPtr->isBattle) {
         gCurrentItemEntities = WorldItemEntities;

@@ -10,7 +10,7 @@
 s16 gNpcCount;
 static NpcList gWorldNpcList;
 static NpcList gBattleNpcList;
-static NpcList* gCurrentNpcListPtr;
+NpcList* gCurrentNpcListPtr;
 static b8 gNpcPlayerCollisionsEnabled;
 
 #define PAL_ANIM_END 0xFF
@@ -1022,10 +1022,6 @@ Npc* get_npc_safe(s32 npcID) {
     }
 
     return npc;
-}
-
-NpcList* getNpcListPtr(void) {
-    return gCurrentNpcListPtr;
 }
 
 void enable_npc_shadow(Npc* npc) {
