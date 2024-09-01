@@ -1024,6 +1024,10 @@ Npc* get_npc_safe(s32 npcID) {
     return npc;
 }
 
+NpcList* getNpcListPtr(void) {
+    return gCurrentNpcListPtr;
+}
+
 void enable_npc_shadow(Npc* npc) {
     Shadow* shadow;
 

@@ -46,6 +46,7 @@ b32 startup_fade_screen_in(s16 subtractAlpha);
 b32 startup_fade_screen_out(s16 addAlpha);
 void startup_fade_screen_update(void);
 
+EntityList* getEntityListPtr(void);
 u32 get_entity_type(s32 arg0);
 Entity* get_entity_by_index(s32 index);
 s32 create_entity(EntityBlueprint* bp, ...);
@@ -834,6 +835,7 @@ void add_star_power(s32 amt);
 s32 entity_can_collide_with_jumping_player(Entity* entity);
 void entity_base_block_init(Entity* entity);
 s32 entity_start_script(Entity* entity);
+ItemEntity** getItemEntityListPtr(void);
 void init_item_entity_list(void);
 void init_script_list(void);
 void init_entity_data(void);

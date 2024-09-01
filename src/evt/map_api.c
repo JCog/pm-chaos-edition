@@ -608,7 +608,10 @@ s32 get_lava_reset_pos(f32* outX, f32* outY, f32* outZ) {
     }
 
     while (TRUE) {
-        if (lavaReset->colliderID == -1) {
+        if (lavaReset == NULL || lavaReset->colliderID == -1) {
+            *outX = gPlayerStatus.lastGoodPos.x;
+            *outY = gPlayerStatus.lastGoodPos.y;
+            *outZ = gPlayerStatus.lastGoodPos.z;
             break;
         }
 

@@ -456,6 +456,8 @@ Npc* get_npc_unsafe(s32 npcID);
 /// @returns NULL if not found
 Npc* get_npc_safe(s32 npcID);
 
+NpcList* getNpcListPtr(void);
+
 void enable_npc_shadow(Npc* npc);
 
 void disable_npc_shadow(Npc* npc);

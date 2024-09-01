@@ -30,6 +30,7 @@
 
 /// Map to load when starting a new game.
 #define NEW_GAME_MAP_ID "kmr_20"
+//#define NEW_GAME_MAP_ID "mac_01"
 
 /// Entry to use when starting a new game.
 #define NEW_GAME_ENTRY_ID kmr_20_ENTRY_0
