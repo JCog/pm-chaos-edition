@@ -24,6 +24,7 @@ enum EffectType {
 struct EffectData {
     const char *name;
     enum EffectType type;
+    s8 maxSeconds;
     void (*func)();
     void (*off)();
 };
@@ -43,11 +44,10 @@ const enum GameMode badModes[] = {
 #define MAX_EFFECT_INTERVAL 15
 #define MAX_EFFECT_COUNT 10
 #define MIN_EFFECT_LENGTH 10
-#define MAX_EFFECT_LENGTH 45
+#define MAX_SECONDS_DEFAULT 45
 
 #define MAX_EFFECT_INTERVAL_FRAMES (MAX_EFFECT_INTERVAL * 30)
 #define MIN_EFFECT_LENGTH_FRAMES (MIN_EFFECT_LENGTH * 30)
-#define MAX_MIN_EFFECT_LENGTH_FRAMES_DIFF ((MAX_EFFECT_LENGTH - MIN_EFFECT_LENGTH) * 30)
 
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
@@ -166,13 +166,13 @@ static void wide_off() {
 }
 
 struct EffectData effectData[CHAOS_END] = {
-    {"Peril Sound",     CHAOS_CONTINUOUS,   peril_sound,    NULL},
-    {"Rewind",          CHAOS_CONTINUOUS,   pos_load,       NULL},
-    {"Levitate",        CHAOS_CONTINUOUS,   levitate,       NULL},
-    {"Actor Magnet",    CHAOS_CONTINUOUS,   actor_magnet,   NULL},
-    {"Knockback",       CHAOS_CONTINUOUS,   knockback,      NULL},
-    {"Lava",            CHAOS_INSTANT,      lava,           NULL},
-    {"Wide",            CHAOS_ON_OFF,       wide,           wide_off},
+    {"Peril Sound",     CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    peril_sound,    NULL},
+    {"Rewind",          CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    pos_load,       NULL},
+    {"Levitate",        CHAOS_CONTINUOUS,   10,                     levitate,       NULL},
+    {"Actor Magnet",    CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    actor_magnet,   NULL},
+    {"Knockback",       CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    knockback,      NULL},
+    {"Lava",            CHAOS_INSTANT,      MAX_SECONDS_DEFAULT,    lava,           NULL},
+    {"Wide",            CHAOS_ON_OFF,       MAX_SECONDS_DEFAULT,    wide,           wide_off},
 };
 
 static void draw_effect_list() {
@@ -206,7 +206,7 @@ void update_chaos() {
             effectData[newEffect].func();
         }
         if (effectTimers[newEffect] == 0 && (effectData[newEffect].type == CHAOS_ON_OFF || effectData[newEffect].type == CHAOS_CONTINUOUS)) {
-            effectTimers[newEffect] = rand_int(MAX_MIN_EFFECT_LENGTH_FRAMES_DIFF) + MIN_EFFECT_LENGTH_FRAMES;
+            effectTimers[newEffect] = rand_int((effectData[newEffect].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
         }
         effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES);
     }
