@@ -4,7 +4,7 @@
 #include "dx/debug_menu.h"
 #include "world/actions.h"
 
-enum EffectData {
+enum ChaosEffect {
     CHAOS_PERIL,
     CHAOS_POS,
     CHAOS_LEVITATE,
@@ -21,10 +21,9 @@ enum EffectType {
     CHAOS_ON_OFF,
 };
 
-struct ChaosEffect {
+struct EffectData {
     const char *name;
     enum EffectType type;
-    u16 seconds;
     void (*func)();
 };
 
@@ -35,9 +34,17 @@ const enum GameMode badModes[] = {
     GAME_MODE_GAME_OVER, GAME_MODE_FILE_SELECT, GAME_MODE_END_FILE_SELECT, GAME_MODE_INTRO, GAME_MODE_DEMO
 };
 
-#define EFFECT_INTERVAL 15
-#define EFFECT_MAX 10
-static activeEffects = 0;
+#define MAX_EFFECT_INTERVAL 15
+#define MAX_EFFECT_COUNT 10
+#define MIN_EFFECT_LENGTH 10
+#define MAX_EFFECT_LENGTH 45
+
+#define MAX_EFFECT_INTERVAL_FRAMES (MAX_EFFECT_INTERVAL * 30)
+#define MIN_EFFECT_LENGTH_FRAMES (MIN_EFFECT_LENGTH * 30)
+#define MAX_MIN_EFFECT_LENGTH_FRAMES_DIFF ((MAX_EFFECT_LENGTH - MIN_EFFECT_LENGTH) * 30)
+
+static u8 activeEffects = 0;
+static u32 effectCountdown = 1;
 
 static void peril_sound() {
     if (frameCount % 25 == 0) {
@@ -132,23 +139,25 @@ static void wide() {
     }
 }
 
-struct ChaosEffect effectData[CHAOS_END] = {
-    {"Peril Sound",     CHAOS_CONTINUOUS, 15, peril_sound},
-    {"Rewind",          CHAOS_CONTINUOUS, 30, pos_load},
-    {"Levitate",        CHAOS_CONTINUOUS, 10, levitate},
-    {"Actor Magnet",    CHAOS_CONTINUOUS, 20, actor_magnet},
-    {"Knockback",       CHAOS_CONTINUOUS, 30, knockback},
-    {"Lava",            CHAOS_INSTANT,    0,  lava},
-    {"Wide",            CHAOS_INSTANT,    0,  wide},
+struct EffectData effectData[CHAOS_END] = {
+    {"Peril Sound",     CHAOS_CONTINUOUS,   peril_sound},
+    {"Rewind",          CHAOS_CONTINUOUS,   pos_load},
+    {"Levitate",        CHAOS_CONTINUOUS,   levitate},
+    {"Actor Magnet",    CHAOS_CONTINUOUS,   actor_magnet},
+    {"Knockback",       CHAOS_CONTINUOUS,   knockback},
+    {"Lava",            CHAOS_INSTANT,      lava},
+    {"Wide",            CHAOS_INSTANT,      wide},
 };
 
 static void draw_effect_list() {
     char fmtBuf[128];
     u8 index = 0;
+    sprintf(fmtBuf, "Effect Countdown: %d", effectCountdown / 30);
+    dx_debug_draw_ascii(fmtBuf, 0, 15, 55);
     for (u32 i = 0; i < CHAOS_END; i++) {
         if (effectTimers[i] > 0) {
             sprintf(fmtBuf, "%s: %d", effectData[i].name, effectTimers[i] / 30);
-            dx_debug_draw_ascii(fmtBuf, 0, 15, 55 + index * 10);
+            dx_debug_draw_ascii(fmtBuf, 0, 15, 65 + index * 10);
             index++;
         }
     }
@@ -162,15 +171,17 @@ void update_chaos() {
         }
     }
     frameCount = gPlayerData.frameCounter / 2;
+    effectCountdown--;
 
     // select a new effect
-    if (activeEffects == 0 || (activeEffects < EFFECT_MAX && frameCount % (EFFECT_INTERVAL * 30) == 0)) {
+    if (effectCountdown == 0 && activeEffects < MAX_EFFECT_COUNT) {
         s32 newEffect = rand_int(CHAOS_END - 1);
         if (effectData[newEffect].type == CHAOS_INSTANT) {
             effectData[newEffect].func();
         } else if (effectTimers[newEffect] == 0) {
-            effectTimers[newEffect] = 30 * effectData[newEffect].seconds;
+            effectTimers[newEffect] = rand_int(MAX_MIN_EFFECT_LENGTH_FRAMES_DIFF) + MIN_EFFECT_LENGTH_FRAMES;
         }
+        effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES);
     }
 
     // update active effects
