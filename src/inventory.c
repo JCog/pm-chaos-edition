@@ -1743,6 +1743,10 @@ s32 is_ability_active(s32 ability) {
     s32 ret;
     s32 i;
 
+    if (chaosSlowGo && ability == ABILITY_SLOW_GO) {
+        return 1;
+    }
+
     ret = 0;
     attackFXIndex = 0;
 

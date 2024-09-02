@@ -22,6 +22,7 @@ enum ChaosEffect {
     CHAOS_KNOCKBACK,
     CHAOS_LAVA,
     CHAOS_WIDE,
+    CHAOS_SLOWGO,
     CHAOS_MAX,
 };
 
@@ -55,6 +56,7 @@ const enum GameMode badModes[] = {
 static enum ChaosEffect selectedEffect = 0;
 static s16 selectedTimer = 10;
 #endif
+b8 chaosSlowGo = FALSE;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
 static struct NpcScaleData npcScaleBuffer[MAX_NPCS] = {-1, {0, 0, 0}};
@@ -171,6 +173,10 @@ static void wide_off() {
     }
 }
 
+static void slowGo() {
+    chaosSlowGo = !chaosSlowGo;
+}
+
 struct EffectData effectData[CHAOS_MAX] = {
     {"Peril Sound",     CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    peril_sound,    NULL},
     {"Rewind",          CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    pos_load,       NULL},
@@ -179,6 +185,7 @@ struct EffectData effectData[CHAOS_MAX] = {
     {"Knockback",       CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    knockback,      NULL},
     {"Lava",            CHAOS_INSTANT,      0,  2,                      lava,           NULL},
     {"Wide",            CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    wide,           wide_off},
+    {"Slow Go",         CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    slowGo,         slowGo},
 };
 
 static void draw_effect_list() {
