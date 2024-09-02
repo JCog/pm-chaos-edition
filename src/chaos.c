@@ -14,19 +14,6 @@
 #define MAX_EFFECT_INTERVAL_FRAMES (MAX_EFFECT_INTERVAL * 30)
 #define MIN_EFFECT_LENGTH_FRAMES (MIN_EFFECT_LENGTH * 30)
 
-enum ChaosEffect {
-    CHAOS_PERIL,
-    CHAOS_POS,
-    CHAOS_LEVITATE,
-    CHAOS_ACTOR_MAGNET,
-    CHAOS_KNOCKBACK,
-    CHAOS_LAVA,
-    CHAOS_WIDE,
-    CHAOS_SLOWGO,
-    CHAOS_TOP_DOWN_CAM,
-    CHAOS_MAX,
-};
-
 enum EffectType {
     CHAOS_INSTANT,
     CHAOS_CONTINUOUS,
@@ -54,8 +41,8 @@ const enum GameMode badModes[] = {
 };
 
 #if CHAOS_DEBUG
-static enum ChaosEffect selectedEffect = 0;
-static s16 selectedTimer = 10;
+static u8 selectedEffect = 0;
+static u8 selectedTimer = 10;
 #endif
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
@@ -63,18 +50,18 @@ static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
 static struct NpcScaleData npcScaleBuffer[MAX_NPCS] = {-1, {0, 0, 0}};
 
-static void peril_sound() {
+static void perilSound() {
     if (frameCount % 25 == 0) {
         sfx_play_sound(SOUND_PERIL);
     }
 }
 
-static void pos_load() {
-    static Vec3f saved_pos;
+static void posLoad() {
+    static Vec3f savedPos;
     if (frameCount % 30 == 20) {
-        saved_pos = gPlayerStatus.pos;
+        savedPos = gPlayerStatus.pos;
     } else if (frameCount % 30 == 0) {
-        gPlayerStatus.pos = saved_pos;
+        gPlayerStatus.pos = savedPos;
     }
 }
 
@@ -95,7 +82,7 @@ static void levitate() {
     }
 }
 
-static void magnet_pos_step(Vec3f *pos, f32 speed) {
+static void magnetPosStep(Vec3f *pos, f32 speed) {
     if (gPlayerStatus.pos.x - pos->x > speed) {
         pos->x += speed;
     } else if (gPlayerStatus.pos.x - pos->x < speed) {
@@ -113,23 +100,23 @@ static void magnet_pos_step(Vec3f *pos, f32 speed) {
     }
 }
 
-static void actor_magnet() {
+static void actorMagnet() {
     for (u32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc != NULL) {
-            magnet_pos_step(&npc->pos, 2);
+            magnetPosStep(&npc->pos, 2);
         }
     }
     for (u32 i = 0; i < MAX_ENTITIES; i++) {
         Entity *entity = (*gCurrentEntityListPtr)[i];
         if (entity != NULL) {
-            magnet_pos_step(&entity->pos, 2);
+            magnetPosStep(&entity->pos, 2);
         }
     }
     for (u32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
         ItemEntity *entity = (gCurrentItemEntities)[i];
         if (entity != NULL) {
-            magnet_pos_step(&entity->pos, 2);
+            magnetPosStep(&entity->pos, 2);
         }
     }
 }
@@ -144,7 +131,7 @@ static void lava() {
     set_action_state(ACTION_STATE_HIT_LAVA);
 }
 
-static void wide() {
+static void wideOn() {
     for (u32 i = 0; i < MAX_NPCS; i++) {
         npcScaleBuffer[i].id = -1;
         Npc *npc = (*gCurrentNpcListPtr)[i];
@@ -160,7 +147,7 @@ static void wide() {
     }
 }
 
-static void wide_off() {
+static void wideOff() {
     for (u32 i = 0; i < MAX_NPCS; i++) {
         if (npcScaleBuffer[i].id == -1) {
             continue;
@@ -183,19 +170,21 @@ static void topDownCam() {
     chaosTopDownCam = !chaosTopDownCam;
 }
 
-struct EffectData effectData[CHAOS_MAX] = {
-    {"Peril Sound",     CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    peril_sound,    NULL},
-    {"Rewind",          CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    pos_load,       NULL},
+struct EffectData effectData[] = {
+    {"Peril Sound",     CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    perilSound,     NULL},
+    {"Rewind",          CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    posLoad,        NULL},
     {"Levitate",        CHAOS_CONTINUOUS,   0,  10,                     levitate,       NULL},
-    {"Actor Magnet",    CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    actor_magnet,   NULL},
+    {"Actor Magnet",    CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    actorMagnet,    NULL},
     {"Knockback",       CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    knockback,      NULL},
     {"Lava",            CHAOS_INSTANT,      0,  2,                      lava,           NULL},
-    {"Wide",            CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    wide,           wide_off},
+    {"Wide",            CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    wideOn,         wideOff},
     {"Slow Go",         CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    slowGo,         slowGo},
     {"Top-Down Cam",    CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    topDownCam,     topDownCam},
 };
 
-static void draw_effect_list() {
+#define EFFECT_COUNT (ARRAY_COUNT(effectData))
+
+static void drawEffectList() {
     char fmtBuf[128];
     u8 index = 0;
     #if CHAOS_DEBUG
@@ -204,7 +193,7 @@ static void draw_effect_list() {
     sprintf(fmtBuf, "Effect Countdown: %lu", effectCountdown / 30);
     #endif
     dx_debug_draw_ascii(fmtBuf, 0, 15, 55);
-    for (u32 i = 0; i < CHAOS_MAX; i++) {
+    for (u32 i = 0; i < EFFECT_COUNT; i++) {
         if (effectData[i].timer > 0) {
             sprintf(fmtBuf, "%s: %d", effectData[i].name, effectData[i].timer / 30);
             dx_debug_draw_ascii(fmtBuf, 0, 15, 65 + index * 10);
@@ -213,7 +202,7 @@ static void draw_effect_list() {
     }
 }
 
-void update_chaos() {
+void chaosUpdate() {
     gPlayerData.coins = get_game_mode();
     for (u32 i = 0; i < 10; i++) {
         if (get_game_mode() == badModes[i]) {
@@ -227,11 +216,11 @@ void update_chaos() {
     #if CHAOS_DEBUG
     s32 buttons = gPlayerStatus.pressedButtons;
     if (buttons & BUTTON_D_LEFT) {
-        selectedEffect += CHAOS_MAX - 1;
-        selectedEffect %= CHAOS_MAX;
+        selectedEffect += EFFECT_COUNT - 1;
+        selectedEffect %= EFFECT_COUNT;
     } else if (buttons & BUTTON_D_RIGHT) {
         selectedEffect++;
-        selectedEffect %= CHAOS_MAX;
+        selectedEffect %= EFFECT_COUNT;
     } else if (buttons & BUTTON_D_UP) {
         selectedTimer += 5;
     } else if (buttons & BUTTON_D_DOWN) {
@@ -250,7 +239,7 @@ void update_chaos() {
     #else
     if (effectCountdown == 0 && activeEffects < MAX_EFFECT_COUNT) {
         while (TRUE) {
-            s32 id = rand_int(CHAOS_MAX - 1);
+            s32 id = rand_int(EFFECT_COUNT - 1);
             if (effectData[id].timer > 0) {
                 continue;
             }
@@ -269,9 +258,9 @@ void update_chaos() {
     #endif
 
     // update active effects
-    draw_effect_list();
+    drawEffectList();
     activeEffects = 0;
-    for (u32 i = 0; i < CHAOS_MAX; i++) {
+    for (u32 i = 0; i < EFFECT_COUNT; i++) {
         if (effectData[i].timer > 0) {
             activeEffects++;
             if (effectData[i].timer == 1 && effectData[i].off != NULL) {

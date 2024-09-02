@@ -270,7 +270,7 @@ void gfx_draw_frame(void) {
     #if DX_DEBUG_MENU
     dx_debug_console_main();
     #endif
-    update_chaos();
+    chaosUpdate();
 
     ASSERT((s32)(((u32)(gMainGfxPos - gDisplayContext->mainGfx) << 3) >> 3) < ARRAY_COUNT(gDisplayContext->mainGfx));
 

@@ -1,6 +1,6 @@
-#ifndef PAPERMARIO_CHAOS_EDITION_CHAOS_H
-#define PAPERMARIO_CHAOS_EDITION_CHAOS_H
+#ifndef _PAPERMARIO_CHAOS_EDITION_CHAOS_H_
+#define _PAPERMARIO_CHAOS_EDITION_CHAOS_H_
 
-void update_chaos(void);
+void chaosUpdate(void);
 
-#endif // PAPERMARIO_CHAOS_EDITION_CHAOS_H
+#endif
