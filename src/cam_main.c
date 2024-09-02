@@ -57,6 +57,7 @@ void update_cameras(void) {
                 break;
         }
 
+        gPlayerData.coins = cam->updateMode;
         guLookAtReflectF(cam->viewMtxPlayer, &gDisplayContext->lookAt, cam->lookAt_eye.x, cam->lookAt_eye.y, cam->lookAt_eye.z, cam->lookAt_obj.x, cam->lookAt_obj.y, cam->lookAt_obj.z, 0, 1.0f, 0);
 
         if (!(cam->flags & CAMERA_FLAG_ORTHO)) {

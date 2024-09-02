@@ -23,6 +23,7 @@ enum ChaosEffect {
     CHAOS_LAVA,
     CHAOS_WIDE,
     CHAOS_SLOWGO,
+    CHAOS_TOP_DOWN_CAM,
     CHAOS_MAX,
 };
 
@@ -57,6 +58,7 @@ static enum ChaosEffect selectedEffect = 0;
 static s16 selectedTimer = 10;
 #endif
 b8 chaosSlowGo = FALSE;
+b8 chaosTopDownCam = FALSE;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
 static struct NpcScaleData npcScaleBuffer[MAX_NPCS] = {-1, {0, 0, 0}};
@@ -177,6 +179,10 @@ static void slowGo() {
     chaosSlowGo = !chaosSlowGo;
 }
 
+static void topDownCam() {
+    chaosTopDownCam = !chaosTopDownCam;
+}
+
 struct EffectData effectData[CHAOS_MAX] = {
     {"Peril Sound",     CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    peril_sound,    NULL},
     {"Rewind",          CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    pos_load,       NULL},
@@ -186,6 +192,7 @@ struct EffectData effectData[CHAOS_MAX] = {
     {"Lava",            CHAOS_INSTANT,      0,  2,                      lava,           NULL},
     {"Wide",            CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    wide,           wide_off},
     {"Slow Go",         CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    slowGo,         slowGo},
+    {"Top-Down Cam",    CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    topDownCam,     topDownCam},
 };
 
 static void draw_effect_list() {

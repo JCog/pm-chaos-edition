@@ -888,8 +888,13 @@ void update_camera_zone_interp(Camera* camera) {
     interpAlphaInv = 1.0f - interpAlpha;
     gCurrentCamConfiguration.boomYaw = (camera->prevConfiguration.boomYaw * interpAlphaInv) + (camera->goalConfiguration.boomYaw * interpAlpha);
     gCurrentCamConfiguration.boomLength = (camera->prevConfiguration.boomLength * interpAlphaInv) + (camera->goalConfiguration.boomLength * interpAlpha);
-    gCurrentCamConfiguration.boomPitch = (camera->prevConfiguration.boomPitch * interpAlphaInv) + (camera->goalConfiguration.boomPitch * interpAlpha);
-    gCurrentCamConfiguration.viewPitch = (camera->prevConfiguration.viewPitch * interpAlphaInv) + (camera->goalConfiguration.viewPitch * interpAlpha);
+    if (chaosTopDownCam) {
+        gCurrentCamConfiguration.boomPitch = 89;
+        gCurrentCamConfiguration.viewPitch = 0;
+    } else {
+        gCurrentCamConfiguration.boomPitch = (camera->prevConfiguration.boomPitch * interpAlphaInv) + (camera->goalConfiguration.boomPitch * interpAlpha);
+        gCurrentCamConfiguration.viewPitch = (camera->prevConfiguration.viewPitch * interpAlphaInv) + (camera->goalConfiguration.viewPitch * interpAlpha);
+    }
     gCurrentCamConfiguration.targetPos.x = (camera->prevConfiguration.targetPos.x * interpAlphaInv) + (camera->goalConfiguration.targetPos.x * interpAlpha);
     gCurrentCamConfiguration.targetPos.y = (camera->prevConfiguration.targetPos.y * interpAlphaInv) + (camera->goalConfiguration.targetPos.y * interpAlpha);
     gCurrentCamConfiguration.targetPos.z = (camera->prevConfiguration.targetPos.z * interpAlphaInv) + (camera->goalConfiguration.targetPos.z * interpAlpha);

@@ -110,6 +110,7 @@ extern PlayerSpinState gPlayerSpinState;
 extern PlayerData gPlayerData;
 
 extern b8 chaosSlowGo;
+extern b8 chaosTopDownCam;
 
 #if VERSION_PAL
 extern s32 gCurrentLanguage;
