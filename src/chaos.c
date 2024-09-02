@@ -24,6 +24,7 @@ enum EffectType {
 struct EffectData {
     const char *name;
     enum EffectType type;
+    s16 timer;
     s8 maxSeconds;
     void (*func)();
     void (*off)();
@@ -35,7 +36,6 @@ struct NpcScaleData {
 };
 
 u32 frameCount = 0;
-s16 effectTimers[CHAOS_END];
 const enum GameMode badModes[] = {
     GAME_MODE_STARTUP, GAME_MODE_LOGOS, GAME_MODE_TITLE_SCREEN, GAME_MODE_ENTER_DEMO_WORLD, GAME_MODE_ENTER_WORLD,
     GAME_MODE_GAME_OVER, GAME_MODE_FILE_SELECT, GAME_MODE_END_FILE_SELECT, GAME_MODE_INTRO, GAME_MODE_DEMO
@@ -166,13 +166,13 @@ static void wide_off() {
 }
 
 struct EffectData effectData[CHAOS_END] = {
-    {"Peril Sound",     CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    peril_sound,    NULL},
-    {"Rewind",          CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    pos_load,       NULL},
-    {"Levitate",        CHAOS_CONTINUOUS,   10,                     levitate,       NULL},
-    {"Actor Magnet",    CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    actor_magnet,   NULL},
-    {"Knockback",       CHAOS_CONTINUOUS,   MAX_SECONDS_DEFAULT,    knockback,      NULL},
-    {"Lava",            CHAOS_INSTANT,      MAX_SECONDS_DEFAULT,    lava,           NULL},
-    {"Wide",            CHAOS_ON_OFF,       MAX_SECONDS_DEFAULT,    wide,           wide_off},
+    {"Peril Sound",     CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    peril_sound,    NULL},
+    {"Rewind",          CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    pos_load,       NULL},
+    {"Levitate",        CHAOS_CONTINUOUS,   0,  10,                     levitate,       NULL},
+    {"Actor Magnet",    CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    actor_magnet,   NULL},
+    {"Knockback",       CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    knockback,      NULL},
+    {"Lava",            CHAOS_INSTANT,      0,  MAX_SECONDS_DEFAULT,    lava,           NULL},
+    {"Wide",            CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    wide,           wide_off},
 };
 
 static void draw_effect_list() {
@@ -181,8 +181,8 @@ static void draw_effect_list() {
     sprintf(fmtBuf, "Effect Countdown: %lu", effectCountdown / 30);
     dx_debug_draw_ascii(fmtBuf, 0, 15, 55);
     for (u32 i = 0; i < CHAOS_END; i++) {
-        if (effectTimers[i] > 0) {
-            sprintf(fmtBuf, "%s: %d", effectData[i].name, effectTimers[i] / 30);
+        if (effectData[i].timer > 0) {
+            sprintf(fmtBuf, "%s: %d", effectData[i].name, effectData[i].timer / 30);
             dx_debug_draw_ascii(fmtBuf, 0, 15, 65 + index * 10);
             index++;
         }
@@ -201,28 +201,36 @@ void update_chaos() {
 
     // select a new effect
     if (effectCountdown == 0 && activeEffects < MAX_EFFECT_COUNT) {
-        s32 newEffect = rand_int(CHAOS_END - 1);
-        if (effectData[newEffect].type == CHAOS_INSTANT || effectData[newEffect].type == CHAOS_ON_OFF) {
-            effectData[newEffect].func();
+        while (TRUE) {
+            s32 id = rand_int(CHAOS_END - 1);
+            if (effectData[id].timer > 0) {
+                continue;
+            }
+            
+            if (effectData[id].type == CHAOS_INSTANT || effectData[id].type == CHAOS_ON_OFF) {
+                effectData[id].func();
+            }
+            if (effectData[id].type == CHAOS_ON_OFF || effectData[id].type == CHAOS_CONTINUOUS) {
+                effectData[id].timer =
+                    rand_int((effectData[id].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
+            }
+            effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES);
+            break;
         }
-        if (effectTimers[newEffect] == 0 && (effectData[newEffect].type == CHAOS_ON_OFF || effectData[newEffect].type == CHAOS_CONTINUOUS)) {
-            effectTimers[newEffect] = rand_int((effectData[newEffect].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
-        }
-        effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES);
     }
 
     // update active effects
     draw_effect_list();
     activeEffects = 0;
     for (u32 i = 0; i < CHAOS_END; i++) {
-        if (effectTimers[i] > 0) {
+        if (effectData[i].timer > 0) {
             activeEffects++;
-            if (effectTimers[i] == 1 && effectData[i].off != NULL) {
+            if (effectData[i].timer == 1 && effectData[i].off != NULL) {
                 effectData[i].off();
             } else if (effectData[i].type == CHAOS_CONTINUOUS){
                 effectData[i].func();
             }
-            effectTimers[i]--;
+            effectData[i].timer--;
         }
     }
 }
