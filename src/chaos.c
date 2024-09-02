@@ -25,6 +25,12 @@ struct EffectData {
     const char *name;
     enum EffectType type;
     void (*func)();
+    void (*off)();
+};
+
+struct NpcScaleData {
+    s8 id;
+    Vec3f scale;
 };
 
 u32 frameCount = 0;
@@ -45,6 +51,7 @@ const enum GameMode badModes[] = {
 
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
+static struct NpcScaleData npcScaleBuffer[MAX_NPCS] = {-1, {0, 0, 0}};
 
 static void peril_sound() {
     if (frameCount % 25 == 0) {
@@ -128,10 +135,14 @@ static void lava() {
 }
 
 static void wide() {
-    NpcList *npcList = gCurrentNpcListPtr;
     for (u32 i = 0; i < MAX_NPCS; i++) {
-        Npc *npc = (*npcList)[i];
+        npcScaleBuffer[i].id = -1;
+        Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc != NULL) {
+            npcScaleBuffer[i].id = npc->npcID;
+            npcScaleBuffer[i].scale.x = npc->scale.x;
+            npcScaleBuffer[i].scale.z = npc->scale.z;
+            npcScaleBuffer[i].scale.y = npc->scale.y;
             npc->scale.x *= 4;
             npc->scale.z *= 4;
             npc->scale.y *= 0.5;
@@ -139,20 +150,35 @@ static void wide() {
     }
 }
 
+static void wide_off() {
+    for (u32 i = 0; i < MAX_NPCS; i++) {
+        if (npcScaleBuffer[i].id == -1) {
+            continue;
+        }
+        Npc *npc = get_npc_safe(npcScaleBuffer[i].id);
+        if (npc != NULL) {
+            npc->scale.x = npcScaleBuffer[i].scale.x;
+            npc->scale.z = npcScaleBuffer[i].scale.z;
+            npc->scale.y = npcScaleBuffer[i].scale.y;
+        }
+        npcScaleBuffer[i].id = -1;
+    }
+}
+
 struct EffectData effectData[CHAOS_END] = {
-    {"Peril Sound",     CHAOS_CONTINUOUS,   peril_sound},
-    {"Rewind",          CHAOS_CONTINUOUS,   pos_load},
-    {"Levitate",        CHAOS_CONTINUOUS,   levitate},
-    {"Actor Magnet",    CHAOS_CONTINUOUS,   actor_magnet},
-    {"Knockback",       CHAOS_CONTINUOUS,   knockback},
-    {"Lava",            CHAOS_INSTANT,      lava},
-    {"Wide",            CHAOS_INSTANT,      wide},
+    {"Peril Sound",     CHAOS_CONTINUOUS,   peril_sound,    NULL},
+    {"Rewind",          CHAOS_CONTINUOUS,   pos_load,       NULL},
+    {"Levitate",        CHAOS_CONTINUOUS,   levitate,       NULL},
+    {"Actor Magnet",    CHAOS_CONTINUOUS,   actor_magnet,   NULL},
+    {"Knockback",       CHAOS_CONTINUOUS,   knockback,      NULL},
+    {"Lava",            CHAOS_INSTANT,      lava,           NULL},
+    {"Wide",            CHAOS_ON_OFF,       wide,           wide_off},
 };
 
 static void draw_effect_list() {
     char fmtBuf[128];
     u8 index = 0;
-    sprintf(fmtBuf, "Effect Countdown: %d", effectCountdown / 30);
+    sprintf(fmtBuf, "Effect Countdown: %lu", effectCountdown / 30);
     dx_debug_draw_ascii(fmtBuf, 0, 15, 55);
     for (u32 i = 0; i < CHAOS_END; i++) {
         if (effectTimers[i] > 0) {
@@ -176,9 +202,10 @@ void update_chaos() {
     // select a new effect
     if (effectCountdown == 0 && activeEffects < MAX_EFFECT_COUNT) {
         s32 newEffect = rand_int(CHAOS_END - 1);
-        if (effectData[newEffect].type == CHAOS_INSTANT) {
+        if (effectData[newEffect].type == CHAOS_INSTANT || effectData[newEffect].type == CHAOS_ON_OFF) {
             effectData[newEffect].func();
-        } else if (effectTimers[newEffect] == 0) {
+        }
+        if (effectTimers[newEffect] == 0 && (effectData[newEffect].type == CHAOS_ON_OFF || effectData[newEffect].type == CHAOS_CONTINUOUS)) {
             effectTimers[newEffect] = rand_int(MAX_MIN_EFFECT_LENGTH_FRAMES_DIFF) + MIN_EFFECT_LENGTH_FRAMES;
         }
         effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES);
@@ -190,7 +217,11 @@ void update_chaos() {
     for (u32 i = 0; i < CHAOS_END; i++) {
         if (effectTimers[i] > 0) {
             activeEffects++;
-            effectData[i].func();
+            if (effectTimers[i] == 1 && effectData[i].off != NULL) {
+                effectData[i].off();
+            } else if (effectData[i].type == CHAOS_CONTINUOUS){
+                effectData[i].func();
+            }
             effectTimers[i]--;
         }
     }
