@@ -6,6 +6,7 @@
 
 #define CHAOS_DEBUG 1
 
+#define NAMESPACE chaos
 #define MAX_EFFECT_INTERVAL 15
 #define MIN_EFFECT_LENGTH 10
 
@@ -195,6 +196,40 @@ static void negativeAttack() {
     chaosNegativeAttack = !chaosNegativeAttack;
 }
 
+API_CALLABLE(GetRandMsgId) {
+    s32 idA;
+    s32 idB;
+    s32 tattle = rand_int(100);
+    if (tattle < 45) {
+        idA = 0x19;
+        idB = rand_int(0x188);
+    } else if (tattle < 78) {
+        idA = 0x1A;
+        idB = rand_int(0x121);
+    } else if (tattle < 88) {
+        idA = 0x1B;
+        idB = rand_int(0x25);
+    } else {
+        idA = 0x1C;
+        idB = rand_int(0x95);
+    }
+    script->varTable[0] = MESSAGE_ID(idA, idB);
+
+    return ApiStatus_DONE2;
+}
+
+
+EvtScript N(EVS_Random_Tattle) = {
+    Call(GetRandMsgId)
+    Call(ShowMessageAtScreenPos, LVar0, 160, 40)
+    Return
+    End
+};
+
+static void randomMessage() {
+    start_script(&N(EVS_Random_Tattle), EVT_PRIORITY_A, 0);
+}
+
 struct EffectData effectData[] = {
     {"Peril Sound",     TRUE,   0,  45, perilSound,     NULL},
     {"Rewind",          TRUE,   0,  45, posLoad,        NULL},
@@ -206,6 +241,7 @@ struct EffectData effectData[] = {
     {"Slow Go",         FALSE,  0,  45, slowGo,         slowGo},
     {"Top-Down Cam",    FALSE,  0,  45, topDownCam,     topDownCam},
     {"Negative Attack", FALSE,  0,  45, negativeAttack, negativeAttack},
+    {"Random Tattle",   FALSE,  0,  0,  randomMessage,  NULL}
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
