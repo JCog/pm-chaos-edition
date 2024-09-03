@@ -41,7 +41,6 @@ PlayerData gPlayerData;
 
 extern s32 WorldTattleInteractionID;
 
-HitID player_raycast_down(f32*, f32*, f32*, f32*);
 HitID player_raycast_up_corner(f32* x, f32* y, f32* z, f32* length);
 HitID player_raycast_general(s32, f32, f32, f32, f32, f32, f32, f32*, f32*, f32*, f32*, f32*, f32*, f32*);
 void player_get_slip_vector(f32* outX, f32* outY, f32 x, f32 y, f32 nX, f32 nY);

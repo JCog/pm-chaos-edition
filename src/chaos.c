@@ -39,6 +39,7 @@ static u8 selectedTimer = 10;
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
 b8 chaosNegativeAttack = FALSE;
+static f32 prevHeight = -10000.0f;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
 static struct NpcScaleData npcScaleBuffer[] = {[0 ... MAX_NPCS] = {-1, {0, 0, 0}} };
@@ -59,20 +60,36 @@ static void posLoad() {
 }
 
 static void levitate() {
-    if (gPlayerStatus.timeInAir == 0) {
-        gPlayerStatus.pos.y += 5;
+    Vec3f raycast = gPlayerStatus.pos;
+    f32 rayLength = 10;
+    player_raycast_down(&(raycast.x), &(raycast.y), &(raycast.z), &rayLength);
+    if (rayLength < 10) {
+        gPlayerStatus.pos.y = prevHeight = raycast.y + 10.0f;
+    } else if (prevHeight < gPlayerStatus.pos.y) {
+        prevHeight = gPlayerStatus.pos.y;
+    } else {
+        gPlayerStatus.pos.y = prevHeight;
     }
+
     gPlayerStatus.flags |= 1 << 1;
     gPlayerStatus.flags &= ~(1 << 2);
     gPlayerStatus.timeInAir = 1;
-    gPlayerStatus.gravityIntegrator[0] = 2;
+    gPlayerStatus.gravityIntegrator[0] = 0;
     gPlayerStatus.gravityIntegrator[1] = 0;
     gPlayerStatus.gravityIntegrator[2] = 0;
-    gPlayerStatus.gravityIntegrator[3] = -0.0115200001746f;
+    gPlayerStatus.gravityIntegrator[3] = 0;
 
     if (gGameStatus.peachFlags & (1 << 0)) {
         PlayerActionsTable[5].flag = TRUE;
     }
+}
+
+static void levitateStop() {
+    gPlayerStatus.gravityIntegrator[0] = 0.154342994094f;
+    gPlayerStatus.gravityIntegrator[1] = -0.350080013275f;
+    gPlayerStatus.gravityIntegrator[2] = -0.182262003422f;
+    gPlayerStatus.gravityIntegrator[3] = 0.0115200001746f;
+    prevHeight = -10000.0f;
 }
 
 static void magnetPosStep(Vec3f *pos, f32 speed) {
@@ -184,7 +201,7 @@ static void negativeAttack() {
 struct EffectData effectData[] = {
     {"Peril Sound",     TRUE,   0,  45, perilSound,     NULL},
     {"Rewind",          TRUE,   0,  45, posLoad,        NULL},
-    {"Levitate",        TRUE,   0,  10, levitate,       NULL},
+    {"Levitate",        TRUE,   0,  10, levitate,       levitateStop},
     {"Actor Magnet",    TRUE,   0,  45, actorMagnet,    NULL},
     {"Knockback",       TRUE,   0,  45, knockback,      NULL},
     {"Lava",            FALSE,  0,  0,  lava,           NULL},
@@ -219,7 +236,6 @@ static void drawEffectList() {
 }
 
 void chaosUpdate() {
-    gPlayerData.coins = get_game_mode();
     for (u32 i = 0; i < 10; i++) {
         if (get_game_mode() == badModes[i]) {
             return;
