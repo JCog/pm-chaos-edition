@@ -7,22 +7,14 @@
 #define CHAOS_DEBUG 1
 
 #define MAX_EFFECT_INTERVAL 15
-#define MAX_EFFECT_COUNT 10
 #define MIN_EFFECT_LENGTH 10
-#define MAX_SECONDS_DEFAULT 45
 
 #define MAX_EFFECT_INTERVAL_FRAMES (MAX_EFFECT_INTERVAL * 30)
 #define MIN_EFFECT_LENGTH_FRAMES (MIN_EFFECT_LENGTH * 30)
 
-enum EffectType {
-    CHAOS_INSTANT,
-    CHAOS_CONTINUOUS,
-    CHAOS_ON_OFF,
-};
-
 struct EffectData {
     const char *name;
-    enum EffectType type;
+    b8 everyFrame;
     s16 timer;
     s8 maxSeconds;
     void (*func)();
@@ -176,16 +168,16 @@ static void negativeAttack() {
 }
 
 struct EffectData effectData[] = {
-    {"Peril Sound",     CHAOS_CONTINUOUS,   0,  45, perilSound,     NULL},
-    {"Rewind",          CHAOS_CONTINUOUS,   0,  45, posLoad,        NULL},
-    {"Levitate",        CHAOS_CONTINUOUS,   0,  10, levitate,       NULL},
-    {"Actor Magnet",    CHAOS_CONTINUOUS,   0,  45, actorMagnet,    NULL},
-    {"Knockback",       CHAOS_CONTINUOUS,   0,  45, knockback,      NULL},
-    {"Lava",            CHAOS_INSTANT,      0,  2,  lava,           NULL},
-    {"Wide",            CHAOS_ON_OFF,       0,  45, wideOn,         wideOff},
-    {"Slow Go",         CHAOS_ON_OFF,       0,  45, slowGo,         slowGo},
-    {"Top-Down Cam",    CHAOS_ON_OFF,       0,  45, topDownCam,     topDownCam},
-    {"Negative Attack", CHAOS_ON_OFF,       0,  45, negativeAttack, negativeAttack},
+    {"Peril Sound",     TRUE,   0,  45, perilSound,     NULL},
+    {"Rewind",          TRUE,   0,  45, posLoad,        NULL},
+    {"Levitate",        TRUE,   0,  10, levitate,       NULL},
+    {"Actor Magnet",    TRUE,   0,  45, actorMagnet,    NULL},
+    {"Knockback",       TRUE,   0,  45, knockback,      NULL},
+    {"Lava",            FALSE,  0,  0,  lava,           NULL},
+    {"Wide",            FALSE,  0,  45, wideOn,         wideOff},
+    {"Slow Go",         FALSE,  0,  45, slowGo,         slowGo},
+    {"Top-Down Cam",    FALSE,  0,  45, topDownCam,     topDownCam},
+    {"Negative Attack", FALSE,  0,  45, negativeAttack, negativeAttack},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
@@ -201,7 +193,11 @@ static void drawEffectList() {
     dx_debug_draw_ascii(fmtBuf, 0, 15, 55);
     for (u32 i = 0; i < EFFECT_COUNT; i++) {
         if (effectData[i].timer > 0) {
-            sprintf(fmtBuf, "%s: %d", effectData[i].name, effectData[i].timer / 30);
+            if (effectData[i].maxSeconds == 0) {
+                sprintf(fmtBuf, "%s", effectData[i].name);
+            } else {
+                sprintf(fmtBuf, "%s: %d", effectData[i].name, effectData[i].timer / 30);
+            }
             dx_debug_draw_ascii(fmtBuf, 0, 15, 65 + index * 10);
             index++;
         }
@@ -235,25 +231,29 @@ void chaosUpdate() {
             selectedTimer = 0;
         }
     } else if (buttons & BUTTON_R) {
-        if (effectData[selectedEffect].type == CHAOS_INSTANT || effectData[selectedEffect].type == CHAOS_ON_OFF) {
+        if (!effectData[selectedEffect].everyFrame) {
             effectData[selectedEffect].func();
         }
-        if (effectData[selectedEffect].type == CHAOS_ON_OFF || effectData[selectedEffect].type == CHAOS_CONTINUOUS) {
+        if (effectData[selectedEffect].maxSeconds == 0) {
+            effectData[selectedEffect].timer = 90;
+        } else {
             effectData[selectedEffect].timer = selectedTimer * 30;
         }
     }
     #else
-    if (effectCountdown == 0 && activeEffects < MAX_EFFECT_COUNT) {
+    if (effectCountdown == 0 && activeEffects < EFFECT_COUNT) {
         while (TRUE) {
             s32 id = rand_int(EFFECT_COUNT - 1);
             if (effectData[id].timer > 0) {
                 continue;
             }
 
-            if (effectData[id].type == CHAOS_INSTANT || effectData[id].type == CHAOS_ON_OFF) {
+            if (!effectData[id].everyFrame) {
                 effectData[id].func();
             }
-            if (effectData[id].type == CHAOS_ON_OFF || effectData[id].type == CHAOS_CONTINUOUS) {
+            if (effectData[id].maxSeconds == 0) {
+                effectData[id].timer = 90;
+            } else {
                 effectData[id].timer =
                     rand_int((effectData[id].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
             }
@@ -271,7 +271,7 @@ void chaosUpdate() {
             activeEffects++;
             if (effectData[i].timer == 1 && effectData[i].off != NULL) {
                 effectData[i].off();
-            } else if (effectData[i].type == CHAOS_CONTINUOUS){
+            } else if (effectData[i].everyFrame){
                 effectData[i].func();
             }
             effectData[i].timer--;

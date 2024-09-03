@@ -180,7 +180,7 @@ HitResult calc_item_damage_enemy(void) {
             && !partImmuneToElement
             && !(targetPart->targetFlags & ACTOR_PART_TARGET_NO_DAMAGE)
         ) {
-            target->curHP -= attackDamage;
+            target->curHP -= attackDamage;//
             if (target->curHP <= 0) {
                 target->curHP = 0;
                 dispatchEvent = EVENT_DEATH;
