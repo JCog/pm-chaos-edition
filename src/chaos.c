@@ -214,6 +214,11 @@ struct EffectData effectData[] = {
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
 
 static void drawEffectList() {
+    #if DX_DEBUG_MENU
+    if (dx_debug_menu_is_open()) {
+        return;
+    }
+    #endif
     char fmtBuf[128];
     u8 index = 0;
     #if CHAOS_DEBUG
@@ -246,7 +251,12 @@ void chaosUpdate() {
 
     // select a new effect
     #if CHAOS_DEBUG
-    s32 buttons = gPlayerStatus.pressedButtons;
+    s32 buttons = gGameStatus.pressedButtons[0];
+    #if DX_DEBUG_MENU
+    if (dx_debug_menu_is_open()) {
+        buttons = 0;
+    }
+    #endif
     if (buttons & BUTTON_D_LEFT) {
         selectedEffect += EFFECT_COUNT - 1;
         selectedEffect %= EFFECT_COUNT;
