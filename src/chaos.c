@@ -41,7 +41,7 @@ b8 chaosTopDownCam = FALSE;
 b8 chaosNegativeAttack = FALSE;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
-static struct NpcScaleData npcScaleBuffer[MAX_NPCS] = {-1, {0, 0, 0}};
+static struct NpcScaleData npcScaleBuffer[] = {[0 ... MAX_NPCS] = {-1, {0, 0, 0}} };
 
 static void perilSound() {
     if (frameCount % 25 == 0) {
@@ -124,23 +124,37 @@ static void lava() {
     set_action_state(ACTION_STATE_HIT_LAVA);
 }
 
-static void wideOn() {
+static void squish() {
     for (u32 i = 0; i < MAX_NPCS; i++) {
-        npcScaleBuffer[i].id = -1;
         Npc *npc = (*gCurrentNpcListPtr)[i];
-        if (npc != NULL) {
-            npcScaleBuffer[i].id = npc->npcID;
-            npcScaleBuffer[i].scale.x = npc->scale.x;
-            npcScaleBuffer[i].scale.z = npc->scale.z;
-            npcScaleBuffer[i].scale.y = npc->scale.y;
-            npc->scale.x *= 4;
-            npc->scale.z *= 4;
-            npc->scale.y *= 0.5;
+        if (npc == NULL) {
+            continue;
+        }
+        b8 existingData = FALSE;
+        struct NpcScaleData *firstEmpty = NULL;
+        for (u32 j = 0; j < MAX_NPCS; j++) {
+            if (npcScaleBuffer[j].id == npc->npcID) {
+                existingData = TRUE;
+                break;
+            } else if (npcScaleBuffer[j].id == -1){
+                firstEmpty = &npcScaleBuffer[j];
+                break;
+            }
+        }
+        if (existingData) {
+            npc->scale.x += 0.03f;
+            npc->scale.z += 0.03f;
+            npc->scale.y -= 0.0005f;
+        } else if (firstEmpty != NULL) {
+            firstEmpty->id = npc->npcID;
+            firstEmpty->scale.x = npc->scale.x;
+            firstEmpty->scale.z = npc->scale.z;
+            firstEmpty->scale.y = npc->scale.y;
         }
     }
 }
 
-static void wideOff() {
+static void squishOff() {
     for (u32 i = 0; i < MAX_NPCS; i++) {
         if (npcScaleBuffer[i].id == -1) {
             continue;
@@ -174,7 +188,7 @@ struct EffectData effectData[] = {
     {"Actor Magnet",    TRUE,   0,  45, actorMagnet,    NULL},
     {"Knockback",       TRUE,   0,  45, knockback,      NULL},
     {"Lava",            FALSE,  0,  0,  lava,           NULL},
-    {"Wide",            FALSE,  0,  45, wideOn,         wideOff},
+    {"Squish",          TRUE,   0,  45, squish,         squishOff},
     {"Slow Go",         FALSE,  0,  45, slowGo,         slowGo},
     {"Top-Down Cam",    FALSE,  0,  45, topDownCam,     topDownCam},
     {"Negative Attack", FALSE,  0,  45, negativeAttack, negativeAttack},
