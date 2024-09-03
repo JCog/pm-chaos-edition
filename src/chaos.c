@@ -46,6 +46,7 @@ static u8 selectedTimer = 10;
 #endif
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
+b8 chaosNegativeAttack = FALSE;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
 static struct NpcScaleData npcScaleBuffer[MAX_NPCS] = {-1, {0, 0, 0}};
@@ -170,16 +171,21 @@ static void topDownCam() {
     chaosTopDownCam = !chaosTopDownCam;
 }
 
+static void negativeAttack() {
+    chaosNegativeAttack = !chaosNegativeAttack;
+}
+
 struct EffectData effectData[] = {
-    {"Peril Sound",     CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    perilSound,     NULL},
-    {"Rewind",          CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    posLoad,        NULL},
-    {"Levitate",        CHAOS_CONTINUOUS,   0,  10,                     levitate,       NULL},
-    {"Actor Magnet",    CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    actorMagnet,    NULL},
-    {"Knockback",       CHAOS_CONTINUOUS,   0,  MAX_SECONDS_DEFAULT,    knockback,      NULL},
-    {"Lava",            CHAOS_INSTANT,      0,  2,                      lava,           NULL},
-    {"Wide",            CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    wideOn,         wideOff},
-    {"Slow Go",         CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    slowGo,         slowGo},
-    {"Top-Down Cam",    CHAOS_ON_OFF,       0,  MAX_SECONDS_DEFAULT,    topDownCam,     topDownCam},
+    {"Peril Sound",     CHAOS_CONTINUOUS,   0,  45, perilSound,     NULL},
+    {"Rewind",          CHAOS_CONTINUOUS,   0,  45, posLoad,        NULL},
+    {"Levitate",        CHAOS_CONTINUOUS,   0,  10, levitate,       NULL},
+    {"Actor Magnet",    CHAOS_CONTINUOUS,   0,  45, actorMagnet,    NULL},
+    {"Knockback",       CHAOS_CONTINUOUS,   0,  45, knockback,      NULL},
+    {"Lava",            CHAOS_INSTANT,      0,  2,  lava,           NULL},
+    {"Wide",            CHAOS_ON_OFF,       0,  45, wideOn,         wideOff},
+    {"Slow Go",         CHAOS_ON_OFF,       0,  45, slowGo,         slowGo},
+    {"Top-Down Cam",    CHAOS_ON_OFF,       0,  45, topDownCam,     topDownCam},
+    {"Negative Attack", CHAOS_ON_OFF,       0,  45, negativeAttack, negativeAttack},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))

@@ -616,17 +616,27 @@ HitResult calc_player_damage_enemy(void) {
 
             battleStatus->lastAttackDamage = 0;
         } else {
-            target->damageCounter += currentAttackDamage;
             dispatchEvent = EVENT_HIT_COMBO;
             hitResult = HIT_RESULT_HIT;
-            target->hpChangeCounter -= currentAttackDamage;
+            if (chaosNegativeAttack) {
+                target->damageCounter   -= currentAttackDamage;
+                target->hpChangeCounter += currentAttackDamage;
+                battleStatus->lastAttackDamage += 100; // adds a negative symbol
+            } else {
+                target->damageCounter   += currentAttackDamage;
+                target->hpChangeCounter -= currentAttackDamage;
+            }
 
             if (!(targetPart->flags & ACTOR_PART_FLAG_DAMAGE_IMMUNE)
                 && !(gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE)
                 && !partImmuneToElement
                 && !(targetPart->targetFlags & ACTOR_PART_TARGET_NO_DAMAGE)
             ) {
-                target->curHP -= currentAttackDamage;
+                if (chaosNegativeAttack) {
+                    target->curHP += currentAttackDamage;
+                } else {
+                    target->curHP -= currentAttackDamage;
+                }
 
                 if (target->curHP < 1) {
                     target->curHP = 0;

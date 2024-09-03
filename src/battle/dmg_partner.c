@@ -457,18 +457,28 @@ HitResult calc_partner_damage_enemy(void) {
 
             battleStatus->lastAttackDamage = 0;
         } else {
-            target->damageCounter += damageDealt;
-            target->hpChangeCounter -= damageDealt;
             battleStatus->lastAttackDamage = 0;
             dispatchEvent = EVENT_HIT_COMBO;
             hitResult = HIT_RESULT_HIT;
+            if (chaosNegativeAttack) {
+                target->damageCounter -= damageDealt;
+                target->hpChangeCounter += damageDealt;
+                battleStatus->lastAttackDamage += 100; // adds a negative symbol
+            } else {
+                target->damageCounter   += damageDealt;
+                target->hpChangeCounter -= damageDealt;
+            }
 
             if (!(targetPart->flags & ACTOR_PART_FLAG_DAMAGE_IMMUNE)
                 && !(gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE)
                 && !partImmuneToElement
                 && !(targetPart->targetFlags & ACTOR_PART_TARGET_NO_DAMAGE)
             ) {
-                target->curHP -= damageDealt;
+                if (chaosNegativeAttack) {
+                    target->curHP += damageDealt;
+                } else {
+                    target->curHP -= damageDealt;
+                }
 
                 if (target->curHP < 1) {
                     target->curHP = 0;
