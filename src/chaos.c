@@ -92,41 +92,38 @@ static void levitateStop() {
     prevHeight = -10000.0f;
 }
 
-static void magnetPosStep(Vec3f *pos, f32 speed) {
-    if (gPlayerStatus.pos.x - pos->x > speed) {
-        pos->x += speed;
-    } else if (gPlayerStatus.pos.x - pos->x < speed) {
-        pos->x -= speed;
+static void magnetPosStep(Vec3f *pos) {
+    f32 speed = 3;
+    Vec3f marioPos = gPlayerStatus.pos;
+    if (dist3D(marioPos.x, marioPos.y, marioPos.z, pos->x, pos->y, pos->z) <= speed) {
+        return;
     }
-    if (gPlayerStatus.pos.y - pos->y > speed) {
-        pos->y += speed;
-    } else if (gPlayerStatus.pos.y - pos->y < speed) {
-        pos->y -= speed;
-    }
-    if (gPlayerStatus.pos.z - pos->z > speed) {
-        pos->z += speed;
-    } else if (gPlayerStatus.pos.z - pos->z < speed) {
-        pos->z -= speed;
-    }
+    f32 xDiff = marioPos.x - pos->x;
+    f32 yDiff = marioPos.y - pos->y;
+    f32 zDiff = marioPos.z - pos->z;
+    f32 temp = speed / sqrtf(SQ(xDiff) + SQ(yDiff) + SQ(zDiff));
+    pos->x += temp * xDiff;
+    pos->y += temp * yDiff;
+    pos->z += temp * zDiff;
 }
 
 static void actorMagnet() {
     for (u32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc != NULL) {
-            magnetPosStep(&npc->pos, 2);
+            magnetPosStep(&npc->pos);
         }
     }
     for (u32 i = 0; i < MAX_ENTITIES; i++) {
         Entity *entity = (*gCurrentEntityListPtr)[i];
         if (entity != NULL) {
-            magnetPosStep(&entity->pos, 2);
+            magnetPosStep(&entity->pos);
         }
     }
     for (u32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
         ItemEntity *entity = (gCurrentItemEntities)[i];
         if (entity != NULL) {
-            magnetPosStep(&entity->pos, 2);
+            magnetPosStep(&entity->pos);
         }
     }
 }
