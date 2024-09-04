@@ -282,6 +282,30 @@ static void addRemoveStarPoints() {
     }
 }
 
+static void unequipBadge() {
+    s32 eqBadgeCount = 0;
+    for (u32 i = 0; i < 64; i++) {
+        if (gPlayerData.equippedBadges[i] == 0) {
+            break;
+        } else {
+            eqBadgeCount++;
+        }
+    }
+    if (eqBadgeCount == 0) {
+        return;
+    }
+
+    sfx_play_sound(SOUND_MENU_BADGE_UNEQUIP);
+    if (eqBadgeCount == 1) {
+        gPlayerData.equippedBadges[0] = 0;
+    } else {
+        // prevent gaps in the array
+        s32 badgeIndex = rand_int(eqBadgeCount - 1);
+        gPlayerData.equippedBadges[badgeIndex] = gPlayerData.equippedBadges[eqBadgeCount - 1];
+        gPlayerData.equippedBadges[eqBadgeCount - 1] = 0;
+    }
+}
+
 struct ChaosEffectData effectData[] = {
     {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL},
     {"Rewind",                  TRUE,   0,  45, posLoad,                NULL},
@@ -298,6 +322,7 @@ struct ChaosEffectData effectData[] = {
     {"All SFX AttackFX",        FALSE,  0,  45, allSfxAttackFx,         allSfxAttackFx},
     {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL},
     {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL},
+    {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
