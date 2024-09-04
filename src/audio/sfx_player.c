@@ -40,7 +40,6 @@ static void au_SEFCmd_17_PlaySound(SoundManager* manager, SoundPlayer* player);
 static void au_SEFCmd_18_SetAlternativeVolume(SoundManager* manager, SoundPlayer* player);
 static s32 au_sfx_get_random_pitch(s32 arg0, s32 arg1, s32 arg2);
 static u8 au_sfx_get_random_vol(s32 arg0, s32 arg1, s32 arg2);
-static void au_sfx_reset_players(SoundManager* manager);
 
 enum SoundEffectParamFlags {
     // 8 bytes: flags, instrument, volume, pan, reverb, pitch, randomPitch
@@ -1697,7 +1696,7 @@ static u8 au_sfx_get_random_vol(s32 seed, s32 amplitude, s32 volume) {
     return volume * (0x8000 - (amplitude * random)) >> 0xF;
 }
 
-static void au_sfx_reset_players(SoundManager* manager) {
+void au_sfx_reset_players(SoundManager* manager) {
     s32 i;
 
     for (i = 0; i < ARRAY_COUNT(manager->players); i++) {

@@ -21,6 +21,8 @@
 #define MENU_TEXT_Y (MENU_Y + 3)
 #define MENU_TIMER_OFFSET (MENU_TEXT_X + 100)
 
+#define RELOAD_COOLDOWN_TIME 60
+
 struct EffectData {
     const char *name;
     b8 everyFrame;
@@ -52,6 +54,10 @@ b8 chaosNegativeAttack = FALSE;
 static f32 prevHeight = -10000.0f;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
+static b8 reloading = FALSE;
+static u8 reloadDelay = 0;
+static u16 reloadCooldown = 0;
+static u16 reloadMessageTimer = 0;
 static struct NpcScaleData npcScaleBuffer[] = {[0 ... MAX_NPCS] = {-1, {0, 0, 0}} };
 
 static void perilSound() {
@@ -260,6 +266,57 @@ struct EffectData effectData[] = {
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
 
+static void reloadRoom() {
+    bgm_set_song(1, -1, 0, 0, 0); // clear secondary songs
+    snd_ambient_stop_all(0);
+    au_sfx_reset_player();
+    disable_player_input();
+    gGameStatus.exitTangent = 0;
+    clear_windows();
+    set_curtain_scale_goal(2.0f);
+    set_curtain_draw_callback(NULL);
+    set_curtain_fade_goal(0.0f);
+
+    if (get_game_mode() == GAME_MODE_PAUSE) {
+        reloadDelay = 5;
+        set_game_mode(GAME_MODE_UNPAUSE);
+    } else {
+        reloadDelay = 0;
+    }
+    reloadCooldown = RELOAD_COOLDOWN_TIME * 30;
+    reloading = TRUE;
+}
+
+static void updateReload() {
+    if (reloadCooldown > 0) {
+        reloadCooldown--;
+    }
+    if (reloadMessageTimer) {
+        reloadMessageTimer--;
+        dx_debug_draw_ascii("Reload Cooldown Active", 0, 102, 80);
+    }
+    s32 held = gGameStatus.curButtons[0];
+    s32 pressed = gGameStatus.pressedButtons[0];
+    if ((held & BUTTON_R) && (pressed & BUTTON_D_DOWN)) {
+        if (reloadCooldown > 0) {
+            reloadMessageTimer = 90;
+            return;
+        }
+        reloadRoom();
+    }
+
+    if (!reloading) {
+        return;
+    }
+    if (reloadDelay > 0) {
+        reloadDelay--;
+        return;
+    }
+    set_map_transition_effect(TRANSITION_STANDARD);
+    set_game_mode(GAME_MODE_CHANGE_MAP);
+    reloading = FALSE;
+}
+
 static void drawEffectList() {
     #if DX_DEBUG_MENU
     if (dx_debug_menu_is_open()) {
@@ -319,6 +376,9 @@ static void handleMenu() {
         return;
     }
     #if CHAOS_DEBUG
+    if (!chaosMenuOpen) {
+        return;
+    }
     if (buttons & BUTTON_D_LEFT) {
         selectedEffect += EFFECT_COUNT - 1;
         selectedEffect %= EFFECT_COUNT;
@@ -348,6 +408,7 @@ void chaosUpdate() {
     effectCountdown--;
 
     handleMenu();
+    updateReload();
 
     // select a new effect
     #if !CHAOS_DEBUG

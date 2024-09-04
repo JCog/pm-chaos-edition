@@ -100,6 +100,7 @@ s32 au_sfx_set_reverb_type(SoundManager* manager, s32 arg1);
 void au_sfx_set_state(SoundManager* manager, s32 arg1);
 void au_sfx_load_sound(SoundManager* manager, SoundSFXEntry* entry, SoundManagerCustomCmdList*);
 s16 au_sfx_manager_update(SoundManager* manager);
+void au_sfx_reset_players(SoundManager* manager);
 
 // 28910_len_5090.c
 void au_bgm_update_main(BGMPlayer* player);

@@ -1242,3 +1242,7 @@ void au_copy_words(void* src, void* dst, s32 size) {
         }
     }
 }
+
+void au_sfx_reset_player() {
+    au_sfx_reset_players(gSoundManager);
+}
