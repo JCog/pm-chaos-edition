@@ -462,6 +462,14 @@ void sfx_play_sound_with_params(s32 soundID, u8 volume, u8 pan, s16 pitchShift) 
         return;
     }
 
+    if (chaosAllSfxAttackFx) {
+        enum SoundIDs attackFxIds[] = {
+            SOUND_LIFE_SHROOM_CHIME, SOUND_PLANTS_BELL, SOUND_SLIDE_WHISTLE_OUT, SOUND_YOSHI, SOUND_HIT_WHACKA,
+            SOUND_FLOWERS_LAUGH
+        };
+        soundID = attackFxIds[rand_int(5)];
+    }
+
     if (soundID & SOUND_TYPE_SPECIAL) {
         s32 soundIndex = soundID & 0xFF;
         s32 soundType = (soundID & 0x70000000) >> 0x1C;

@@ -51,6 +51,7 @@ b8 chaosMenuOpen = FALSE;
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
 b8 chaosHealingTouch = FALSE;
+b8 chaosAllSfxAttackFx = FALSE;
 static f32 prevHeight = -10000.0f;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
@@ -249,6 +250,10 @@ static void intangibleEnemies() {
     gGameStatus.debugEnemyContact = !gGameStatus.debugEnemyContact;
 }
 
+static void allSfxAttackFx() {
+    chaosAllSfxAttackFx = !chaosAllSfxAttackFx;
+}
+
 struct ChaosEffectData effectData[] = {
     {"Peril Sound",         TRUE,   0,  45, perilSound,         NULL},
     {"Rewind",              TRUE,   0,  45, posLoad,            NULL},
@@ -262,6 +267,7 @@ struct ChaosEffectData effectData[] = {
     {"Healing Touch",       FALSE,  0,  45, negativeAttack,     negativeAttack},
     {"Random Tattle",       FALSE,  0,  0,  randomTattle,       NULL},
     {"Intangible Enemies",  FALSE,  0,  45, intangibleEnemies,  intangibleEnemies},
+    {"All SFX AttackFX",    FALSE,  0,  45, allSfxAttackFx,     allSfxAttackFx},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
