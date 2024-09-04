@@ -254,20 +254,50 @@ static void allSfxAttackFx() {
     chaosAllSfxAttackFx = !chaosAllSfxAttackFx;
 }
 
+static void addRemoveCoins() {
+    s32 coins = rand_int(99) + 1;
+    if (rand_int(1)) {
+        coins *= -1;
+    }
+    add_coins(coins);
+    sfx_play_sound(SOUND_COIN_PICKUP);
+    open_status_bar_quickly();
+}
+
+static void addRemoveStarPoints() {
+    s32 sp = rand_int(49) + 1;
+    if (rand_int(1)) {
+        sp *= -1;
+    }
+    gPlayerData.starPoints += sp;
+    if (gPlayerData.starPoints > 99) {
+        gPlayerData.starPoints = 99;
+    } else if (gPlayerData.starPoints < 0) {
+        gPlayerData.starPoints = 0;
+    }
+    sfx_play_sound(SOUND_STAR_POINT_PICKUP);
+    open_status_bar_quickly();
+    if (!gGameStatus.isBattle) {
+        status_bar_start_blinking_starpoints();
+    }
+}
+
 struct ChaosEffectData effectData[] = {
-    {"Peril Sound",         TRUE,   0,  45, perilSound,         NULL},
-    {"Rewind",              TRUE,   0,  45, posLoad,            NULL},
-    {"Levitate",            TRUE,   0,  10, levitate,           levitateStop},
-    {"Actor Chase",         TRUE,   0,  45, actorMagnet,        NULL},
-    {"Knockback",           TRUE,   0,  45, knockback,          NULL},
-    {"Lava",                FALSE,  0,  0,  lava,               NULL},
-    {"Squish",              TRUE,   0,  45, squish,             squishOff},
-    {"Slow Go",             FALSE,  0,  45, slowGo,             slowGo},
-    {"Top-Down Cam",        FALSE,  0,  45, topDownCam,         topDownCam},
-    {"Healing Touch",       FALSE,  0,  45, negativeAttack,     negativeAttack},
-    {"Random Tattle",       FALSE,  0,  0,  randomTattle,       NULL},
-    {"Intangible Enemies",  FALSE,  0,  45, intangibleEnemies,  intangibleEnemies},
-    {"All SFX AttackFX",    FALSE,  0,  45, allSfxAttackFx,     allSfxAttackFx},
+    {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL},
+    {"Rewind",                  TRUE,   0,  45, posLoad,                NULL},
+    {"Levitate",                TRUE,   0,  10, levitate,               levitateStop},
+    {"Actor Chase",             TRUE,   0,  45, actorMagnet,            NULL},
+    {"Knockback",               TRUE,   0,  45, knockback,              NULL},
+    {"Lava",                    FALSE,  0,  0,  lava,                   NULL},
+    {"Squish",                  TRUE,   0,  45, squish,                 squishOff},
+    {"Slow Go",                 FALSE,  0,  45, slowGo,                 slowGo},
+    {"Top-Down Cam",            FALSE,  0,  45, topDownCam,             topDownCam},
+    {"Healing Touch",           FALSE,  0,  45, negativeAttack,         negativeAttack},
+    {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL},
+    {"Intangible Enemies",      FALSE,  0,  45, intangibleEnemies,      intangibleEnemies},
+    {"All SFX AttackFX",        FALSE,  0,  45, allSfxAttackFx,         allSfxAttackFx},
+    {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL},
+    {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))

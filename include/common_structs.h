@@ -688,6 +688,7 @@ typedef struct StatusBar {
     /* 0x51 */ s8 spBlinkCounter;
     /* 0x52 */ s8 starpointsBlinking; /* bool */
     /* 0x53 */ s8 starpointsBlinkCounter;
+               s8 starpointsBlinkTimer;
     /* 0x54 */ s8 coinsBlinking; /* bool */
     /* 0x55 */ s8 coinsBlinkCounter;
     /* 0x56 */ s8 coinsBlinkTimer; /* until stop */

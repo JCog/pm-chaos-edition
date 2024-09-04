@@ -1023,6 +1023,13 @@ void update_status_bar(void) {
         }
     }
 
+    if (statusBar->starpointsBlinkTimer > 0) {
+        statusBar->starpointsBlinkTimer--;
+        if (statusBar->starpointsBlinkTimer == 0) {
+            status_bar_stop_blinking_starpoints();
+        }
+    }
+
     showStat = TRUE;
     if (statusBar->coinsBlinking != BLINK_OFF) {
         if (statusBar->coinsBlinkCounter > 8) {
@@ -1639,6 +1646,10 @@ void status_bar_start_blinking_sp_bars(s32 numBarsToBlink) {
 
 void status_bar_start_blinking_starpoints(void) {
     StatusBar* statusBar = &gStatusBar;
+
+    if (!gGameStatusPtr->isBattle) {
+        statusBar->starpointsBlinkTimer = 120;
+    }
 
     if (statusBar->starpointsBlinking != BLINK_ON) {
         statusBar->starpointsBlinking = BLINK_ON;
