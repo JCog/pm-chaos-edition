@@ -207,11 +207,13 @@ void render_frame(s32 isSecondPass) {
                 if (!(camera->flags & CAMERA_FLAG_RENDER_MODELS)) {
                     GFX_PROFILER_START(PROFILER_TIME_SUB_GFX_MODELS);
                     #if DX_DEBUG_MENU
-                    if (!dx_debug_should_hide_models()) {
+                    if (!dx_debug_should_hide_models() && !chaosHideModels) {
                         render_models();
                     }
                     #else
-                    render_models();
+                    if (!chaosHideModels) {
+                        render_models();
+                    }
                     #endif
                     GFX_PROFILER_COMPLETE(PROFILER_TIME_SUB_GFX_MODELS);
                 }

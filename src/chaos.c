@@ -13,7 +13,7 @@
 #define MAX_EFFECT_INTERVAL_FRAMES (MAX_EFFECT_INTERVAL * 30)
 #define MIN_EFFECT_LENGTH_FRAMES (MIN_EFFECT_LENGTH * 30)
 
-#define MENU_WIDTH 220
+#define MENU_WIDTH 240
 #define MENU_HEIGHT_BASE 19
 #define MENU_X 15
 #define MENU_Y 23
@@ -52,6 +52,7 @@ b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
 b8 chaosHealingTouch = FALSE;
 b8 chaosAllSfxAttackFx = FALSE;
+b8 chaosHideModels = FALSE;
 static f32 prevHeight = -10000.0f;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
@@ -306,6 +307,10 @@ static void unequipBadge() {
     }
 }
 
+static void hideModels() {
+    chaosHideModels = !chaosHideModels;
+}
+
 struct ChaosEffectData effectData[] = {
     {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL},
     {"Rewind",                  TRUE,   0,  45, posLoad,                NULL},
@@ -323,6 +328,7 @@ struct ChaosEffectData effectData[] = {
     {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL},
     {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL},
+    {"Hide Models",             FALSE,  0,  45, hideModels,             hideModels},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
