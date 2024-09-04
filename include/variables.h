@@ -109,6 +109,7 @@ extern PlayerStatus gPlayerStatus;
 extern PlayerSpinState gPlayerSpinState;
 extern PlayerData gPlayerData;
 
+extern b8 chaosMenuOpen;
 extern b8 chaosSlowGo;
 extern b8 chaosTopDownCam;
 extern b8 chaosNegativeAttack;

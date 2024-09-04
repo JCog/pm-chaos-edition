@@ -37,6 +37,7 @@ const enum GameMode badModes[] = {
 static u8 selectedEffect = 0;
 static u8 selectedTimer = 10;
 #endif
+b8 chaosMenuOpen = FALSE;
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
 b8 chaosNegativeAttack = FALSE;
@@ -234,13 +235,13 @@ struct EffectData effectData[] = {
     {"Peril Sound",     TRUE,   0,  45, perilSound,     NULL},
     {"Rewind",          TRUE,   0,  45, posLoad,        NULL},
     {"Levitate",        TRUE,   0,  10, levitate,       levitateStop},
-    {"Actor Magnet",    TRUE,   0,  45, actorMagnet,    NULL},
+    {"Actor Chase",     TRUE,   0,  45, actorMagnet,    NULL},
     {"Knockback",       TRUE,   0,  45, knockback,      NULL},
     {"Lava",            FALSE,  0,  0,  lava,           NULL},
     {"Squish",          TRUE,   0,  45, squish,         squishOff},
     {"Slow Go",         FALSE,  0,  45, slowGo,         slowGo},
     {"Top-Down Cam",    FALSE,  0,  45, topDownCam,     topDownCam},
-    {"Negative Attack", FALSE,  0,  45, negativeAttack, negativeAttack},
+    {"Healing Touch",   FALSE,  0,  45, negativeAttack, negativeAttack},
     {"Random Tattle",   FALSE,  0,  0,  randomMessage,  NULL}
 };
 
@@ -252,44 +253,59 @@ static void drawEffectList() {
         return;
     }
     #endif
-    char fmtBuf[128];
+    char fmtBuf[64];
     u8 index = 0;
+    dx_debug_draw_box(15, 23, 200, 19 + 10 * activeEffects, WINDOW_STYLE_4, 192);
     #if CHAOS_DEBUG
     sprintf(fmtBuf, "Selected: %ds - %d %s", selectedTimer, selectedEffect, effectData[selectedEffect].name);
+    dx_debug_draw_ascii(fmtBuf, 0, 20, 26);
     #else
-    sprintf(fmtBuf, "Effect Countdown: %lu", effectCountdown / 30);
+    sprintf(fmtBuf, "%lu", effectCountdown / 30);
+    dx_debug_draw_ascii("Chaos Timer", 0, 20, 26);
+    dx_debug_draw_ascii(fmtBuf, 0, 100, 26);
     #endif
-    dx_debug_draw_ascii(fmtBuf, 0, 15, 55);
     for (u32 i = 0; i < EFFECT_COUNT; i++) {
         if (effectData[i].timer > 0) {
             if (effectData[i].maxSeconds == 0) {
-                sprintf(fmtBuf, "%s", effectData[i].name);
+                sprintf(fmtBuf, "");
             } else {
-                sprintf(fmtBuf, "%s: %d", effectData[i].name, effectData[i].timer / 30);
+                sprintf(fmtBuf, "%d", effectData[i].timer / 30);
             }
-            dx_debug_draw_ascii(fmtBuf, 0, 15, 65 + index * 10);
+            dx_debug_draw_ascii(effectData[i].name, 0, 20, 36 + index * 10);
+            dx_debug_draw_ascii(fmtBuf, 0, 100, 36 + index * 10);
             index++;
         }
     }
 }
 
-void chaosUpdate() {
-    for (u32 i = 0; i < 10; i++) {
-        if (get_game_mode() == badModes[i]) {
-            return;
-        }
+static void activateEffect(s32 effectId) {
+    if (!effectData[effectId].everyFrame) {
+        effectData[effectId].func();
     }
-    frameCount = gPlayerData.frameCounter / 2;
-    effectCountdown--;
+    if (effectData[effectId].maxSeconds == 0) {
+        effectData[effectId].timer = 90;
+    } else {
+        #if CHAOS_DEBUG
+        effectData[selectedEffect].timer = selectedTimer * 30;
+        #else
+        effectData[effectId].timer =
+            rand_int((effectData[effectId].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
+        #endif
+    }
+}
 
-    // select a new effect
-    #if CHAOS_DEBUG
-    s32 buttons = gGameStatus.pressedButtons[0];
+static void handleMenu() {
     #if DX_DEBUG_MENU
     if (dx_debug_menu_is_open()) {
-        buttons = 0;
+        return;
     }
     #endif
+    s32 buttons = gGameStatus.pressedButtons[0];
+    if (buttons & BUTTON_L) {
+        chaosMenuOpen = !chaosMenuOpen;
+        return;
+    }
+    #if CHAOS_DEBUG
     if (buttons & BUTTON_D_LEFT) {
         selectedEffect += EFFECT_COUNT - 1;
         selectedEffect %= EFFECT_COUNT;
@@ -304,40 +320,37 @@ void chaosUpdate() {
             selectedTimer = 0;
         }
     } else if (buttons & BUTTON_R) {
-        if (!effectData[selectedEffect].everyFrame) {
-            effectData[selectedEffect].func();
-        }
-        if (effectData[selectedEffect].maxSeconds == 0) {
-            effectData[selectedEffect].timer = 90;
-        } else {
-            effectData[selectedEffect].timer = selectedTimer * 30;
+        activateEffect(selectedEffect);
+    }
+    #endif
+}
+
+void chaosUpdate() {
+    for (u32 i = 0; i < 10; i++) {
+        if (get_game_mode() == badModes[i]) {
+            return;
         }
     }
-    #else
+    frameCount = gPlayerData.frameCounter / 2;
+    effectCountdown--;
+
+    handleMenu();
+
+    // select a new effect
+    #if !CHAOS_DEBUG
     if (effectCountdown == 0 && activeEffects < EFFECT_COUNT) {
         while (TRUE) {
             s32 id = rand_int(EFFECT_COUNT - 1);
             if (effectData[id].timer > 0) {
                 continue;
             }
-
-            if (!effectData[id].everyFrame) {
-                effectData[id].func();
-            }
-            if (effectData[id].maxSeconds == 0) {
-                effectData[id].timer = 90;
-            } else {
-                effectData[id].timer =
-                    rand_int((effectData[id].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
-            }
+            activateEffect(id);
             effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES);
             break;
         }
     }
     #endif
-
     // update active effects
-    drawEffectList();
     activeEffects = 0;
     for (u32 i = 0; i < EFFECT_COUNT; i++) {
         if (effectData[i].timer > 0) {
@@ -349,5 +362,9 @@ void chaosUpdate() {
             }
             effectData[i].timer--;
         }
+    }
+
+    if (chaosMenuOpen) {
+        drawEffectList();
     }
 }

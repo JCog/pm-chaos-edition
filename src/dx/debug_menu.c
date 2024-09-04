@@ -458,8 +458,11 @@ void dx_debug_menu_main() {
     dx_debug_update_banner();
 
     // check input for menu open/close
+    if (chaosMenuOpen) {
+        return;
+    }
     if (DebugMenuState == DBM_NONE) {
-        if (PRESSED(BUTTON_L)) {
+        if (PRESSED(BUTTON_D_LEFT)) {
             DebugMenuState = DBM_MAIN_MENU;
         }
     } else if (DebugMenuState == DBM_MAIN_MENU) {
