@@ -112,7 +112,7 @@ extern PlayerData gPlayerData;
 extern b8 chaosMenuOpen;
 extern b8 chaosSlowGo;
 extern b8 chaosTopDownCam;
-extern b8 chaosNegativeAttack;
+extern b8 chaosHealingTouch;
 
 #if VERSION_PAL
 extern s32 gCurrentLanguage;

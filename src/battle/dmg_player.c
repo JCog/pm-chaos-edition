@@ -618,7 +618,7 @@ HitResult calc_player_damage_enemy(void) {
         } else {
             dispatchEvent = EVENT_HIT_COMBO;
             hitResult = HIT_RESULT_HIT;
-            if (chaosNegativeAttack) {
+            if (chaosHealingTouch) {
                 target->damageCounter   -= currentAttackDamage;
                 target->hpChangeCounter += currentAttackDamage;
                 battleStatus->lastAttackDamage += 100; // adds a negative symbol
@@ -632,8 +632,11 @@ HitResult calc_player_damage_enemy(void) {
                 && !partImmuneToElement
                 && !(targetPart->targetFlags & ACTOR_PART_TARGET_NO_DAMAGE)
             ) {
-                if (chaosNegativeAttack) {
+                if (chaosHealingTouch) {
                     target->curHP += currentAttackDamage;
+                    if (target->curHP > target->maxHP) {
+                        target->maxHP = target->curHP;
+                    }
                 } else {
                     target->curHP -= currentAttackDamage;
                 }

@@ -460,7 +460,7 @@ HitResult calc_partner_damage_enemy(void) {
             battleStatus->lastAttackDamage = 0;
             dispatchEvent = EVENT_HIT_COMBO;
             hitResult = HIT_RESULT_HIT;
-            if (chaosNegativeAttack) {
+            if (chaosHealingTouch) {
                 target->damageCounter -= damageDealt;
                 target->hpChangeCounter += damageDealt;
                 battleStatus->lastAttackDamage += 100; // adds a negative symbol
@@ -474,7 +474,7 @@ HitResult calc_partner_damage_enemy(void) {
                 && !partImmuneToElement
                 && !(targetPart->targetFlags & ACTOR_PART_TARGET_NO_DAMAGE)
             ) {
-                if (chaosNegativeAttack) {
+                if (chaosHealingTouch) {
                     target->curHP += damageDealt;
                 } else {
                     target->curHP -= damageDealt;

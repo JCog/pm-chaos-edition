@@ -23,7 +23,7 @@
 
 #define RELOAD_COOLDOWN_TIME 60
 
-struct EffectData {
+struct ChaosEffectData {
     const char *name;
     b8 everyFrame;
     s16 timer;
@@ -50,7 +50,7 @@ static u8 selectedTimer = 10;
 b8 chaosMenuOpen = FALSE;
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
-b8 chaosNegativeAttack = FALSE;
+b8 chaosHealingTouch = FALSE;
 static f32 prevHeight = -10000.0f;
 static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
@@ -208,10 +208,10 @@ static void topDownCam() {
 }
 
 static void negativeAttack() {
-    chaosNegativeAttack = !chaosNegativeAttack;
+    chaosHealingTouch = !chaosHealingTouch;
 }
 
-API_CALLABLE(GetRandMsgId) {
+API_CALLABLE(GetRandTattleId) {
     s32 idA;
     s32 idB;
     s32 tattle = rand_int(100);
@@ -235,13 +235,13 @@ API_CALLABLE(GetRandMsgId) {
 
 
 EvtScript N(EVS_Random_Tattle) = {
-    Call(GetRandMsgId)
+    Call(GetRandTattleId)
     Call(ShowMessageAtScreenPos, LVar0, 160, 40)
     Return
     End
 };
 
-static void randomMessage() {
+static void randomTattle() {
     start_script(&N(EVS_Random_Tattle), EVT_PRIORITY_A, 0);
 }
 
@@ -249,7 +249,7 @@ static void intangibleEnemies() {
     gGameStatus.debugEnemyContact = !gGameStatus.debugEnemyContact;
 }
 
-struct EffectData effectData[] = {
+struct ChaosEffectData effectData[] = {
     {"Peril Sound",         TRUE,   0,  45, perilSound,         NULL},
     {"Rewind",              TRUE,   0,  45, posLoad,            NULL},
     {"Levitate",            TRUE,   0,  10, levitate,           levitateStop},
@@ -260,7 +260,7 @@ struct EffectData effectData[] = {
     {"Slow Go",             FALSE,  0,  45, slowGo,             slowGo},
     {"Top-Down Cam",        FALSE,  0,  45, topDownCam,         topDownCam},
     {"Healing Touch",       FALSE,  0,  45, negativeAttack,     negativeAttack},
-    {"Random Tattle",       FALSE,  0,  0,  randomMessage,      NULL},
+    {"Random Tattle",       FALSE,  0,  0,  randomTattle,       NULL},
     {"Intangible Enemies",  FALSE,  0,  45, intangibleEnemies,  intangibleEnemies},
 };
 
@@ -424,6 +424,7 @@ void chaosUpdate() {
         }
     }
     #endif
+
     // update active effects
     activeEffects = 0;
     for (u32 i = 0; i < EFFECT_COUNT; i++) {
