@@ -7,11 +7,19 @@
 #define CHAOS_DEBUG 1
 
 #define NAMESPACE chaos
+
 #define MAX_EFFECT_INTERVAL 15
 #define MIN_EFFECT_LENGTH 10
-
 #define MAX_EFFECT_INTERVAL_FRAMES (MAX_EFFECT_INTERVAL * 30)
 #define MIN_EFFECT_LENGTH_FRAMES (MIN_EFFECT_LENGTH * 30)
+
+#define MENU_WIDTH 220
+#define MENU_HEIGHT_BASE 19
+#define MENU_X 15
+#define MENU_Y 23
+#define MENU_TEXT_X (MENU_X + 5)
+#define MENU_TEXT_Y (MENU_Y + 3)
+#define MENU_TIMER_OFFSET (MENU_TEXT_X + 100)
 
 struct EffectData {
     const char *name;
@@ -231,18 +239,23 @@ static void randomMessage() {
     start_script(&N(EVS_Random_Tattle), EVT_PRIORITY_A, 0);
 }
 
+static void intangibleEnemies() {
+    gGameStatus.debugEnemyContact = !gGameStatus.debugEnemyContact;
+}
+
 struct EffectData effectData[] = {
-    {"Peril Sound",     TRUE,   0,  45, perilSound,     NULL},
-    {"Rewind",          TRUE,   0,  45, posLoad,        NULL},
-    {"Levitate",        TRUE,   0,  10, levitate,       levitateStop},
-    {"Actor Chase",     TRUE,   0,  45, actorMagnet,    NULL},
-    {"Knockback",       TRUE,   0,  45, knockback,      NULL},
-    {"Lava",            FALSE,  0,  0,  lava,           NULL},
-    {"Squish",          TRUE,   0,  45, squish,         squishOff},
-    {"Slow Go",         FALSE,  0,  45, slowGo,         slowGo},
-    {"Top-Down Cam",    FALSE,  0,  45, topDownCam,     topDownCam},
-    {"Healing Touch",   FALSE,  0,  45, negativeAttack, negativeAttack},
-    {"Random Tattle",   FALSE,  0,  0,  randomMessage,  NULL}
+    {"Peril Sound",         TRUE,   0,  45, perilSound,         NULL},
+    {"Rewind",              TRUE,   0,  45, posLoad,            NULL},
+    {"Levitate",            TRUE,   0,  10, levitate,           levitateStop},
+    {"Actor Chase",         TRUE,   0,  45, actorMagnet,        NULL},
+    {"Knockback",           TRUE,   0,  45, knockback,          NULL},
+    {"Lava",                FALSE,  0,  0,  lava,               NULL},
+    {"Squish",              TRUE,   0,  45, squish,             squishOff},
+    {"Slow Go",             FALSE,  0,  45, slowGo,             slowGo},
+    {"Top-Down Cam",        FALSE,  0,  45, topDownCam,         topDownCam},
+    {"Healing Touch",       FALSE,  0,  45, negativeAttack,     negativeAttack},
+    {"Random Tattle",       FALSE,  0,  0,  randomMessage,      NULL},
+    {"Intangible Enemies",  FALSE,  0,  45, intangibleEnemies,  intangibleEnemies},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
@@ -255,14 +268,14 @@ static void drawEffectList() {
     #endif
     char fmtBuf[64];
     u8 index = 0;
-    dx_debug_draw_box(15, 23, 200, 19 + 10 * activeEffects, WINDOW_STYLE_4, 192);
+    dx_debug_draw_box(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT_BASE + 10 * activeEffects, WINDOW_STYLE_4, 192);
     #if CHAOS_DEBUG
     sprintf(fmtBuf, "Selected: %ds - %d %s", selectedTimer, selectedEffect, effectData[selectedEffect].name);
-    dx_debug_draw_ascii(fmtBuf, 0, 20, 26);
+    dx_debug_draw_ascii(fmtBuf, 0, MENU_TEXT_X, MENU_TEXT_Y);
     #else
     sprintf(fmtBuf, "%lu", effectCountdown / 30);
-    dx_debug_draw_ascii("Chaos Timer", 0, 20, 26);
-    dx_debug_draw_ascii(fmtBuf, 0, 100, 26);
+    dx_debug_draw_ascii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y);
+    dx_debug_draw_ascii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y);
     #endif
     for (u32 i = 0; i < EFFECT_COUNT; i++) {
         if (effectData[i].timer > 0) {
@@ -271,8 +284,8 @@ static void drawEffectList() {
             } else {
                 sprintf(fmtBuf, "%d", effectData[i].timer / 30);
             }
-            dx_debug_draw_ascii(effectData[i].name, 0, 20, 36 + index * 10);
-            dx_debug_draw_ascii(fmtBuf, 0, 100, 36 + index * 10);
+            dx_debug_draw_ascii(effectData[i].name, 0, MENU_TEXT_X, MENU_TEXT_Y + 10 + index * 10);
+            dx_debug_draw_ascii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10 + index * 10);
             index++;
         }
     }
