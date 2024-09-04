@@ -123,7 +123,11 @@ void action_update_spin(void) {
 
         phys_clear_spin_history();
         player_input_to_move_vector(&angle, &magnitude);
-        playerStatus->targetYaw = angle;
+        if (chaosSpinAngle) {
+            playerStatus->targetYaw = rand_int(360);
+        } else {
+            playerStatus->targetYaw = angle;
+        }
         playerSpinState->inputMagnitude = magnitude;
     }
 

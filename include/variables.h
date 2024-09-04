@@ -115,6 +115,7 @@ extern b8 chaosTopDownCam;
 extern b8 chaosHealingTouch;
 extern b8 chaosAllSfxAttackFx;
 extern b8 chaosHideModels;
+extern b8 chaosSpinAngle;
 
 #if VERSION_PAL
 extern s32 gCurrentLanguage;
