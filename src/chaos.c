@@ -1,7 +1,9 @@
 #include "chaos.h"
 #include "common.h"
-#include "game_modes.h"
 #include "dx/debug_menu.h"
+#include "effects.h"
+#include "game_modes.h"
+#include "script_api/battle.h"
 #include "world/actions.h"
 
 #define CHAOS_DEBUG 1
@@ -359,6 +361,96 @@ static void spinAngle() {
     chaosSpinAngle = !chaosSpinAngle;
 }
 
+static b8 actorAtHome(Actor *actor) {
+    // actors can dance around, so checking in a range
+    if (fabsf(actor->homePos.x - actor->curPos.x) > 20) {
+        return FALSE;
+    }
+    if (fabsf(actor->homePos.y - actor->curPos.y) > 20) {
+        return FALSE;
+    }
+    if (fabsf(actor->homePos.z - actor->curPos.z) > 20) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+EvtScript N(EVS_Shuffle_Sparkles) = {
+    Call(PlaySound, SOUND_MULTIPLE_STAR_SPIRITS_APPEAR)
+    Call(GetActorPos, ACTOR_PLAYER, LVar0, LVar1, LVar2)
+    Add(LVar1, 15)
+    PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
+    IfEq(LVar4, TRUE)
+        Call(GetActorPos, ACTOR_PARTNER, LVar0, LVar1, LVar2)
+        Add(LVar1, 15)
+        PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
+    EndIf
+    Set(LVar3, ACTOR_ENEMY0)
+    Loop(LVar5)
+        Call(GetActorPos, LVar3, LVar0, LVar1, LVar2)
+        Add(LVar1, 15)
+        PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
+        Add(LVar3, 1)
+    EndLoop
+    Return
+    End
+};
+
+static void shuffleBattlePos() {
+    if (!gGameStatus.isBattle) {
+        return;
+    }
+
+    Actor *actors[26];
+    b8 atHome[26];
+    u8 actorIdx = 0;
+    actors[actorIdx] = gBattleStatus.playerActor;
+    atHome[actorIdx++] = actorAtHome(gBattleStatus.playerActor);
+    if (gBattleStatus.partnerActor != NULL) {
+        actors[actorIdx] = gBattleStatus.partnerActor;
+        atHome[actorIdx++] = actorAtHome(gBattleStatus.partnerActor);
+    }
+    for (u32 i = 0; i < MAX_ENEMY_ACTORS; i++) {
+        if (gBattleStatus.enemyActors[i] != NULL) {
+            actors[actorIdx] = gBattleStatus.enemyActors[i];
+            atHome[actorIdx++] = actorAtHome(gBattleStatus.partnerActor);
+        }
+    }
+
+    // shuffle positions
+    u8 actorCount = actorIdx--;
+    Vec3f oldPos[26];
+    Vec3s oldHealth[26];
+    Vec3f newPos[26];
+    Vec3s newHealth[26];
+    for (u32 i = 0; i < actorCount; i++) {
+        oldPos[i] = actors[i]->homePos;
+        oldHealth[i] = actors[i]->healthBarPos;
+    }
+    for (u32 i = 0; i < actorCount; i++) {
+        u8 oldIdx = rand_int(actorIdx);
+        newPos[i] = oldPos[oldIdx];
+        newHealth[i] = oldHealth[oldIdx];
+        oldPos[oldIdx] = oldPos[actorIdx];
+        oldHealth[oldIdx] = oldHealth[actorIdx--];
+    }
+
+    // apply new position homes, move them if they're not away from their current home (aka probably attacking)
+    for (u32 i = 0; i < actorCount; i++) {
+        actors[i]->homePos.x = newPos[i].x;
+        actors[i]->homePos.z = newPos[i].z;
+        actors[i]->healthBarPos.x = newPos[i].x;
+        actors[i]->healthBarPos.z = newPos[i].z;
+        if (atHome[i]) {
+            actors[i]->curPos.x = newPos[i].x;
+            actors[i]->curPos.z = newPos[i].z;
+        }
+    }
+    Evt *script = start_script(&N(EVS_Shuffle_Sparkles), EVT_PRIORITY_A, 0);
+    script->varTable[4] = gBattleStatus.partnerActor != NULL;
+    script->varTable[5] = actorCount - 2;
+}
+
 struct ChaosEffectData effectData[] = {
     {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL},
     {"Rewind",                  TRUE,   0,  45, posLoad,                NULL},
@@ -378,6 +470,7 @@ struct ChaosEffectData effectData[] = {
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL},
     {"Hide Models",             FALSE,  0,  45, hideModels,             hideModels},
     {"Random Spin Angle",       FALSE,  0,  45, spinAngle,              spinAngle},
+    {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
