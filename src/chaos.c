@@ -6,7 +6,7 @@
 #include "script_api/battle.h"
 #include "world/actions.h"
 
-#define CHAOS_DEBUG 1
+#define CHAOS_DEBUG TRUE
 
 #define NAMESPACE chaos
 
@@ -15,13 +15,17 @@
 #define MAX_EFFECT_INTERVAL_FRAMES (MAX_EFFECT_INTERVAL * 30)
 #define MIN_EFFECT_LENGTH_FRAMES (MIN_EFFECT_LENGTH * 30)
 
-#define MENU_WIDTH 240
+#if CHAOS_DEBUG
+#define MENU_WIDTH 215
+#else
+#define MENU_WIDTH 160
+#endif
 #define MENU_HEIGHT_BASE 19
 #define MENU_X 15
 #define MENU_Y 56
 #define MENU_TEXT_X (MENU_X + 5)
 #define MENU_TEXT_Y (MENU_Y + 3)
-#define MENU_TIMER_OFFSET (MENU_TEXT_X + 100)
+#define MENU_TIMER_OFFSET (MENU_TEXT_X + 138)
 
 #define RELOAD_COOLDOWN_TIME 60
 
@@ -34,6 +38,7 @@ struct ChaosEffectData {
     s8 maxSeconds;
     void (*func)();
     void (*off)();
+    b8 (*canTrigger)();
 };
 
 enum ActorType {
@@ -66,13 +71,20 @@ b8 chaosAllSfxAttackFx = FALSE;
 b8 chaosHideModels = FALSE;
 b8 chaosSpinAngle = FALSE;
 static f32 prevHeight = -10000.0f;
-static u8 activeEffects = 0;
 static u32 effectCountdown = 1;
 static b8 reloading = FALSE;
 static u8 reloadDelay = 0;
 static u16 reloadCooldown = 0;
 static u16 reloadMessageTimer = 0;
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
+
+static b8 isOverworld() {
+    return !gGameStatus.isBattle;
+}
+
+static b8 isBattle() {
+    return gGameStatus.isBattle;
+}
 
 static void perilSound() {
     if (frameCount % 25 == 0) {
@@ -329,6 +341,15 @@ static void addRemoveStarPoints() {
     }
 }
 
+static b8 canUnequipBadge() {
+    for (u32 i = 0; i < 64; i++) {
+        if (gPlayerData.equippedBadges[i] != 0) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 static void unequipBadge() {
     s32 eqBadgeCount = 0;
     for (u32 i = 0; i < 64; i++) {
@@ -397,10 +418,6 @@ EvtScript N(EVS_Shuffle_Sparkles) = {
 };
 
 static void shuffleBattlePos() {
-    if (!gGameStatus.isBattle) {
-        return;
-    }
-
     Actor *actors[26];
     b8 atHome[26];
     u8 actorIdx = 0;
@@ -465,6 +482,10 @@ static void randomFp() {
     }
 }
 
+static b8 canPointSwap() {
+    return gPlayerData.curHP != gPlayerData.curFP;
+}
+
 static void pointSwap() {
     s8 curHpTemp = gPlayerData.curHP;
     gPlayerData.curHP = gPlayerData.curFP;
@@ -479,28 +500,28 @@ static void pointSwap() {
 }
 
 struct ChaosEffectData effectData[] = {
-    {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL},
-    {"Rewind",                  TRUE,   0,  45, posLoad,                NULL},
-    {"Levitate",                TRUE,   0,  10, levitate,               levitateStop},
-    {"Actor Chase",             TRUE,   0,  45, actorMagnet,            NULL},
-    {"Knockback",               TRUE,   0,  45, knockback,              NULL},
-    {"Lava",                    FALSE,  0,  0,  lava,                   NULL},
-    {"Squish",                  TRUE,   0,  45, squish,                 squishOff},
-    {"Slow Go",                 FALSE,  0,  45, slowGo,                 slowGo},
-    {"Top-Down Cam",            FALSE,  0,  45, topDownCam,             topDownCam},
-    {"Healing Touch",           FALSE,  0,  45, negativeAttack,         negativeAttack},
-    {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL},
-    {"Intangible Enemies",      FALSE,  0,  45, intangibleEnemies,      intangibleEnemies},
-    {"All SFX AttackFX",        FALSE,  0,  45, allSfxAttackFx,         allSfxAttackFx},
-    {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL},
-    {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL},
-    {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL},
-    {"Hide Models",             FALSE,  0,  45, hideModels,             hideModels},
-    {"Random Spin Angle",       FALSE,  0,  45, spinAngle,              spinAngle},
-    {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL},
-    {"Random HP",               FALSE,  0,  0,  randomHp,               NULL},
-    {"Random FP",               FALSE,  0,  0,  randomFp,               NULL},
-    {"Point Swap",              FALSE,  0,  0,  pointSwap,              NULL},
+    {"Rewind",                  TRUE,   0,  45, posLoad,                NULL,               isOverworld},
+    {"Levitate",                TRUE,   0,  10, levitate,               levitateStop,       isOverworld},
+    {"Actor Chase",             TRUE,   0,  45, actorMagnet,            NULL,               isOverworld},
+    {"Knockback",               TRUE,   0,  45, knockback,              NULL,               isOverworld},
+    {"Slow Go",                 FALSE,  0,  45, slowGo,                 slowGo,             isOverworld},
+    {"Top-Down Cam",            FALSE,  0,  45, topDownCam,             topDownCam,         isOverworld},
+    {"Intangible Enemies",      FALSE,  0,  45, intangibleEnemies,      intangibleEnemies,  isOverworld},
+    {"Random Spin Angle",       FALSE,  0,  45, spinAngle,              spinAngle,          isOverworld},
+    {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               isOverworld},
+    {"Healing Touch",           FALSE,  0,  45, negativeAttack,         negativeAttack,     isBattle},
+    {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isBattle},
+    {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
+    {"Point Swap",              FALSE,  0,  0,  pointSwap,              NULL,               canPointSwap},
+    {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL,               NULL},
+    {"Squish",                  TRUE,   0,  45, squish,                 squishOff,          NULL},
+    {"All SFX AttackFX",        FALSE,  0,  45, allSfxAttackFx,         allSfxAttackFx,     NULL},
+    {"Hide Models",             FALSE,  0,  45, hideModels,             hideModels,         NULL},
+    {"Random HP",               FALSE,  0,  0,  randomHp,               NULL,               NULL},
+    {"Random FP",               FALSE,  0,  0,  randomFp,               NULL,               NULL},
+    {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL,               NULL},
+    {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL,               NULL},
+    {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL,               NULL},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
@@ -562,14 +583,20 @@ static void drawEffectList() {
         return;
     }
     #endif
+    u8 activeEffects = 0;
+    for (u32 i = 0; i < EFFECT_COUNT; i++) {
+        if (effectData[i].timer > 0) {
+            activeEffects++;
+        }
+    }
     char fmtBuf[64];
     u8 index = 0;
     dx_debug_draw_box(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT_BASE + 10 * activeEffects, WINDOW_STYLE_4, 192);
     #if CHAOS_DEBUG
-    sprintf(fmtBuf, "Selected: %ds - %d %s", selectedTimer, selectedEffect, effectData[selectedEffect].name);
+    sprintf(fmtBuf, "-- %2ds - %2d %s --", selectedTimer, selectedEffect, effectData[selectedEffect].name);
     dx_debug_draw_ascii(fmtBuf, 0, MENU_TEXT_X, MENU_TEXT_Y);
     #else
-    sprintf(fmtBuf, "%lu", effectCountdown / 30);
+    sprintf(fmtBuf, "%2lu", effectCountdown / 30);
     dx_debug_draw_ascii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y);
     dx_debug_draw_ascii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y);
     #endif
@@ -578,7 +605,7 @@ static void drawEffectList() {
             if (effectData[i].maxSeconds == 0) {
                 sprintf(fmtBuf, "");
             } else {
-                sprintf(fmtBuf, "%d", effectData[i].timer / 30);
+                sprintf(fmtBuf, "%2d", effectData[i].timer / 30);
             }
             dx_debug_draw_ascii(effectData[i].name, 0, MENU_TEXT_X, MENU_TEXT_Y + 10 + index * 10);
             dx_debug_draw_ascii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10 + index * 10);
@@ -625,14 +652,17 @@ static void handleMenu() {
         selectedEffect++;
         selectedEffect %= EFFECT_COUNT;
     } else if (buttons & BUTTON_D_UP) {
-        selectedTimer += 5;
+        if (selectedEffect < 255) {
+            selectedTimer += 5;
+        }
     } else if (buttons & BUTTON_D_DOWN) {
-        selectedTimer -= 5;
-        if (selectedTimer < 0) {
-            selectedTimer = 0;
+        if (selectedTimer > 0) {
+            selectedTimer -= 5;
         }
     } else if (buttons & BUTTON_R) {
-        activateEffect(selectedEffect);
+        if (effectData[selectedEffect].canTrigger == NULL || effectData[selectedEffect].canTrigger()) {
+            activateEffect(selectedEffect);
+        }
     }
     #endif
 }
@@ -651,10 +681,11 @@ void chaosUpdate() {
 
     // select a new effect
     #if !CHAOS_DEBUG
-    if (effectCountdown == 0 && activeEffects < EFFECT_COUNT) {
-        while (TRUE) {
+    if (effectCountdown == 0) {
+        // try 20 times to apply an effect, skip if a valid one can't be found
+        for (u32 i = 0; i < 20; i++) {
             s32 id = rand_int(EFFECT_COUNT - 1);
-            if (effectData[id].timer > 0) {
+            if (effectData[id].timer > 0 || (effectData[id].canTrigger != NULL && !effectData[id].canTrigger())) {
                 continue;
             }
             activateEffect(id);
@@ -665,10 +696,8 @@ void chaosUpdate() {
     #endif
 
     // update active effects
-    activeEffects = 0;
     for (u32 i = 0; i < EFFECT_COUNT; i++) {
-        if (effectData[i].timer > 0) {
-            activeEffects++;
+        if (effectData[i].timer > 0 && (effectData[i].canTrigger == NULL || effectData[i].canTrigger())) {
             if (effectData[i].timer == 1 && effectData[i].off != NULL) {
                 effectData[i].off();
             } else if (effectData[i].everyFrame){
