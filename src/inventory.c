@@ -802,6 +802,7 @@ void update_status_bar(void) {
                 if (gGameStatusPtr->frameCounter % 4 == 0) {
                     statusBar->displayHP++;
                     sfx_play_sound(SOUND_HEART_PICKUP);
+                    chaosHpSoundPlayed = TRUE;
                 }
             } else if (gGameStatusPtr->frameCounter % 4 == 0) {
                 statusBar->displayHP++;
@@ -821,6 +822,7 @@ void update_status_bar(void) {
                 if (gGameStatusPtr->frameCounter % 4 == 0) {
                     statusBar->displayFP++;
                     sfx_play_sound(SOUND_FLOWER_PICKUP);
+                    chaosFpSoundPlayed = TRUE;
                 }
             } else if (gGameStatusPtr->frameCounter % 4 == 0) {
                 statusBar->displayFP++;

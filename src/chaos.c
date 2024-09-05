@@ -70,12 +70,16 @@ b8 chaosHealingTouch = FALSE;
 b8 chaosAllSfxAttackFx = FALSE;
 b8 chaosHideModels = FALSE;
 b8 chaosSpinAngle = FALSE;
+b8 chaosHpSoundPlayed = FALSE;
+b8 chaosFpSoundPlayed = FALSE;
 static f32 prevHeight = -10000.0f;
 static u32 effectCountdown = 1;
 static b8 reloading = FALSE;
 static u8 reloadDelay = 0;
 static u16 reloadCooldown = 0;
 static u16 reloadMessageTimer = 0;
+static s8 hpSoundTimer = 0;
+static s8 fpSoundTimer = 0;
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 
 static b8 isOverworld() {
@@ -473,6 +477,8 @@ static void randomHp() {
     while (gPlayerData.curHP == oldHp) {
         gPlayerData.curHP = rand_int(gPlayerData.curMaxHP - 1) + 1;
     }
+    chaosHpSoundPlayed = FALSE;
+    hpSoundTimer = 20;
 }
 
 static void randomFp() {
@@ -480,6 +486,8 @@ static void randomFp() {
     while (gPlayerData.curFP == oldFp) {
         gPlayerData.curFP = rand_int(gPlayerData.curMaxFP);
     }
+    chaosFpSoundPlayed = FALSE;
+    fpSoundTimer = 20;
 }
 
 static b8 canPointSwap() {
@@ -497,6 +505,11 @@ static void pointSwap() {
     if (gPlayerData.curFP > gPlayerData.curMaxFP) {
         gPlayerData.curFP = gPlayerData.curMaxFP;
     }
+    sfx_play_sound(SOUND_JUMP_COMBO_8);
+    chaosHpSoundPlayed = FALSE;
+    chaosFpSoundPlayed = FALSE;
+    hpSoundTimer = 20;
+    fpSoundTimer = 20;
 }
 
 struct ChaosEffectData effectData[] = {
@@ -575,6 +588,21 @@ static void updateReload() {
     set_map_transition_effect(TRANSITION_STANDARD);
     set_game_mode(GAME_MODE_CHANGE_MAP);
     reloading = FALSE;
+}
+
+static void handleSoundTimers() {
+    if (hpSoundTimer >= 0) {
+        hpSoundTimer--;
+    }
+    if (fpSoundTimer >= 0) {
+        fpSoundTimer--;
+    }
+    if (hpSoundTimer == 0 && !chaosHpSoundPlayed) {
+        sfx_play_sound(SOUND_HEART_PICKUP);
+    }
+    if (fpSoundTimer == 0 && !chaosFpSoundPlayed) {
+        sfx_play_sound(SOUND_FLOWER_PICKUP);
+    }
 }
 
 static void drawEffectList() {
@@ -678,6 +706,7 @@ void chaosUpdate() {
 
     handleMenu();
     updateReload();
+    handleSoundTimers();
 
     // select a new effect
     #if !CHAOS_DEBUG

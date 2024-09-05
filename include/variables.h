@@ -116,6 +116,8 @@ extern b8 chaosHealingTouch;
 extern b8 chaosAllSfxAttackFx;
 extern b8 chaosHideModels;
 extern b8 chaosSpinAngle;
+extern b8 chaosHpSoundPlayed;
+extern b8 chaosFpSoundPlayed;
 
 #if VERSION_PAL
 extern s32 gCurrentLanguage;
