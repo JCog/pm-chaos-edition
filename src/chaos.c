@@ -18,7 +18,7 @@
 #define MENU_WIDTH 240
 #define MENU_HEIGHT_BASE 19
 #define MENU_X 15
-#define MENU_Y 23
+#define MENU_Y 56
 #define MENU_TEXT_X (MENU_X + 5)
 #define MENU_TEXT_Y (MENU_Y + 3)
 #define MENU_TIMER_OFFSET (MENU_TEXT_X + 100)
@@ -451,6 +451,33 @@ static void shuffleBattlePos() {
     script->varTable[5] = actorCount - 2;
 }
 
+static void randomHp() {
+    s8 oldHp = gPlayerData.curHP;
+    while (gPlayerData.curHP == oldHp) {
+        gPlayerData.curHP = rand_int(gPlayerData.curMaxHP - 1) + 1;
+    }
+}
+
+static void randomFp() {
+    s8 oldFp = gPlayerData.curFP;
+    while (gPlayerData.curFP == oldFp) {
+        gPlayerData.curFP = rand_int(gPlayerData.curMaxFP);
+    }
+}
+
+static void pointSwap() {
+    s8 curHpTemp = gPlayerData.curHP;
+    gPlayerData.curHP = gPlayerData.curFP;
+    gPlayerData.curFP = curHpTemp;
+    // intentionally allowing this to set your HP to 0, should be stable -- will change if proven otherwise
+    if (gPlayerData.curHP > gPlayerData.curMaxHP) {
+        gPlayerData.curHP = gPlayerData.curMaxHP;
+    }
+    if (gPlayerData.curFP > gPlayerData.curMaxFP) {
+        gPlayerData.curFP = gPlayerData.curMaxFP;
+    }
+}
+
 struct ChaosEffectData effectData[] = {
     {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL},
     {"Rewind",                  TRUE,   0,  45, posLoad,                NULL},
@@ -471,6 +498,9 @@ struct ChaosEffectData effectData[] = {
     {"Hide Models",             FALSE,  0,  45, hideModels,             hideModels},
     {"Random Spin Angle",       FALSE,  0,  45, spinAngle,              spinAngle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL},
+    {"Random HP",               FALSE,  0,  0,  randomHp,               NULL},
+    {"Random FP",               FALSE,  0,  0,  randomFp,               NULL},
+    {"Point Swap",              FALSE,  0,  0,  pointSwap,              NULL},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
