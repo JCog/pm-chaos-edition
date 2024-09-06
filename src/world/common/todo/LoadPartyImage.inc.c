@@ -5,19 +5,25 @@
 #error "Define PARTY_IMAGE to the asset name to use LoadPartyImage."
 #endif
 
+//this is required for alignment on modern compilers to be correct
+typedef struct Img {
+    u16 palette[256];
+    u8 raster[0x3D90]; // 10 bytes added for padding: 150 * 105 = 0x3D86
+} PartyImage;
+
+static PartyImage img;
+
 API_CALLABLE(N(LoadPartyImage)) {
-    static PAL_BIN palette[256];
-    static IMG_BIN raster[0x3D90]; // 10 bytes added for padding: 150 * 105 = 3D86
     static MessageImageData image;
 
     u32 decompressedSize;
     void* compressed = load_asset_by_name(PARTY_IMAGE, &decompressedSize);
 
-    decode_yay0(compressed, &palette);
+    decode_yay0(compressed, &img);
     general_heap_free(compressed);
 
-    image.raster = raster;
-    image.palette = palette;
+    image.raster = img.raster;
+    image.palette = img.palette;
     image.width = 150;
     image.height = 105;
     image.format = G_IM_FMT_CI;
