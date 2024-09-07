@@ -1,4 +1,7 @@
 #include "chaos.h"
+#include "audio/public.h"
+#include "dx/debug_menu.h"
+#include "dx/utils.h"
 #include "game_modes.h"
 
 #define MAX_EFFECT_INTERVAL 15
@@ -45,6 +48,19 @@ static u8 reloadDelay = 0;
 static u16 reloadCooldown = 0;
 static u16 reloadMessageTimer = 0;
 
+static void chaosDrawBox(s32 posX, s32 posY, s32 sizeX, s32 sizeY, int style, s32 opacity) {
+    draw_box(0, (WindowStyle)style, posX, posY, 0, sizeX, sizeY, opacity,
+             0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, SCREEN_WIDTH, SCREEN_HEIGHT, NULL);
+}
+
+static void chaosDrawAscii(char* text, s32 color, s32 posX, s32 posY) {
+    char buf[128] = {
+        MSG_CHAR_READ_FUNCTION, MSG_READ_FUNC_SIZE, 12, 12
+    };
+    dx_string_to_msg(&buf[4], text);
+    draw_msg((s32)buf, posX, posY, 255, color, 0);
+}
+
 static void reloadRoom() {
     bgm_set_song(1, -1, 0, 0, 0); // clear secondary songs
     snd_ambient_stop_all(0);
@@ -72,7 +88,7 @@ static void updateReload() {
     }
     if (reloadMessageTimer) {
         reloadMessageTimer--;
-        dx_debug_draw_ascii("Reload Cooldown Active", 0, 102, 80);
+        chaosDrawAscii("Reload Cooldown Active", 0, 102, 80);
     }
     s32 held = gGameStatus.curButtons[0];
     s32 pressed = gGameStatus.pressedButtons[0];
@@ -110,10 +126,10 @@ static void drawEffectList() {
     }
     char fmtBuf[64];
     u8 index = 0;
-    dx_debug_draw_box(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT_BASE + 10 * activeEffects, WINDOW_STYLE_4, 192);
+    chaosDrawBox(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT_BASE + 10 * activeEffects, WINDOW_STYLE_4, 192);
     #if CHAOS_DEBUG
     sprintf(fmtBuf, "-- %2ds - %2d %s --", selectedTimer, selectedEffect, effectData[selectedEffect].name);
-    dx_debug_draw_ascii(fmtBuf, 0, MENU_TEXT_X, MENU_TEXT_Y);
+    chaosDrawAscii(fmtBuf, 0, MENU_TEXT_X, MENU_TEXT_Y);
     #else
     sprintf(fmtBuf, "%2lu", effectCountdown / 30);
     dx_debug_draw_ascii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y);
@@ -126,8 +142,8 @@ static void drawEffectList() {
             } else {
                 sprintf(fmtBuf, "%2d", effectData[i].timer / 30);
             }
-            dx_debug_draw_ascii(effectData[i].name, 0, MENU_TEXT_X, MENU_TEXT_Y + 10 + index * 10);
-            dx_debug_draw_ascii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10 + index * 10);
+            chaosDrawAscii(effectData[i].name, 0, MENU_TEXT_X, MENU_TEXT_Y + 10 + index * 10);
+            chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10 + index * 10);
             index++;
         }
     }

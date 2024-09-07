@@ -33,6 +33,7 @@ AuResult au_song_start_variation(s32 songName, s32 variation);
 AuResult au_song_stop(s32 songName);
 void au_stop_songs(void);
 AuResult au_song_is_playing(s32 songName);
+void au_sfx_reset_player();
 AuResult snd_set_song_variation_fade(s32 songName, s32 variation, s32 fadeInTime, s32 startVolume, s32 endVolume);
 AuResult snd_set_song_fade(s32 songName, s32 fadeInTime, s32 startVolume, s32 endVolume);
 AuResult snd_set_song_variation_fade_time(s32 songName, s32 fadeTime, s32 variation);
