@@ -1142,6 +1142,9 @@ void au_bgm_player_update_playing(BGMPlayer *player) {
                         // note
                         if (opcode < 0xD4) {
                             notePitch = (opcode & 0x7F);
+                            if (chaosBadMusic) {
+                                notePitch += rand_int(4) - 2;
+                            }
                             noteVelocity = *(track->bgmReadPos++);
                             POST_BGM_READ();
                             noteLength = *(track->bgmReadPos++);

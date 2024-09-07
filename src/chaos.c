@@ -72,6 +72,7 @@ b8 chaosHideModels = FALSE;
 b8 chaosSpinAngle = FALSE;
 b8 chaosHpSoundPlayed = FALSE;
 b8 chaosFpSoundPlayed = FALSE;
+b8 chaosBadMusic = FALSE;
 static f32 prevHeight = -10000.0f;
 static u32 effectCountdown = 1;
 static b8 reloading = FALSE;
@@ -512,6 +513,10 @@ static void pointSwap() {
     fpSoundTimer = 20;
 }
 
+static void badMusic() {
+    chaosBadMusic = !chaosBadMusic;
+}
+
 struct ChaosEffectData effectData[] = {
     {"Rewind",                  TRUE,   0,  45, posLoad,                NULL,               isOverworld},
     {"Levitate",                TRUE,   0,  10, levitate,               levitateStop,       isOverworld},
@@ -535,6 +540,7 @@ struct ChaosEffectData effectData[] = {
     {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL,               NULL},
     {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL,               NULL},
     {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL,               NULL},
+    {"Bad Music",               FALSE,  0,  45, badMusic,               badMusic,           NULL},
 };
 
 #define EFFECT_COUNT (ARRAY_COUNT(effectData))
