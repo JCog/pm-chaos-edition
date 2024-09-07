@@ -22,6 +22,7 @@ static b8 isOverworld(void);
 static b8 isBattle(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
+static b8 hasMushroom(void);
 
 // overworld
 static void posLoad(void);
@@ -52,6 +53,7 @@ static void addRemoveStarPoints(void);
 static void randomTattle(void);
 static void badMusic(void);
 static void badMusicOff(void);
+static void expireMushroom(void);
 
 struct ChaosEffectData effectData[] = {
     {"Rewind",                  TRUE,   0,  60, posLoad,                NULL,               isOverworld},
@@ -77,6 +79,7 @@ struct ChaosEffectData effectData[] = {
     {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL,               NULL},
     {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL,               NULL},
     {"Bad Music",               TRUE,   0,  60, badMusic,               badMusicOff,        NULL},
+    {"Mushroom Expires",        FALSE,  0,  0,  expireMushroom,         NULL,               hasMushroom},
 };
 
 u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -88,6 +91,11 @@ static s16 fpSoundTimer = 0;
 static s16 perilTimer = 0;
 static s16 badMusicTimer = 0;
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
+
+const enum ItemIDs mushroomIds[] = {
+    ITEM_MUSHROOM, ITEM_VOLT_SHROOM, ITEM_SUPER_SHROOM, ITEM_ULTRA_SHROOM, ITEM_LIFE_SHROOM, ITEM_HONEY_SHROOM,
+    ITEM_MAPLE_SHROOM, ITEM_JELLY_SHROOM
+};
 
 static void decTimer(s16 *timer) {
     if (*timer >= 0) {
@@ -129,6 +137,19 @@ static b8 canUnequipBadge() {
 static b8 canPointSwap() {
     return gPlayerData.curHP != gPlayerData.curFP;
 }
+
+static b8 hasMushroom() {
+    for (u32 i = 0; i < 10; i++) {
+        for (u32 j = 0; j < ARRAY_COUNT(mushroomIds); j++) {
+            if (gPlayerData.invItems[i] == mushroomIds[j]) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 static void posLoad() {
     static Vec3f savedPos;
@@ -551,4 +572,22 @@ static void badMusic() {
 
 static void badMusicOff() {
     chaosBadMusic = 0;
+}
+
+static void expireMushroom() {
+    s32 invIdx[10];
+    u8 count = 0;
+    for (u32 i = 0; i < 10; i++) {
+        for (u32 j = 0; j < ARRAY_COUNT(mushroomIds); j++) {
+            if (gPlayerData.invItems[i] == mushroomIds[j]) {
+                invIdx[count++] = i;
+                break;
+            }
+        }
+    }
+
+    if (count > 0) {
+        s32 idx = invIdx[rand_int(count - 1)];
+        gPlayerData.invItems[idx] = ITEM_DRIED_SHROOM;
+    }
 }

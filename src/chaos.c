@@ -232,7 +232,8 @@ void chaosUpdate() {
 
     // update active effects
     for (u32 i = 0; i < totalEffectCount; i++) {
-        if (effectData[i].timer > 0 && (effectData[i].canTrigger == NULL || effectData[i].canTrigger())) {
+        b8 shouldTrigger = effectData[i].canTrigger == NULL || effectData[i].canTrigger();
+        if (effectData[i].timer > 0 && (shouldTrigger || effectData[i].maxSeconds == 0)) {
             if (effectData[i].timer == 1 && effectData[i].off != NULL) {
                 effectData[i].off();
             } else if (effectData[i].everyFrame){
