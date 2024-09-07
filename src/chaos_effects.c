@@ -264,17 +264,21 @@ EvtScript N(EVS_Shuffle_Sparkles) = {
     Call(GetActorPos, ACTOR_PLAYER, LVar0, LVar1, LVar2)
     Add(LVar1, 15)
     PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
-    IfEq(LVar4, TRUE)
+    Call(ActorExists, ACTOR_PARTNER, LVar0)
+    IfEq(LVar0, TRUE)
         Call(GetActorPos, ACTOR_PARTNER, LVar0, LVar1, LVar2)
         Add(LVar1, 15)
         PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
     EndIf
     Set(LVar3, ACTOR_ENEMY0)
-    Loop(LVar5)
-        Call(GetActorPos, LVar3, LVar0, LVar1, LVar2)
-        Add(LVar1, 15)
-        PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
-        Add(LVar3, 1)
+    Loop(MAX_ENEMY_ACTORS)
+        Call(ActorExists, LVar3, LVar0)
+        IfEq(LVar0, TRUE)
+            Call(GetActorPos, LVar3, LVar0, LVar1, LVar2)
+            Add(LVar1, 15)
+            PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
+            Add(LVar3, 1)
+        EndIf
     EndLoop
     Return
     End
@@ -340,9 +344,7 @@ static void shuffleBattlePos() {
             actors[i]->curPos.z = newPos[i].z;
         }
     }
-    Evt *script = start_script(&N(EVS_Shuffle_Sparkles), EVT_PRIORITY_A, 0);
-    script->varTable[4] = gBattleStatus.partnerActor != NULL;
-    script->varTable[5] = actorCount - 2;
+    start_script(&N(EVS_Shuffle_Sparkles), EVT_PRIORITY_A, 0);
 }
 
 static void unequipBadge() {
