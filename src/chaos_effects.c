@@ -82,18 +82,22 @@ u8 totalEffectCount = ARRAY_COUNT(effectData);
 
 u32 frameCount = 0;
 static f32 prevHeight = -10000.0f;
-static s8 hpSoundTimer = 0;
-static s8 fpSoundTimer = 0;
+static s16 hpSoundTimer = 0;
+static s16 fpSoundTimer = 0;
+static s16 perilTimer = 0;
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
+
+static void decTimer(s16 *timer) {
+    if (*timer >= 0) {
+        (*timer)--;
+    }
+}
 
 void handleTimers() {
     frameCount = gPlayerData.frameCounter / 2;
-    if (hpSoundTimer >= 0) {
-        hpSoundTimer--;
-    }
-    if (fpSoundTimer >= 0) {
-        fpSoundTimer--;
-    }
+    decTimer(&hpSoundTimer);
+    decTimer(&fpSoundTimer);
+    decTimer(&perilTimer);
     if (hpSoundTimer == 0 && !chaosHpSoundPlayed) {
         sfx_play_sound(SOUND_HEART_PICKUP);
     }
@@ -360,8 +364,9 @@ static void pointSwap() {
 }
 
 static void perilSound() {
-    if (frameCount % 25 == 0) {
+    if (perilTimer <= 0) {
         sfx_play_sound(SOUND_PERIL);
+        perilTimer = 15 + rand_int(25);
     }
 }
 
