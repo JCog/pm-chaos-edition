@@ -1142,8 +1142,30 @@ void au_bgm_player_update_playing(BGMPlayer *player) {
                         // note
                         if (opcode < 0xD4) {
                             notePitch = (opcode & 0x7F);
-                            if (chaosBadMusic) {
-                                notePitch += rand_int(4) - 2;
+                            if (!track->isDrumTrack) {
+                                switch (chaosBadMusic) {
+                                    case 0:
+                                        break;
+                                    case 1:
+                                        if (rand_int(6) == 0) {
+                                            notePitch += rand_int(2) - 1;
+                                        }
+                                        break;
+                                    case 2:
+                                        if (rand_int(3) == 0) {
+                                            notePitch += rand_int(2) - 1;
+                                        }
+                                        break;
+                                    case 3:
+                                        notePitch += rand_int(2) - 1;
+                                        break;
+                                    case 4:
+                                        notePitch += rand_int(4) - 2;
+                                        break;
+                                    default:
+                                        notePitch += rand_int(6) - 3;
+                                        break;
+                                }
                             }
                             noteVelocity = *(track->bgmReadPos++);
                             POST_BGM_READ();

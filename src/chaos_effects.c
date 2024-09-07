@@ -51,31 +51,32 @@ static void addRemoveCoins(void);
 static void addRemoveStarPoints(void);
 static void randomTattle(void);
 static void badMusic(void);
+static void badMusicOff(void);
 
 struct ChaosEffectData effectData[] = {
-    {"Rewind",                  TRUE,   0,  45, posLoad,                NULL,               isOverworld},
+    {"Rewind",                  TRUE,   0,  60, posLoad,                NULL,               isOverworld},
     {"Levitate",                TRUE,   0,  10, levitate,               levitateStop,       isOverworld},
-    {"Actor Chase",             TRUE,   0,  45, actorMagnet,            NULL,               isOverworld},
-    {"Knockback",               TRUE,   0,  45, knockback,              NULL,               isOverworld},
-    {"Slow Go",                 FALSE,  0,  45, slowGo,                 slowGo,             isOverworld},
-    {"Top-Down Cam",            FALSE,  0,  45, topDownCam,             topDownCam,         isOverworld},
-    {"Intangible Enemies",      FALSE,  0,  45, intangibleEnemies,      intangibleEnemies,  isOverworld},
-    {"Random Spin Angle",       FALSE,  0,  45, spinAngle,              spinAngle,          isOverworld},
+    {"Actor Chase",             TRUE,   0,  30, actorMagnet,            NULL,               isOverworld},
+    {"Knockback",               TRUE,   0,  60, knockback,              NULL,               isOverworld},
+    {"Slow Go",                 FALSE,  0,  60, slowGo,                 slowGo,             isOverworld},
+    {"Top-Down Cam",            FALSE,  0,  60, topDownCam,             topDownCam,         isOverworld},
+    {"Intangible Enemies",      FALSE,  0,  60, intangibleEnemies,      intangibleEnemies,  isOverworld},
+    {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
     {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               isOverworld},
-    {"Healing Touch",           FALSE,  0,  45, negativeAttack,         negativeAttack,     isBattle},
+    {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     isBattle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isBattle},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
     {"Point Swap",              FALSE,  0,  0,  pointSwap,              NULL,               canPointSwap},
-    {"Peril Sound",             TRUE,   0,  45, perilSound,             NULL,               NULL},
-    {"Squish",                  TRUE,   0,  45, squish,                 squishOff,          NULL},
-    {"All SFX AttackFX",        FALSE,  0,  45, allSfxAttackFx,         allSfxAttackFx,     NULL},
-    {"Hide Models",             FALSE,  0,  45, hideModels,             hideModels,         NULL},
+    {"Peril Sound",             TRUE,   0,  60, perilSound,             NULL,               NULL},
+    {"Squish",                  TRUE,   0,  60, squish,                 squishOff,          NULL},
+    {"All SFX AttackFX",        FALSE,  0,  60, allSfxAttackFx,         allSfxAttackFx,     NULL},
+    {"Hide Models",             FALSE,  0,  60, hideModels,             hideModels,         NULL},
     {"Random HP",               FALSE,  0,  0,  randomHp,               NULL,               NULL},
     {"Random FP",               FALSE,  0,  0,  randomFp,               NULL,               NULL},
     {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL,               NULL},
     {"Add/Remove Star Points",  FALSE,  0,  0,  addRemoveStarPoints,    NULL,               NULL},
     {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL,               NULL},
-    {"Bad Music",               FALSE,  0,  45, badMusic,               badMusic,           NULL},
+    {"Bad Music",               TRUE,   0,  60, badMusic,               badMusicOff,        NULL},
 };
 
 u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -85,6 +86,7 @@ static f32 prevHeight = -10000.0f;
 static s16 hpSoundTimer = 0;
 static s16 fpSoundTimer = 0;
 static s16 perilTimer = 0;
+static s16 badMusicTimer = 0;
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 
 static void decTimer(s16 *timer) {
@@ -98,6 +100,7 @@ void handleTimers() {
     decTimer(&hpSoundTimer);
     decTimer(&fpSoundTimer);
     decTimer(&perilTimer);
+    decTimer(&badMusicTimer);
     if (hpSoundTimer == 0 && !chaosHpSoundPlayed) {
         sfx_play_sound(SOUND_HEART_PICKUP);
     }
@@ -537,5 +540,15 @@ static void randomTattle() {
 }
 
 static void badMusic() {
-    chaosBadMusic = !chaosBadMusic;
+    if (chaosBadMusic == 0) {
+        badMusicTimer = 5 * 30;
+        chaosBadMusic = 1;
+    } else if (badMusicTimer == 0) {
+        badMusicTimer = chaosBadMusic * 5 * 30;
+        chaosBadMusic++;
+    }
+}
+
+static void badMusicOff() {
+    chaosBadMusic = 0;
 }
