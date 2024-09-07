@@ -1,34 +1,13 @@
-# Paper Mario DX
+# Paper Mario: Chaos Edition
 
-[![Release](https://img.shields.io/github/v/release/star-haven/papermario-dx)][releases]
-[![Download](https://img.shields.io/github/downloads/star-haven/papermario-dx/total)][download]
-![Build Status](https://img.shields.io/github/actions/workflow/status/star-haven/papermario-dx/build.yaml)
+[![Release](https://img.shields.io/github/v/release/jcog/pm-chaos-edition)][releases]
+[![Download](https://img.shields.io/github/downloads/jcog/pm-chaos-edition/total)][download]
+![Build Status](https://img.shields.io/github/actions/workflow/status/jcog/pm-chaos-edition/build.yaml)
 
-This is a fork of the [Paper Mario decompilation][papermario-repo] which provides a flexible, easy-to-use base for creating romhacks.
+This is a mod of Paper Mario that makes things a bit more chaotic. Built using [papermario-dx][dx-repo], it frequently enables random effects for a much more difficult (and often unfair!) experience.
 
-To get started, see [docs.starhaven.dev](https://docs.starhaven.dev/tools/decomp/setup.html).
+Work is still in progress, but if you'd like to contribute, see [SETUP.md](SETUP.md) to learn how to get started. I have a fairly clear idea of how I want this mod to play, so I'd recommend reaching out before doing anything substantial to make sure your effort isn't wasted.
 
-[discord]: https://discord.gg/star-haven
-[discord-badge]: https://img.shields.io/discord/279322074412089344?color=%237289DA&logo=discord&logoColor=ffffff
-[papermario-repo]: https://github.com/pmret/papermario
-[releases]: https://github.com/star-haven/papermario-dx/releases
-[download]: https://github.com/star-haven/papermario-dx/releases/download/latest/papermario.bps
-
-## List of changes
-
-- US release only (no JP, PAL, or iQue - none of these are near 100% yet).
-- Default configure flags: `--shift --modern-gcc --non-matching --ccache`
-- Backtrace (call stack) on crash screen including file names and line numbers.
-    - You can call [`debug_backtrace()`](src/dx/backtrace.h) to print a backtrace in any function.
-    - Failed assertions (`ASSERT`) will trigger the crash screen and print a backtrace instead of hanging.
-    - Backtraces provide filenames and line numbers for files with debug symbols (pass `--debug` to configure to enable for all files).
-- `assets/star_rod_build` directory for Star Rod to write assets to.
-- Fixed many bugs / incorrect behaviour.
-- Skip compiling or linking dead code.
-- Link with [libgcc_vr4300] to provide compiler intrinsics.
-- Added a debug/cheats menu.
-- Enemy HP is now a `s16`, increasing the cap to 32767.
-- Added support for badges with negative BP costs.
-- Additional features can be configured in [src/dx/config.h](src/dx/config.h).
-
-[libgcc_vr4300]: https://github.com/Decompollaborate/libgcc_vr4300
+[dx-repo]: https://github.com/star-haven/papermario-dx
+[releases]: https://github.com/jcog/pm-chaos-edition/releases
+[download]: https://github.com/jcog/pm-chaos-edition/releases/download/latest/papermario.bps

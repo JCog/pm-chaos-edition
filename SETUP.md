@@ -13,8 +13,8 @@ If you encounter any issues setting up the repo, please feel free to [reach out 
 
 Clone the repository:
 ```sh
-git clone https://github.com/nanaian/papermario-dx
-cd papermario
+git clone https://github.com/jcog/pm-chaos-edition
+cd pm-chaos-edition
 ```
 
 Install pigment64 (our image-processing tool)
