@@ -1,5 +1,6 @@
 #include "chaos.h"
 #include "effects.h"
+#include "inventory.h"
 #include "script_api/battle.h"
 #include "world/actions.h"
 
@@ -20,6 +21,7 @@ struct ActorScaleData {
 // conditionals
 static b8 isOverworld(void);
 static b8 isBattle(void);
+static b8 canEquipBadge(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
 static b8 hasMushroom(void);
@@ -39,13 +41,14 @@ static void lava(void);
 static void negativeAttack(void);
 static void shuffleBattlePos(void);
 // anywhere
+static void equipBadge(void);
 static void unequipBadge(void);
-static void pointSwap(void);
 static void perilSound(void);
 static void squish(void);
 static void squishOff(void);
 static void allSfxAttackFx(void);
 static void hideModels(void);
+static void pointSwap(void);
 static void randomHp(void);
 static void randomFp(void);
 static void addRemoveCoins(void);
@@ -67,12 +70,13 @@ struct ChaosEffectData effectData[] = {
     {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               isOverworld},
     {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     isBattle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isBattle},
+    {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
-    {"Point Swap",              FALSE,  0,  0,  pointSwap,              NULL,               canPointSwap},
     {"Peril Sound",             TRUE,   0,  60, perilSound,             NULL,               NULL},
     {"Squish",                  TRUE,   0,  60, squish,                 squishOff,          NULL},
     {"All SFX AttackFX",        FALSE,  0,  60, allSfxAttackFx,         allSfxAttackFx,     NULL},
     {"Hide Models",             FALSE,  0,  60, hideModels,             hideModels,         NULL},
+    {"Point Swap",              FALSE,  0,  0,  pointSwap,              NULL,               canPointSwap},
     {"Random HP",               FALSE,  0,  0,  randomHp,               NULL,               NULL},
     {"Random FP",               FALSE,  0,  0,  randomFp,               NULL,               NULL},
     {"Add/Remove Coins",        FALSE,  0,  0,  addRemoveCoins,         NULL,               NULL},
@@ -123,6 +127,36 @@ static b8 isOverworld() {
 
 static b8 isBattle() {
     return gGameStatus.isBattle;
+}
+
+static s32 getTotalEquippedBpCost() {
+    s32 totalCost = 0;
+    for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
+        s16 itemID = gPlayerData.equippedBadges[i];
+        if (itemID != ITEM_NONE) {
+            s32 moveID = gItemTable[itemID].moveID;
+            totalCost += gMoveTable[moveID].costBP;
+        }
+    }
+    return totalCost;
+}
+
+static b8 canEquipBadge() {
+    s32 availableBp = gPlayerData.maxBP - getTotalEquippedBpCost();
+    if (availableBp == 0) {
+        return FALSE;
+    }
+    for (u32 i = 0; i < 128; i++) {
+        s16 badgeId = gPlayerData.badges[i];
+        if (badgeId == 0) {
+            continue;
+        }
+        if (item_is_badge(badgeId) && gMoveTable[gItemTable[badgeId].moveID].costBP <= availableBp &&
+            !is_badge_equipped(badgeId)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 static b8 canUnequipBadge() {
@@ -345,6 +379,35 @@ static void shuffleBattlePos() {
         }
     }
     start_script(&N(EVS_Shuffle_Sparkles), EVT_PRIORITY_A, 0);
+}
+
+static void equipBadge() {
+    s32 availableBp = gPlayerData.maxBP - getTotalEquippedBpCost();
+    s16 equippableBadges[128];
+    u8 count = 0;
+    for (u32 i = 0; i < 128; i++) {
+        s16 badgeId = gPlayerData.badges[i];
+        if (badgeId == 0) {
+            continue;
+        }
+        s8 badgeCost = gMoveTable[gItemTable[badgeId].moveID].costBP;
+        if (badgeCost > availableBp) {
+            continue;
+        }
+        if (!is_badge_equipped(badgeId)) {
+            equippableBadges[count++] = badgeId;
+        }
+    }
+
+    s16 equipId = equippableBadges[rand_int(count - 1)];
+    for (u32 i = 0; i < 64; i++) {
+        if (gPlayerData.equippedBadges[i] == 0) {
+            gPlayerData.equippedBadges[i] = equipId;
+            sfx_play_sound(SOUND_MENU_BADGE_EQUIP);
+            return;
+        }
+    }
+
 }
 
 static void unequipBadge() {
