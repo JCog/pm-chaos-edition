@@ -2,8 +2,8 @@
 #define _PAPERMARIO_CHAOS_EDITION_CHAOS_H_
 
 #include "common.h"
+#include "dx/config.h"
 
-#define CHAOS_DEBUG TRUE
 #define NAMESPACE chaos
 
 struct ChaosEffectData {
@@ -18,6 +18,9 @@ struct ChaosEffectData {
 
 extern struct ChaosEffectData effectData[];
 extern u8 totalEffectCount;
+#if CHAOS_DEBUG
+extern b8 randomEffects;
+#endif
 
 void handleTimers(void);
 

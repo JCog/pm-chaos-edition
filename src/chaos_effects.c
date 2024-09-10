@@ -26,6 +26,9 @@ static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
 static b8 hasMushroom(void);
 
+#if CHAOS_DEBUG
+static void toggleRandomEffects(void);
+#endif
 // overworld
 static void posLoad(void);
 static void levitate(void);
@@ -59,6 +62,9 @@ static void badMusicOff(void);
 static void expireMushroom(void);
 
 struct ChaosEffectData effectData[] = {
+    #if CHAOS_DEBUG
+    {"Toggle Random Effects",   FALSE,  0,  0,  toggleRandomEffects,    NULL,               NULL},
+    #endif
     {"Rewind",                  TRUE,   0,  60, posLoad,                NULL,               isOverworld},
     {"Levitate",                TRUE,   0,  10, levitate,               levitateStop,       isOverworld},
     {"Actor Chase",             TRUE,   0,  30, actorMagnet,            NULL,               isOverworld},
@@ -87,6 +93,9 @@ struct ChaosEffectData effectData[] = {
 };
 
 u8 totalEffectCount = ARRAY_COUNT(effectData);
+#if CHAOS_DEBUG
+b8 randomEffects = FALSE;
+#endif
 
 u32 frameCount = 0;
 static f32 prevHeight = -10000.0f;
@@ -184,6 +193,20 @@ static b8 hasMushroom() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#if CHAOS_DEBUG
+static void toggleRandomEffects() {
+    if (randomEffects) {
+        for (u32 i = 0; i < totalEffectCount; i++) {
+            if (effectData[i].timer > 0 && effectData[i].off != NULL) {
+                effectData[i].off();
+            }
+            effectData[i].timer = 0;
+        }
+    }
+    randomEffects = !randomEffects;
+}
+#endif
 
 static void posLoad() {
     static Vec3f savedPos;

@@ -45,4 +45,6 @@
 /// Skip laggy blur operations when opening the pause menu on emulator
 #define DX_PAUSE_LAG_FIX 1
 
+#define CHAOS_DEBUG 1
+
 #endif

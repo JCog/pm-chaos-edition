@@ -120,30 +120,51 @@ static void drawEffectList() {
     #endif
     u8 activeEffects = 0;
     for (u32 i = 0; i < totalEffectCount; i++) {
+        #if CHAOS_DEBUG
+        if (i == 0) {
+            continue;
+        }
+        #endif
         if (effectData[i].timer > 0) {
             activeEffects++;
         }
     }
     char fmtBuf[64];
     u8 index = 0;
-    chaosDrawBox(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT_BASE + 10 * activeEffects, WINDOW_STYLE_4, 192);
+    #if CHAOS_DEBUG
+    if (randomEffects) {
+        index++;
+    }
+    #endif
+    chaosDrawBox(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT_BASE + 10 * (activeEffects + index), WINDOW_STYLE_4, 192);
     #if CHAOS_DEBUG
     sprintf(fmtBuf, "-- %2ds - %2d %s --", selectedTimer, selectedEffect, effectData[selectedEffect].name);
     chaosDrawAscii(fmtBuf, 0, MENU_TEXT_X, MENU_TEXT_Y);
+    if (randomEffects) {
+        sprintf(fmtBuf, "%2lu", effectCountdown / 30);
+        chaosDrawAscii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y + 10);
+        chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10);
+    }
     #else
     sprintf(fmtBuf, "%2lu", effectCountdown / 30);
-    dx_debug_draw_ascii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y);
-    dx_debug_draw_ascii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y);
+    chaosDrawAscii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y);
+    chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y);
     #endif
+    index++;
     for (u32 i = 0; i < totalEffectCount; i++) {
+        #if CHAOS_DEBUG
+        if (i == 0) {
+            continue;
+        }
+        #endif
         if (effectData[i].timer > 0) {
             if (effectData[i].maxSeconds == 0) {
                 sprintf(fmtBuf, "");
             } else {
                 sprintf(fmtBuf, "%2d", effectData[i].timer / 30);
             }
-            chaosDrawAscii(effectData[i].name, 0, MENU_TEXT_X, MENU_TEXT_Y + 10 + index * 10);
-            chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10 + index * 10);
+            chaosDrawAscii(effectData[i].name, 0, MENU_TEXT_X, MENU_TEXT_Y + index * 10);
+            chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + index * 10);
             index++;
         }
     }
@@ -157,7 +178,12 @@ static void activateEffect(s32 effectId) {
         effectData[effectId].timer = 90;
     } else {
         #if CHAOS_DEBUG
-        effectData[selectedEffect].timer = selectedTimer * 30;
+        if (randomEffects) {
+            effectData[effectId].timer =
+                rand_int((effectData[effectId].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
+        } else {
+            effectData[selectedEffect].timer = selectedTimer * 30;
+        }
         #else
         effectData[effectId].timer =
             rand_int((effectData[effectId].maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
@@ -208,18 +234,23 @@ void chaosUpdate() {
             return;
         }
     }
+    #if CHAOS_DEBUG
+    if (randomEffects) {
+        effectCountdown--;
+    }
+    #else
     effectCountdown--;
+    #endif
 
     handleMenu();
     updateReload();
     handleTimers();
 
     // select a new effect
-    #if !CHAOS_DEBUG
     if (effectCountdown == 0) {
         // try 20 times to apply an effect, skip if a valid one can't be found
         for (u32 i = 0; i < 20; i++) {
-            s32 id = rand_int(EFFECT_COUNT - 1);
+            s32 id = rand_int(totalEffectCount - 1);
             if (effectData[id].timer > 0 || (effectData[id].canTrigger != NULL && !effectData[id].canTrigger())) {
                 continue;
             }
@@ -228,7 +259,6 @@ void chaosUpdate() {
             break;
         }
     }
-    #endif
 
     // update active effects
     for (u32 i = 0; i < totalEffectCount; i++) {
