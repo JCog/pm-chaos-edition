@@ -21,6 +21,7 @@ struct ActorScaleData {
 // conditionals
 static b8 isOverworld(void);
 static b8 isBattle(void);
+static b8 canTouchLava(void);
 static b8 canEquipBadge(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
@@ -73,7 +74,7 @@ struct ChaosEffectData effectData[] = {
     {"Top-Down Cam",            FALSE,  0,  60, topDownCam,             topDownCam,         isOverworld},
     {"Intangible Enemies",      FALSE,  0,  60, intangibleEnemies,      intangibleEnemies,  isOverworld},
     {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
-    {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               isOverworld},
+    {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
     {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     isBattle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isBattle},
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
@@ -136,6 +137,11 @@ static b8 isOverworld() {
 
 static b8 isBattle() {
     return gGameStatus.isBattle;
+}
+
+static b8 canTouchLava() {
+    // only trigger when grounded
+    return isOverworld() && gPlayerStatus.actionState <= ACTION_STATE_RUN;
 }
 
 static s32 getTotalEquippedBpCost() {
