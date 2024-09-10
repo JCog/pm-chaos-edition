@@ -15,7 +15,8 @@ enum ActorType {
 struct ActorScaleData {
     s16 id;
     enum ActorType actorType;
-    Vec3f scale;
+    Vec3f originalScale;
+    Vec3f curScale;
 };
 
 // conditionals
@@ -490,26 +491,30 @@ static void perilSound() {
 
 static void squishActor(s8 id, enum ActorType actorType, Vec3f *scale) {
     b8 existingData = FALSE;
-    struct ActorScaleData *firstEmpty = NULL;
+    struct ActorScaleData *scaleData = NULL;
     for (u32 i = 0; i < ACTOR_DATA_COUNT; i++) {
         if (actorScaleBuffer[i].id == id && actorScaleBuffer[i].actorType == actorType) {
             existingData = TRUE;
+            scaleData = &actorScaleBuffer[i];
             break;
         } else if (actorScaleBuffer[i].id == -1){
-            firstEmpty = &actorScaleBuffer[i];
+            scaleData = &actorScaleBuffer[i];
             break;
         }
     }
     if (existingData) {
-        scale->x += 0.03f;
-        scale->z += 0.03f;
-        scale->y -= 0.0005f;
-    } else if (firstEmpty != NULL) {
-        firstEmpty->id = id;
-        firstEmpty->actorType = actorType;
-        firstEmpty->scale.x = scale->x;
-        firstEmpty->scale.z = scale->z;
-        firstEmpty->scale.y = scale->y;
+        scaleData->curScale.x += 0.03f;
+        scaleData->curScale.z += 0.03f;
+        scaleData->curScale.y -= 0.0005f;
+        scale->x = scaleData->curScale.x;
+        scale->z = scaleData->curScale.z;
+        scale->y = scaleData->curScale.y;
+    } else if (scaleData != NULL) {
+        scaleData->id = id;
+        scaleData->actorType = actorType;
+        scaleData->originalScale.x = scaleData->curScale.x = scale->x;
+        scaleData->originalScale.z = scaleData->curScale.z = scale->z;
+        scaleData->originalScale.y = scaleData->curScale.y = scale->y;
     }
 }
 
@@ -542,25 +547,25 @@ static void squishOff() {
             case ACTOR_NPC: {
                 Npc *npc = get_npc_safe(actorScaleBuffer[i].id);
                 if (npc != NULL) {
-                    npc->scale.x = actorScaleBuffer[i].scale.x;
-                    npc->scale.z = actorScaleBuffer[i].scale.z;
-                    npc->scale.y = actorScaleBuffer[i].scale.y;
+                    npc->scale.x = actorScaleBuffer[i].originalScale.x;
+                    npc->scale.z = actorScaleBuffer[i].originalScale.z;
+                    npc->scale.y = actorScaleBuffer[i].originalScale.y;
                 }
                 break;
             }
             case ACTOR_ENEMY: {
                 Actor *enemy = gBattleStatus.enemyActors[actorScaleBuffer[i].id];
                 if (enemy != NULL) {
-                    enemy->scale.x = actorScaleBuffer[i].scale.x;
-                    enemy->scale.z = actorScaleBuffer[i].scale.z;
-                    enemy->scale.y = actorScaleBuffer[i].scale.y;
+                    enemy->scale.x = actorScaleBuffer[i].originalScale.x;
+                    enemy->scale.z = actorScaleBuffer[i].originalScale.z;
+                    enemy->scale.y = actorScaleBuffer[i].originalScale.y;
                 }
                 break;
             }
             case ACTOR_BATTLE_PARTNER: {
-                gBattleStatus.partnerActor->scale.x = actorScaleBuffer[i].scale.x;
-                gBattleStatus.partnerActor->scale.z = actorScaleBuffer[i].scale.z;
-                gBattleStatus.partnerActor->scale.y = actorScaleBuffer[i].scale.y;
+                gBattleStatus.partnerActor->scale.x = actorScaleBuffer[i].originalScale.x;
+                gBattleStatus.partnerActor->scale.z = actorScaleBuffer[i].originalScale.z;
+                gBattleStatus.partnerActor->scale.y = actorScaleBuffer[i].originalScale.y;
             }
         }
         actorScaleBuffer[i].id = -1;
