@@ -23,6 +23,7 @@ struct ActorScaleData {
 static b8 isOverworld(void);
 static b8 isBattle(void);
 static b8 canTouchLava(void);
+static b8 enemyExists();
 static b8 canEquipBadge(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
@@ -44,6 +45,7 @@ static void spinAngle(void);
 static void lava(void);
 // battle
 static void negativeAttack(void);
+static void randomEnemyHp(void);
 static void shuffleBattlePos(void);
 // anywhere
 static void equipBadge(void);
@@ -67,6 +69,7 @@ struct ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
     {"Toggle Random Effects",   FALSE,  0,  0,  toggleRandomEffects,    NULL,               NULL},
     #endif
+    // overworld
     {"Rewind",                  TRUE,   0,  60, posLoad,                NULL,               isOverworld},
     {"Levitate",                TRUE,   0,  10, levitate,               levitateStop,       isOverworld},
     {"Actor Chase",             TRUE,   0,  30, actorMagnet,            NULL,               isOverworld},
@@ -76,8 +79,11 @@ struct ChaosEffectData effectData[] = {
     {"Intangible Enemies",      FALSE,  0,  60, intangibleEnemies,      intangibleEnemies,  isOverworld},
     {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
     {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
-    {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     isBattle},
-    {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isBattle},
+    // battle
+    {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     enemyExists},
+    {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               enemyExists},
+    {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               enemyExists},
+    // anywhere
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
     {"Peril Sound",             TRUE,   0,  60, perilSound,             NULL,               NULL},
@@ -100,17 +106,37 @@ b8 randomEffects = FALSE;
 #endif
 
 u32 frameCount = 0;
+s16 chaosEnemyHpUpdateTimer = 0;
 static f32 prevHeight = -10000.0f;
 static s16 hpSoundTimer = 0;
 static s16 fpSoundTimer = 0;
 static s16 perilTimer = 0;
 static s16 badMusicTimer = 0;
+static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 
 const enum ItemIDs mushroomIds[] = {
     ITEM_MUSHROOM, ITEM_VOLT_SHROOM, ITEM_SUPER_SHROOM, ITEM_ULTRA_SHROOM, ITEM_LIFE_SHROOM, ITEM_HONEY_SHROOM,
     ITEM_MAPLE_SHROOM, ITEM_JELLY_SHROOM
 };
+
+static void updateEnemyHpDeltas() {
+    b8 playSound = FALSE;
+    for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
+        Actor* enemy = gBattleStatus.enemyActors[i];
+        if (enemy == NULL || enemyHpDeltas[i] == 0) {
+            continue;
+        }
+        s16 diff = enemyHpDeltas[i] > 0 ? 1 : -1;
+        enemy->curHP += diff;
+        enemyHpDeltas[i] -= diff;
+        chaosEnemyHpUpdateTimer = 34;
+        playSound = TRUE;
+    }
+    if (playSound) {
+        sfx_play_sound(SOUND_HEART_PICKUP);
+    }
+}
 
 static void decTimer(s16 *timer) {
     if (*timer >= 0) {
@@ -120,10 +146,14 @@ static void decTimer(s16 *timer) {
 
 void handleTimers() {
     frameCount = gPlayerData.frameCounter / 2;
+    decTimer(&chaosEnemyHpUpdateTimer);
     decTimer(&hpSoundTimer);
     decTimer(&fpSoundTimer);
     decTimer(&perilTimer);
     decTimer(&badMusicTimer);
+    if (chaosEnemyHpUpdateTimer == 30) {
+        updateEnemyHpDeltas();
+    }
     if (hpSoundTimer == 0 && !chaosHpSoundPlayed) {
         sfx_play_sound(SOUND_HEART_PICKUP);
     }
@@ -136,13 +166,25 @@ static b8 isOverworld() {
     return !gGameStatus.isBattle;
 }
 
+static b8 canTouchLava() {
+    // only trigger when grounded
+    return isOverworld() && gPlayerStatus.actionState <= ACTION_STATE_RUN;
+}
+
 static b8 isBattle() {
     return gGameStatus.isBattle;
 }
 
-static b8 canTouchLava() {
-    // only trigger when grounded
-    return isOverworld() && gPlayerStatus.actionState <= ACTION_STATE_RUN;
+static b8 enemyExists() {
+    if (!isBattle()) {
+        return FALSE;
+    }
+    for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
+        if (gBattleStatus.enemyActors[i] != NULL) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 static s32 getTotalEquippedBpCost() {
@@ -321,6 +363,21 @@ static void lava() {
 
 static void negativeAttack() {
     chaosHealingTouch = !chaosHealingTouch;
+}
+
+static void randomEnemyHp() {
+    for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
+        Actor *enemy = gBattleStatus.enemyActors[i];
+        if (enemy == NULL) {
+            continue;
+        }
+        s16 newHp = enemy->curHP;
+        while (newHp == enemy->curHP) {
+            newHp = rand_int(enemy->maxHP - 1) + 1;
+        }
+        enemyHpDeltas[i] = newHp - enemy->curHP;
+        chaosEnemyHpUpdateTimer = 34;
+    }
 }
 
 EvtScript N(EVS_Shuffle_Sparkles) = {

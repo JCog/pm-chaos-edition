@@ -2069,7 +2069,7 @@ s32 is_ability_active(s32 ability) {
                 }
                 break;
             case ABILITY_PEEKABOO:
-                if (badgeMoveID == MOVE_PEEKABOO) {
+                if (badgeMoveID == MOVE_PEEKABOO || chaosEnemyHpUpdateTimer > 0) {
                     ret++;
                 }
                 break;

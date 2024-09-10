@@ -118,6 +118,7 @@ extern b8 chaosHideModels;
 extern b8 chaosSpinAngle;
 extern b8 chaosHpSoundPlayed;
 extern b8 chaosFpSoundPlayed;
+extern s16 chaosEnemyHpUpdateTimer;
 extern s8 chaosBadMusic;
 
 #if VERSION_PAL
