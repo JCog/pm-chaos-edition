@@ -29,13 +29,13 @@ BinPackParameters: false
 AlignAfterOpenBracket: BlockIndent
 
 AlignConsecutiveAssignments:
-  Enabled: true
+  Enabled: false
   AcrossEmptyLines: false
   AcrossComments: false
-  AlignCompound: true
-  PadOperators: true
+  AlignCompound: false
+  PadOperators: false
 AlignConsecutiveDeclarations: # structs etc
-  Enabled: true
+  Enabled: false
   AcrossEmptyLines: false
   AcrossComments: false
 AlignConsecutiveMacros:

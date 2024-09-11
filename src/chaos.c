@@ -244,6 +244,7 @@ void chaosUpdate() {
 
     handleMenu();
     updateReload();
+    handleBattleQueue();
     handleTimers();
 
     // select a new effect

@@ -47,6 +47,7 @@ static void lava(void);
 static void negativeAttack(void);
 static void randomEnemyHp(void);
 static void shuffleBattlePos(void);
+static void randomMarioMove(void);
 // anywhere
 static void equipBadge(void);
 static void unequipBadge(void);
@@ -83,6 +84,7 @@ struct ChaosEffectData effectData[] = {
     {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     enemyExists},
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               enemyExists},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               enemyExists},
+    {"Random Mario Move",       FALSE,  0,  0,  randomMarioMove,        NULL,               enemyExists},
     // anywhere
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
@@ -107,6 +109,7 @@ b8 randomEffects = FALSE;
 
 u32 frameCount = 0;
 s16 chaosEnemyHpUpdateTimer = 0;
+static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
 static s16 hpSoundTimer = 0;
 static s16 fpSoundTimer = 0;
@@ -159,6 +162,84 @@ void handleTimers() {
     }
     if (fpSoundTimer == 0 && !chaosFpSoundPlayed) {
         sfx_play_sound(SOUND_FLOWER_PICKUP);
+    }
+}
+
+static b8 isMovePossible(MoveData* move) {
+    if ((move->costFP > gPlayerData.curFP) || (move->category == MOVE_TYPE_JUMP && gPlayerData.bootsLevel < 0)
+        || (move->category == MOVE_TYPE_HAMMER && gPlayerData.hammerLevel < 0))
+    {
+        return FALSE;
+    }
+    Actor* player = gBattleStatus.playerActor;
+    if (move->category == MOVE_TYPE_JUMP) {
+        gBattleStatus.moveCategory = BTL_MENU_TYPE_JUMP;
+        gBattleStatus.moveArgument = gPlayerData.bootsLevel;
+    } else if (move->category == MOVE_TYPE_HAMMER) {
+        gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
+        gBattleStatus.moveArgument = gPlayerData.hammerLevel;
+    }
+    gBattleStatus.curTargetListFlags = move->flags;
+    create_current_pos_target_list(player);
+    return player->targetListLength > 0;
+}
+
+
+
+void handleBattleQueue() {
+    if (!isBattle()) {
+        battleQueueMario = FALSE;
+        return;
+    }
+
+    // get list of possible moves
+    if (battleQueueMario && (gBattleState == BATTLE_STATE_PLAYER_MENU || gBattleState == BATTLE_STATE_SELECT_TARGET)) {
+        Actor* player = gBattleStatus.playerActor;
+        u8 moveChoices[24] = {0};
+        u8 moveCount = 0;
+
+        // check regular jump and hammer first
+        if (isMovePossible(&gMoveTable[MOVE_JUMP1])) {
+            moveChoices[moveCount++] = MOVE_JUMP1 + gPlayerData.bootsLevel;
+        }
+        if (isMovePossible(&gMoveTable[MOVE_HAMMER1])) {
+            moveChoices[moveCount++] = MOVE_HAMMER1 + gPlayerData.hammerLevel;
+        }
+
+        // check for badge moves
+        for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
+            s16 badge = gPlayerData.equippedBadges[i];
+            if (badge == ITEM_NONE) {
+                continue;
+            }
+
+            u8 moveId = gItemTable[badge].moveID;
+            MoveData* move = &gMoveTable[moveId];
+            if (move->category != MOVE_TYPE_JUMP && move->category != MOVE_TYPE_HAMMER) {
+                continue;
+            }
+
+            if (isMovePossible(move)) {
+                moveChoices[moveCount++] = moveId;
+            }
+        }
+
+        // pick a random target and move
+        s16 moveId = moveChoices[rand_int(moveCount - 1)];
+        MoveData *move = &gMoveTable[moveId];
+        if (move->category == MOVE_TYPE_JUMP) {
+            gBattleStatus.moveCategory = BTL_MENU_TYPE_JUMP;
+            gBattleStatus.moveArgument = gPlayerData.bootsLevel;
+        } else if (move->category == MOVE_TYPE_HAMMER) {
+            gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
+            gBattleStatus.moveArgument = gPlayerData.hammerLevel;
+        }
+        gBattleStatus.selectedMoveID = moveId;
+        gBattleStatus.curTargetListFlags = move->flags;
+        create_current_pos_target_list(player);
+        player->selectedTargetIndex = rand_int(player->targetListLength - 1);
+        btl_set_state(BATTLE_STATE_PLAYER_MOVE);
+        battleQueueMario = FALSE;
     }
 }
 
@@ -420,8 +501,8 @@ static b8 actorAtHome(Actor *actor) {
 }
 
 static void shuffleBattlePos() {
-    Actor *actors[26];
-    b8 atHome[26];
+    Actor *actors[26] = {0};
+    b8 atHome[26] = {0};
     u8 actorIdx = 0;
     actors[actorIdx] = gBattleStatus.playerActor;
     atHome[actorIdx++] = actorAtHome(gBattleStatus.playerActor);
@@ -466,6 +547,10 @@ static void shuffleBattlePos() {
         }
     }
     start_script(&N(EVS_Shuffle_Sparkles), EVT_PRIORITY_A, 0);
+}
+
+static void randomMarioMove(void) {
+    battleQueueMario = TRUE;
 }
 
 static void equipBadge() {

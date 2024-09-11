@@ -23,6 +23,7 @@ extern b8 randomEffects;
 #endif
 
 void handleTimers(void);
+void handleBattleQueue(void);
 
 void chaosUpdate(void);
 
