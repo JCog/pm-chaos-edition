@@ -233,11 +233,14 @@ void handleBattleQueue() {
         } else if (move->category == MOVE_TYPE_HAMMER) {
             gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
             gBattleStatus.moveArgument = gPlayerData.hammerLevel;
+        } else {
+            return;
         }
         gBattleStatus.selectedMoveID = moveId;
         gBattleStatus.curTargetListFlags = move->flags;
         create_current_pos_target_list(player);
         player->selectedTargetIndex = rand_int(player->targetListLength - 1);
+        clear_windows();
         btl_set_state(BATTLE_STATE_PLAYER_MOVE);
         battleQueueMario = FALSE;
     }
