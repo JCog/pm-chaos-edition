@@ -16,6 +16,8 @@ expected/
 /ver/*/assets
 ctx.c.m2c
 /data2c
+/cmake-build-debug
+CMakeLists.txt
 
 # Build artifacts
 build.ninja
