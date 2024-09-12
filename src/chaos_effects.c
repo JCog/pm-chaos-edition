@@ -484,7 +484,7 @@ static void negativeAttack() {
 static void randomEnemyHp() {
     for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
         Actor *enemy = gBattleStatus.enemyActors[i];
-        if (enemy == NULL) {
+        if (enemy == NULL || enemy->maxHP == 1) {
             continue;
         }
         s16 newHp = enemy->curHP;
