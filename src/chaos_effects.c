@@ -124,7 +124,7 @@ const enum ItemIDs mushroomIds[] = {
 };
 
 static void updateEnemyHpDeltas() {
-    b8 playSound = FALSE;
+    b8 hpUpdated = FALSE;
     for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
         Actor* enemy = gBattleStatus.enemyActors[i];
         if (enemy == NULL || enemyHpDeltas[i] == 0) {
@@ -133,11 +133,11 @@ static void updateEnemyHpDeltas() {
         s16 diff = enemyHpDeltas[i] > 0 ? 1 : -1;
         enemy->curHP += diff;
         enemyHpDeltas[i] -= diff;
-        chaosEnemyHpUpdateTimer = 34;
-        playSound = TRUE;
+        hpUpdated = TRUE;
     }
-    if (playSound) {
+    if (hpUpdated) {
         sfx_play_sound(SOUND_HEART_PICKUP);
+        chaosEnemyHpUpdateTimer += 4;
     }
 }
 
@@ -786,7 +786,7 @@ static void addRemoveCoins() {
 }
 
 static void addRemoveStarPoints() {
-    s32 sp = rand_int(49) + 1;
+    s32 sp = rand_int(24) + 1;
     if (rand_int(1)) {
         sp *= -1;
     }
