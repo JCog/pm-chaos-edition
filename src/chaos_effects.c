@@ -165,8 +165,10 @@ void handleTimers() {
     }
 }
 
-static b8 isMovePossible(MoveData* move) {
-    if ((move->costFP > gPlayerData.curFP) || (move->category == MOVE_TYPE_JUMP && gPlayerData.bootsLevel < 0)
+static b8 isMovePossible(u8 moveId, MoveData* move) {
+    if ((move->category == MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.starPower / 0x100)
+        || (move->category != MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.curFP)
+        || (move->category == MOVE_TYPE_JUMP && gPlayerData.bootsLevel < 0)
         || (move->category == MOVE_TYPE_HAMMER && gPlayerData.hammerLevel < 0))
     {
         return FALSE;
@@ -178,6 +180,18 @@ static b8 isMovePossible(MoveData* move) {
     } else if (move->category == MOVE_TYPE_HAMMER) {
         gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
         gBattleStatus.moveArgument = gPlayerData.hammerLevel;
+    } else if (move->category == MOVE_TYPE_STAR_POWER) {
+        if (moveId == MOVE_FOCUS) {
+            return gPlayerData.maxStarPower > 0;
+        }
+        if (moveId == MOVE_STAR_BEAM) {
+            return gPlayerData.starBeamLevel == 1;
+        }
+        if (moveId == MOVE_PEACH_BEAM) {
+            return gPlayerData.starBeamLevel == 2;
+        }
+        gBattleStatus.moveCategory = BTL_MENU_TYPE_STAR_POWERS;
+        gBattleStatus.moveArgument = moveId;
     }
     gBattleStatus.curTargetListFlags = move->flags;
     create_current_pos_target_list(player);
@@ -191,59 +205,77 @@ void handleBattleQueue() {
         battleQueueMario = FALSE;
         return;
     }
-
-    // get list of possible moves
-    if (battleQueueMario && (gBattleState == BATTLE_STATE_PLAYER_MENU || gBattleState == BATTLE_STATE_SELECT_TARGET)) {
-        Actor* player = gBattleStatus.playerActor;
-        u8 moveChoices[24] = {0};
-        u8 moveCount = 0;
-
-        // check regular jump and hammer first
-        if (isMovePossible(&gMoveTable[MOVE_JUMP1])) {
-            moveChoices[moveCount++] = MOVE_JUMP1 + gPlayerData.bootsLevel;
-        }
-        if (isMovePossible(&gMoveTable[MOVE_HAMMER1])) {
-            moveChoices[moveCount++] = MOVE_HAMMER1 + gPlayerData.hammerLevel;
-        }
-
-        // check for badge moves
-        for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
-            s16 badge = gPlayerData.equippedBadges[i];
-            if (badge == ITEM_NONE) {
-                continue;
-            }
-
-            u8 moveId = gItemTable[badge].moveID;
-            MoveData* move = &gMoveTable[moveId];
-            if (move->category != MOVE_TYPE_JUMP && move->category != MOVE_TYPE_HAMMER) {
-                continue;
-            }
-
-            if (isMovePossible(move)) {
-                moveChoices[moveCount++] = moveId;
-            }
-        }
-
-        // pick a random target and move
-        s16 moveId = moveChoices[rand_int(moveCount - 1)];
-        MoveData *move = &gMoveTable[moveId];
-        if (move->category == MOVE_TYPE_JUMP) {
-            gBattleStatus.moveCategory = BTL_MENU_TYPE_JUMP;
-            gBattleStatus.moveArgument = gPlayerData.bootsLevel;
-        } else if (move->category == MOVE_TYPE_HAMMER) {
-            gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
-            gBattleStatus.moveArgument = gPlayerData.hammerLevel;
-        } else {
-            return;
-        }
-        gBattleStatus.selectedMoveID = moveId;
-        gBattleStatus.curTargetListFlags = move->flags;
-        create_current_pos_target_list(player);
-        player->selectedTargetIndex = rand_int(player->targetListLength - 1);
-        clear_windows();
-        btl_set_state(BATTLE_STATE_PLAYER_MOVE);
-        battleQueueMario = FALSE;
+    if (!battleQueueMario || (gBattleState != BATTLE_STATE_PLAYER_MENU && gBattleState != BATTLE_STATE_SELECT_TARGET)) {
+        return;
     }
+
+    Actor* player = gBattleStatus.playerActor;
+    u8 moveChoices[24] = {0};
+    u8 moveCount = 0;
+
+    // check regular jump and hammer
+    if (isMovePossible(MOVE_JUMP1, &gMoveTable[MOVE_JUMP1])) {
+        moveChoices[moveCount++] = MOVE_JUMP1 + gPlayerData.bootsLevel;
+    }
+    if (isMovePossible(MOVE_JUMP1, &gMoveTable[MOVE_HAMMER1])) {
+        moveChoices[moveCount++] = MOVE_HAMMER1 + gPlayerData.hammerLevel;
+    }
+
+    // check for badge moves
+    for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
+        s16 badge = gPlayerData.equippedBadges[i];
+        if (badge == ITEM_NONE) {
+            continue;
+        }
+
+        u8 moveId = gItemTable[badge].moveID;
+        MoveData* move = &gMoveTable[moveId];
+        if (move->category != MOVE_TYPE_JUMP && move->category != MOVE_TYPE_HAMMER) {
+            continue;
+        }
+
+        if (isMovePossible(moveId, move)) {
+            moveChoices[moveCount++] = moveId;
+        }
+    }
+
+    // check for star power
+    if (isMovePossible(MOVE_FOCUS, &gMoveTable[MOVE_FOCUS])) {
+        moveChoices[moveCount++] = MOVE_FOCUS;
+    }
+    if (isMovePossible(MOVE_STAR_BEAM, &gMoveTable[MOVE_STAR_BEAM])) {
+        moveChoices[moveCount++] = MOVE_STAR_BEAM;
+    } else if (isMovePossible(MOVE_PEACH_BEAM, &gMoveTable[MOVE_PEACH_BEAM])) {
+        moveChoices[moveCount++] = MOVE_PEACH_BEAM;
+    }
+    for (u32 i = 0; i < 7; i++) {
+        if (isMovePossible(MOVE_REFRESH + i, &gMoveTable[MOVE_REFRESH + i])) {
+            moveChoices[moveCount++] = MOVE_REFRESH + i;
+        }
+    }
+
+    // pick a random target and move
+    s16 moveId = moveChoices[rand_int(moveCount - 1)];
+    MoveData *move = &gMoveTable[moveId];
+    if (move->category == MOVE_TYPE_JUMP) {
+        gBattleStatus.moveCategory = BTL_MENU_TYPE_JUMP;
+        gBattleStatus.moveArgument = gPlayerData.bootsLevel;
+    } else if (move->category == MOVE_TYPE_HAMMER) {
+        gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
+        gBattleStatus.moveArgument = gPlayerData.hammerLevel;
+    } else if (move->category == MOVE_TYPE_STAR_POWER) {
+        gBattleStatus.moveCategory = BTL_MENU_TYPE_STAR_POWERS;
+        gBattleStatus.moveArgument = moveId - MOVE_FOCUS;
+    } else {
+        return;
+    }
+    gBattleStatus.selectedMoveID = moveId;
+    gBattleStatus.curTargetListFlags = move->flags;
+    create_current_pos_target_list(player);
+    player->selectedTargetIndex = rand_int(player->targetListLength - 1);
+    clear_windows();
+    btl_set_state(BATTLE_STATE_PLAYER_MOVE);
+    battleQueueMario = FALSE;
 }
 
 static b8 isOverworld() {
