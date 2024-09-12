@@ -251,7 +251,11 @@ void chaosUpdate() {
     if (effectCountdown == 0) {
         // try 20 times to apply an effect, skip if a valid one can't be found
         for (u32 i = 0; i < 20; i++) {
+            #if CHAOS_DEBUG
+            s32 id = rand_int(totalEffectCount - 2) + 1;
+            #else
             s32 id = rand_int(totalEffectCount - 1);
+            #endif
             if (effectData[id].timer > 0 || (effectData[id].canTrigger != NULL && !effectData[id].canTrigger())) {
                 continue;
             }
