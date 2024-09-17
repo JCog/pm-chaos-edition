@@ -497,7 +497,7 @@ void func_802A1098(void) {
     BattleMenuState = BTL_MENU_STATE_UNK_1E;
 }
 
-void btl_main_menu_destroy(void) {
+void btl_main_menu_destroy(void) {//
     s32 i;
 
     for (i = 0; i < BattleMenu_NumOptions; i++) {

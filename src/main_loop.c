@@ -6,6 +6,8 @@
 #include "overlay.h"
 #include "game_modes.h"
 #include "dx/profiling.h"
+#include "dx/debug_menu.h"
+#include "chaos.h"
 
 s32 gOverrideFlags;
 s32 timeFreezeMode;
