@@ -42,6 +42,7 @@ b8 chaosSpinAngle = FALSE;
 b8 chaosHpSoundPlayed = FALSE;
 b8 chaosFpSoundPlayed = FALSE;
 b8 chaosBadMusic = FALSE;
+b8 chaosRotateCamera = FALSE;
 static u32 effectCountdown = 1;
 static b8 reloading = FALSE;
 static u8 reloadDelay = 0;

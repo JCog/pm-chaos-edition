@@ -65,6 +65,8 @@ static void randomTattle(void);
 static void badMusic(void);
 static void badMusicOff(void);
 static void expireMushroom(void);
+static void rotateCamera(void);
+static void rotateCameraStop(void);
 
 struct ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -100,6 +102,7 @@ struct ChaosEffectData effectData[] = {
     {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL,               NULL},
     {"Bad Music",               TRUE,   0,  60, badMusic,               badMusicOff,        NULL},
     {"Mushroom Expires",        FALSE,  0,  0,  expireMushroom,         NULL,               hasMushroom},
+    {"Rotate Camera",           FALSE,  0,  60, rotateCamera,           rotateCameraStop,   NULL},
 };
 
 u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -866,4 +869,17 @@ static void expireMushroom() {
         s32 idx = invIdx[rand_int(count - 1)];
         gPlayerData.invItems[idx] = ITEM_DRIED_SHROOM;
     }
+}
+
+static void rotateCamera() {
+    chaosRotateCamera = TRUE;
+    f32 angle = (rand_float() * 270.0f) + 45.0f;
+    Camera* camera = &gCameras[CAM_DEFAULT];
+    guRotateF(camera->viewMtxChaos, angle, 0.0f, 0.0f, -1.0f);
+    camera = &gCameras[CAM_BATTLE];
+    guRotateF(camera->viewMtxChaos, angle, 0.0f, 0.0f, -1.0f);
+}
+
+static void rotateCameraStop() {
+    chaosRotateCamera = FALSE;
 }
