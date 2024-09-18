@@ -493,7 +493,7 @@
     actionTip: NONE
     costFP: 6
     costBP: 3
-- Unused_37:
+- SwitchPartner:
     nameMsg: (s32) "つうじょう"
     fullDescMsg: MSG_NONE
     shortDescMsg: MSG_NONE

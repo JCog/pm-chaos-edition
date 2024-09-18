@@ -241,7 +241,9 @@ void handleBattleQueue() {
         return;
     }
 
-    enum MoveType moveTypes[] = {MOVE_TYPE_JUMP, MOVE_TYPE_HAMMER, MOVE_TYPE_STAR_POWER, MOVE_TYPE_ITEMS};
+    enum MoveType moveTypes[] = {
+        MOVE_TYPE_JUMP, MOVE_TYPE_HAMMER, MOVE_TYPE_STAR_POWER, MOVE_TYPE_ITEMS, MOVE_TYPE_SWITCH
+    };
     enum MoveType moveType;
     for (s32 i = 0; i < 20; i++) {
         moveType = moveTypes[rand_int(ARRAY_COUNT(moveTypes) - 1)];
@@ -286,6 +288,20 @@ void handleBattleQueue() {
                         break;
                     }
                 }
+                break;
+            case MOVE_TYPE_SWITCH:
+                Actor* partner = gBattleStatus.partnerActor;
+                if (partner->koStatus == STATUS_KEY_DAZE || partner->debuff == STATUS_KEY_FROZEN) {
+                    break;
+                }
+
+                u8 partnersEnabled = 0;
+                for (s32 j = 0; j < ARRAY_COUNT(gPlayerData.partners); j++) {
+                    if (gPlayerData.partners[j].enabled) {
+                        partnersEnabled++;
+                    }
+                }
+                validType = partnersEnabled >= 2;
                 break;
             default:
                 // should never reach here
@@ -353,6 +369,15 @@ void handleBattleQueue() {
         }
     }
 
+    // check for partner swap
+    if (moveType == MOVE_TYPE_SWITCH) {
+        for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.partners); i++) {
+            if (gPlayerData.partners[i].enabled && i != gPlayerData.curPartner) {
+                moveChoices[moveCount++] = i;
+            }
+        }
+    }
+
     // pick a random target and move
     if (moveCount == 0) {
         battleQueueMario = FALSE;
@@ -360,10 +385,16 @@ void handleBattleQueue() {
     }
     s16 moveId = moveChoices[rand_int(moveCount - 1)];
     MoveData *move;
-    if (moveType == MOVE_TYPE_ITEMS) {
-        move = &gMoveTable[MOVE_ITEMS];
-    } else {
-        move = &gMoveTable[moveId];
+    switch (moveType) {
+        case MOVE_TYPE_ITEMS:
+            move = &gMoveTable[MOVE_ITEMS];
+            break;
+        case MOVE_TYPE_SWITCH:
+            move = &gMoveTable[MOVE_SWITCH_PARTNER];
+            break;
+        default:
+            move = &gMoveTable[moveId];
+            break;
     }
 
     gBattleStatus.selectedMoveID = moveId;
@@ -388,14 +419,25 @@ void handleBattleQueue() {
             gBattleStatus.curTargetListFlags = gItemTable[moveId].targetFlags | TARGET_FLAG_PRIMARY_ONLY;
             gBattleStatus.curAttackElement = 0;
             break;
+        case MOVE_TYPE_SWITCH:
+            gBattleStatus.moveCategory = BTL_MENU_TYPE_CHANGE_PARTNER;
+            gBattleStatus.selectedMoveID = MOVE_SWITCH_PARTNER;
+            gBattleStatus.moveArgument = moveId;
+            gBattleStatus.unk_1AC = moveId;
+            break;
         default:
             return;
     }
-    Actor* player = gBattleStatus.playerActor;
-    create_current_pos_target_list(player);
-    player->selectedTargetIndex = rand_int(player->targetListLength - 1);
+
     clear_windows();
-    btl_set_state(BATTLE_STATE_PLAYER_MOVE);
+    if (move->category == MOVE_TYPE_SWITCH) {
+        btl_set_state(BATTLE_STATE_CHANGE_PARTNER);
+    } else {
+        Actor* player = gBattleStatus.playerActor;
+        create_current_pos_target_list(player);
+        player->selectedTargetIndex = rand_int(player->targetListLength - 1);
+        btl_set_state(BATTLE_STATE_PLAYER_MOVE);
+    }
     battleQueueMario = FALSE;
 }
 

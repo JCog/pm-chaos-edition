@@ -3533,7 +3533,7 @@ void btl_state_update_player_menu(void) {
                     battleStatus->acceptTargetMenuSubstate = BTL_SUBSTATE_PLAYER_MENU_CHANGE_MEMBER_6;
                     battleStatus->unk_1AC = popup->userIndex[popup->result - 1];
                     battleStatus->moveCategory = BTL_MENU_TYPE_CHANGE_PARTNER;
-                    battleStatus->selectedMoveID = MOVE_UNUSED_37;
+                    battleStatus->selectedMoveID = MOVE_SWITCH_PARTNER;
                     battleStatus->curTargetListFlags = TARGET_FLAG_2;
                     battleStatus->moveArgument = battleStatus->unk_1AC;
                     battleStatus->lastPlayerMenuSelection[BTL_MENU_IDX_PARTNER] = popup->result - 1;
@@ -4125,7 +4125,7 @@ void btl_state_update_partner_menu(void) {
                 battleStatus->acceptTargetMenuSubstate = BTL_SUBSTATE_PARTNER_MENU_UNUSED_CHANGE_PARTNER_6;
                 battleStatus->unk_1AC = popupMenu->userIndex[popupMenu->result - 1];
                 battleStatus->moveCategory = BTL_MENU_TYPE_CHANGE_PARTNER;
-                battleStatus->selectedMoveID = MOVE_UNUSED_37;
+                battleStatus->selectedMoveID = MOVE_SWITCH_PARTNER;
                 battleStatus->curTargetListFlags = TARGET_FLAG_2;
                 battleStatus->moveArgument = battleStatus->unk_1AC;
                 battleStatus->lastPartnerMenuSelection[BTL_MENU_IDX_PARTNER] = popupMenu->result - 1;
@@ -4400,7 +4400,7 @@ void btl_state_update_partner_menu(void) {
                 battleStatus->acceptTargetMenuSubstate = BTL_SUBSTATE_PARTNER_MENU_CHANGE_PARTNER_6;
                 battleStatus->unk_1AC = popupMenu->userIndex[popupMenu->result - 1];
                 battleStatus->moveCategory = BTL_MENU_TYPE_CHANGE_PARTNER;
-                battleStatus->selectedMoveID = MOVE_UNUSED_37;
+                battleStatus->selectedMoveID = MOVE_SWITCH_PARTNER;
                 battleStatus->curTargetListFlags = TARGET_FLAG_2;
                 battleStatus->moveArgument = battleStatus->unk_1AC;
                 battleStatus->lastPartnerMenuSelection[BTL_MENU_IDX_PARTNER] = popupMenu->result - 1;
