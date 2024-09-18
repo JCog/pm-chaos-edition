@@ -82,9 +82,9 @@ static void updateReload() {
         reloadMessageTimer--;
         chaosDrawAscii("Reload Cooldown Active", 0, 102, 80);
     }
-    s32 held = gGameStatus.curButtons[0];
+    s32 cur = gGameStatus.curButtons[0];
     s32 pressed = gGameStatus.pressedButtons[0];
-    if ((held & BUTTON_R) && (pressed & BUTTON_D_DOWN)) {
+    if ((cur & BUTTON_R) && (pressed & BUTTON_D_DOWN)) {
         if (reloadCooldown > 0) {
             reloadMessageTimer = 90;
             return;
@@ -189,8 +189,9 @@ static void handleMenu() {
         return;
     }
     #endif
-    s32 buttons = gGameStatus.pressedButtons[0];
-    if (buttons & BUTTON_L) {
+    s32 pressed = gGameStatus.pressedButtons[0];
+    s32 held = gGameStatus.heldButtons[0];
+    if (pressed & BUTTON_L) {
         chaosMenuOpen = !chaosMenuOpen;
         return;
     }
@@ -198,21 +199,21 @@ static void handleMenu() {
     if (!chaosMenuOpen) {
         return;
     }
-    if (buttons & BUTTON_D_LEFT) {
+    if (held & BUTTON_D_LEFT) {
         selectedEffect += totalEffectCount - 1;
         selectedEffect %= totalEffectCount;
-    } else if (buttons & BUTTON_D_RIGHT) {
+    } else if (held & BUTTON_D_RIGHT) {
         selectedEffect++;
         selectedEffect %= totalEffectCount;
-    } else if (buttons & BUTTON_D_UP) {
+    } else if (held & BUTTON_D_UP) {
         if (selectedEffect < 255) {
             selectedTimer += 5;
         }
-    } else if (buttons & BUTTON_D_DOWN) {
+    } else if (held & BUTTON_D_DOWN) {
         if (selectedTimer > 0) {
             selectedTimer -= 5;
         }
-    } else if (buttons & BUTTON_R) {
+    } else if (pressed & BUTTON_R) {
         if (effectData[selectedEffect].canTrigger == NULL || effectData[selectedEffect].canTrigger()) {
             activateEffect(selectedEffect);
         }
