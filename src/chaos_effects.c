@@ -112,6 +112,17 @@ b8 randomEffects = FALSE;
 
 u32 frameCount = 0;
 s16 chaosEnemyHpUpdateTimer = 0;
+b8 chaosSlowGo = FALSE;
+b8 chaosTopDownCam = FALSE;
+b8 chaosHealingTouch = FALSE;
+b8 chaosAllSfxAttackFx = FALSE;
+b8 chaosHideModels = FALSE;
+b8 chaosSpinAngle = FALSE;
+b8 chaosHpSoundPlayed = FALSE;
+b8 chaosFpSoundPlayed = FALSE;
+b8 chaosBadMusic = FALSE;
+b8 chaosRotateCamera = FALSE;
+Matrix4f chaosRotateMtx = {0};
 static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
 static s16 hpSoundTimer = 0;
@@ -873,11 +884,7 @@ static void expireMushroom() {
 
 static void rotateCamera() {
     chaosRotateCamera = TRUE;
-    f32 angle = (rand_float() * 270.0f) + 45.0f;
-    Camera* camera = &gCameras[CAM_DEFAULT];
-    guRotateF(camera->viewMtxChaos, angle, 0.0f, 0.0f, -1.0f);
-    camera = &gCameras[CAM_BATTLE];
-    guRotateF(camera->viewMtxChaos, angle, 0.0f, 0.0f, -1.0f);
+    guRotateF(chaosRotateMtx, (rand_float() * 270.0f) + 45.0f, 0.0f, 0.0f, -1.0f);
 }
 
 static void rotateCameraStop() {

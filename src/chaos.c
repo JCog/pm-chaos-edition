@@ -32,17 +32,8 @@ const enum GameMode badModes[] = {
 static u8 selectedEffect = 0;
 static u8 selectedTimer = 10;
 #endif
+
 b8 chaosMenuOpen = FALSE;
-b8 chaosSlowGo = FALSE;
-b8 chaosTopDownCam = FALSE;
-b8 chaosHealingTouch = FALSE;
-b8 chaosAllSfxAttackFx = FALSE;
-b8 chaosHideModels = FALSE;
-b8 chaosSpinAngle = FALSE;
-b8 chaosHpSoundPlayed = FALSE;
-b8 chaosFpSoundPlayed = FALSE;
-b8 chaosBadMusic = FALSE;
-b8 chaosRotateCamera = FALSE;
 static u32 effectCountdown = 1;
 static b8 reloading = FALSE;
 static u8 reloadDelay = 0;

@@ -75,7 +75,7 @@ void update_cameras(void) {
             }
 
             if (chaosRotateCamera) {
-                guMtxCatF(cam->viewMtxChaos, cam->perspectiveMatrix, cam->perspectiveMatrix);
+                guMtxCatF(chaosRotateMtx, cam->perspectiveMatrix, cam->perspectiveMatrix);
             }
 
             guMtxCatF(cam->viewMtxPlayer, cam->perspectiveMatrix, cam->perspectiveMatrix);

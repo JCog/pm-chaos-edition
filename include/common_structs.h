@@ -806,7 +806,6 @@ typedef struct Camera {
     /* 0x114 */ Matrix4f viewMtxPlayer; /* centers on player */
     /* 0x154 */ Matrix4f viewMtxLeading; /* leads player slightly */
     /* 0x194 */ Matrix4f viewMtxShaking; /* used while ShakeCam is active */
-    /* 0x194 */ Matrix4f viewMtxChaos;
     /* 0x1D4 */ char unk_1D4[0x28];
     /* 0x1FC */ void (*fpDoPreRender)(struct Camera*);
     /* 0x200 */ void (*fpDoPostRender)(struct Camera*);
