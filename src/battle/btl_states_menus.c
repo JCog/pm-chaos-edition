@@ -213,7 +213,7 @@ s32 BattleMenu_CategoryForSubmenu[] = {
     [BTL_MENU_TYPE_JUMP]            MOVE_TYPE_JUMP,
     [BTL_MENU_TYPE_SMASH]           MOVE_TYPE_HAMMER,
     [BTL_MENU_TYPE_ITEMS]           MOVE_TYPE_ITEMS,
-    [BTL_MENU_TYPE_RUN_AWAY]        MOVE_TYPE_6,
+    [BTL_MENU_TYPE_RUN_AWAY]        MOVE_TYPE_RUN_AWAY,
     [BTL_MENU_TYPE_DEFEND]          MOVE_TYPE_3,
     [BTL_MENU_TYPE_CHANGE_PARTNER]  MOVE_TYPE_SWITCH,
     [BTL_MENU_TYPE_ABILITY]         0x1A,
@@ -3441,7 +3441,7 @@ void btl_state_update_player_menu(void) {
                         gBattleSubState = BTL_SUBSTATE_PLAYER_MENU_STRATEGIES_6;
                         btl_state_update_player_menu();
                         battleStatus->moveCategory = BTL_MENU_TYPE_RUN_AWAY;
-                        battleStatus->selectedMoveID = MOVE_UNUSED_39;
+                        battleStatus->selectedMoveID = MOVE_RUN_AWAY;
                         btl_set_state(BATTLE_STATE_RUN_AWAY);
                         break;
                     case 9:
@@ -4327,7 +4327,7 @@ void btl_state_update_partner_menu(void) {
                     gBattleSubState = BTL_SUBSTATE_PARTNER_MENU_STRATEGIES_6;
                     btl_state_update_partner_menu();
                     battleStatus->moveCategory = entryIdx;
-                    battleStatus->selectedMoveID = MOVE_UNUSED_39;
+                    battleStatus->selectedMoveID = MOVE_RUN_AWAY;
                     btl_set_state(BATTLE_STATE_RUN_AWAY);
                     break;
                 case 10:

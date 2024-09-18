@@ -242,10 +242,10 @@ void handleBattleQueue() {
     }
 
     enum MoveType moveTypes[] = {
-        MOVE_TYPE_JUMP, MOVE_TYPE_HAMMER, MOVE_TYPE_STAR_POWER, MOVE_TYPE_ITEMS, MOVE_TYPE_SWITCH
+        MOVE_TYPE_JUMP, MOVE_TYPE_HAMMER, MOVE_TYPE_STAR_POWER, MOVE_TYPE_ITEMS, MOVE_TYPE_NONE
     };
     enum MoveType moveType;
-    for (s32 i = 0; i < 20; i++) {
+    while (TRUE) {
         moveType = moveTypes[rand_int(ARRAY_COUNT(moveTypes) - 1)];
         b8 validType = FALSE;
         switch (moveType) {
@@ -289,23 +289,10 @@ void handleBattleQueue() {
                     }
                 }
                 break;
-            case MOVE_TYPE_SWITCH:
-                Actor* partner = gBattleStatus.partnerActor;
-                if (partner->koStatus == STATUS_KEY_DAZE || partner->debuff == STATUS_KEY_FROZEN) {
-                    break;
-                }
-
-                u8 partnersEnabled = 0;
-                for (s32 j = 0; j < ARRAY_COUNT(gPlayerData.partners); j++) {
-                    if (gPlayerData.partners[j].enabled) {
-                        partnersEnabled++;
-                    }
-                }
-                validType = partnersEnabled >= 2;
-                break;
             default:
-                // should never reach here
-                return;
+                // strategies can always at least do nothing
+                validType = TRUE;
+                break;
         }
         if (validType) {
             break;
@@ -369,12 +356,53 @@ void handleBattleQueue() {
         }
     }
 
-    // check for partner swap
-    if (moveType == MOVE_TYPE_SWITCH) {
-        for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.partners); i++) {
-            if (gPlayerData.partners[i].enabled && i != gPlayerData.curPartner) {
-                moveChoices[moveCount++] = i;
+    // check for strategies
+    if (moveType == MOVE_TYPE_NONE) {
+        u8 strategyCount = 0;
+        enum BattleMenuTypes strategyTypes[3] = {0};
+        enum BattleMenuTypes strategy;
+
+        strategyTypes[strategyCount++] = BTL_MENU_TYPE_DO_NOTHING;
+
+        if (!gCurrentEncounter.forbidFleeing) {
+            strategyTypes[strategyCount++] = BTL_MENU_TYPE_RUN_AWAY;
+        }
+
+        Actor* partner = gBattleStatus.partnerActor;
+        if (partner->koStatus != STATUS_KEY_DAZE && partner->debuff != STATUS_KEY_FROZEN) {
+            u8 partnersEnabled = 0;
+            for (s32 j = 0; j < ARRAY_COUNT(gPlayerData.partners); j++) {
+                if (gPlayerData.partners[j].enabled) {
+                    partnersEnabled++;
+                }
             }
+            if (partnersEnabled >= 2) {
+                strategyTypes[strategyCount++] = BTL_MENU_TYPE_CHANGE_PARTNER;
+            }
+        }
+
+        strategy = strategyTypes[rand_int(strategyCount - 1)];
+        switch(strategy) {
+            case BTL_MENU_TYPE_DO_NOTHING:
+                clear_windows();
+                btl_set_state(BATTLE_STATE_END_PLAYER_TURN);
+                return;
+            case BTL_MENU_TYPE_RUN_AWAY:
+                clear_windows();
+                gBattleStatus.moveCategory = BTL_MENU_TYPE_RUN_AWAY;
+                gBattleStatus.selectedMoveID = MOVE_RUN_AWAY;
+                btl_set_state(BATTLE_STATE_RUN_AWAY);
+                break;
+            case BTL_MENU_TYPE_CHANGE_PARTNER:
+                moveType = MOVE_TYPE_SWITCH;
+                for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.partners); i++) {
+                    if (gPlayerData.partners[i].enabled && i != gPlayerData.curPartner) {
+                        moveChoices[moveCount++] = i;
+                    }
+                }
+                break;
+            default:
+                return;
         }
     }
 

@@ -511,12 +511,12 @@
     actionTip: NONE
     costFP: 0
     costBP: 4
-- Unused_39:
+- RunAway:
     nameMsg: (s32) "つうじょう"
     fullDescMsg: MSG_NONE
     shortDescMsg: MSG_NONE
     flags: [ TARGET_FLAG_SELECT_ONE, TARGET_FLAG_GROUND, TARGET_FLAG_ALLOW_TARGET_ONLY ]
-    category: MOVE_TYPE_6
+    category: MOVE_TYPE_RUN_AWAY
     actionTip: NONE
     costFP: 0
     costBP: 0
