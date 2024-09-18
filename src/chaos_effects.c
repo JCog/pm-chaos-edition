@@ -226,12 +226,58 @@ void handleBattleQueue() {
     Actor* player = gBattleStatus.playerActor;
     u8 moveChoices[24] = {0};
     u8 moveCount = 0;
+    enum MoveType moveTypes[] = {MOVE_TYPE_JUMP, MOVE_TYPE_HAMMER, MOVE_TYPE_STAR_POWER};
+    enum MoveType moveType;
+    for (s32 i = 0; i < 20; i++) {
+        moveType = moveTypes[rand_int(ARRAY_COUNT(moveTypes) - 1)];
+        b8 validType = FALSE;
+        switch (moveType) {
+            case MOVE_TYPE_JUMP:
+                // jump logic is simple - if you can't do a normal jump, you can't do any other jump move
+                validType = isMovePossible(MOVE_JUMP1, &gMoveTable[MOVE_JUMP1]);
+                break;
+            case MOVE_TYPE_HAMMER:
+                // hammer logic isn't simple - e.g. you might be able to hammer throw but not hammer
+                validType = isMovePossible(MOVE_HAMMER1, &gMoveTable[MOVE_HAMMER1]);
+                if (validType) {
+                    break;
+                }
+                for (u32 j = 0; j < ARRAY_COUNT(gPlayerData.equippedBadges); j++) {
+                    s16 badge = gPlayerData.equippedBadges[j];
+                    if (badge == ITEM_NONE) {
+                        continue;
+                    }
+
+                    u8 moveId = gItemTable[badge].moveID;
+                    MoveData* move = &gMoveTable[moveId];
+                    if (move->category != MOVE_TYPE_HAMMER) {
+                        continue;
+                    }
+
+                    if (isMovePossible(moveId, move)) {
+                        validType = TRUE;
+                        break;
+                    }
+                }
+                break;
+            case MOVE_TYPE_STAR_POWER:
+                // focus being possible is logically sufficient here
+                validType = isMovePossible(MOVE_FOCUS, &gMoveTable[MOVE_FOCUS]);
+                break;
+            default:
+                // should never reach here
+                return;
+        }
+        if (validType) {
+            break;
+        }
+    }
 
     // check regular jump and hammer
-    if (isMovePossible(MOVE_JUMP1, &gMoveTable[MOVE_JUMP1])) {
+    if (moveType == MOVE_TYPE_JUMP && isMovePossible(MOVE_JUMP1, &gMoveTable[MOVE_JUMP1])) {
         moveChoices[moveCount++] = MOVE_JUMP1 + gPlayerData.bootsLevel;
     }
-    if (isMovePossible(MOVE_JUMP1, &gMoveTable[MOVE_HAMMER1])) {
+    if (moveType == MOVE_TYPE_HAMMER && isMovePossible(MOVE_HAMMER1, &gMoveTable[MOVE_HAMMER1])) {
         moveChoices[moveCount++] = MOVE_HAMMER1 + gPlayerData.hammerLevel;
     }
 
@@ -244,7 +290,7 @@ void handleBattleQueue() {
 
         u8 moveId = gItemTable[badge].moveID;
         MoveData* move = &gMoveTable[moveId];
-        if (move->category != MOVE_TYPE_JUMP && move->category != MOVE_TYPE_HAMMER) {
+        if (move->category != moveType) {
             continue;
         }
 
@@ -254,17 +300,19 @@ void handleBattleQueue() {
     }
 
     // check for star power
-    if (isMovePossible(MOVE_FOCUS, &gMoveTable[MOVE_FOCUS])) {
-        moveChoices[moveCount++] = MOVE_FOCUS;
-    }
-    if (isMovePossible(MOVE_STAR_BEAM, &gMoveTable[MOVE_STAR_BEAM])) {
-        moveChoices[moveCount++] = MOVE_STAR_BEAM;
-    } else if (isMovePossible(MOVE_PEACH_BEAM, &gMoveTable[MOVE_PEACH_BEAM])) {
-        moveChoices[moveCount++] = MOVE_PEACH_BEAM;
-    }
-    for (u32 i = 0; i < 7; i++) {
-        if (isMovePossible(MOVE_REFRESH + i, &gMoveTable[MOVE_REFRESH + i])) {
-            moveChoices[moveCount++] = MOVE_REFRESH + i;
+    if (moveType == MOVE_TYPE_STAR_POWER) {
+        if (isMovePossible(MOVE_FOCUS, &gMoveTable[MOVE_FOCUS])) {
+            moveChoices[moveCount++] = MOVE_FOCUS;
+        }
+        if (isMovePossible(MOVE_STAR_BEAM, &gMoveTable[MOVE_STAR_BEAM])) {
+            moveChoices[moveCount++] = MOVE_STAR_BEAM;
+        } else if (isMovePossible(MOVE_PEACH_BEAM, &gMoveTable[MOVE_PEACH_BEAM])) {
+            moveChoices[moveCount++] = MOVE_PEACH_BEAM;
+        }
+        for (u32 i = 0; i < 7; i++) {
+            if (isMovePossible(MOVE_REFRESH + i, &gMoveTable[MOVE_REFRESH + i])) {
+                moveChoices[moveCount++] = MOVE_REFRESH + i;
+            }
         }
     }
 
