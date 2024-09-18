@@ -66,7 +66,7 @@ static void badMusic(void);
 static void badMusicOff(void);
 static void expireMushroom(void);
 static void rotateCamera(void);
-static void rotateCameraStop(void);
+static void rotateCameraOff(void);
 
 struct ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -102,7 +102,7 @@ struct ChaosEffectData effectData[] = {
     {"Random Tattle",           FALSE,  0,  0,  randomTattle,           NULL,               NULL},
     {"Bad Music",               TRUE,   0,  60, badMusic,               badMusicOff,        NULL},
     {"Mushroom Expires",        FALSE,  0,  0,  expireMushroom,         NULL,               hasMushroom},
-    {"Rotate Camera",           FALSE,  0,  60, rotateCamera,           rotateCameraStop,   NULL},
+    {"Rotate Camera",           FALSE,  0,  60, rotateCamera,           rotateCameraOff,    NULL},
 };
 
 u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -182,8 +182,8 @@ void handleTimers() {
 static b8 isMovePossible(u8 moveId, MoveData* move) {
     if ((move->category == MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.starPower / 0x100)
         || (move->category != MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.curFP)
-        || (move->category == MOVE_TYPE_JUMP && gPlayerData.bootsLevel < 0)
-        || (move->category == MOVE_TYPE_HAMMER && gPlayerData.hammerLevel < 0))
+        || (move->category == MOVE_TYPE_JUMP && (gPlayerData.bootsLevel < 0 || gBattleStatus.jumpLossTurns > 0))
+        || (move->category == MOVE_TYPE_HAMMER && (gPlayerData.hammerLevel < 0 || gBattleStatus.hammerLossTurns > 0)))
     {
         return FALSE;
     }
@@ -212,6 +212,24 @@ static b8 isMovePossible(u8 moveId, MoveData* move) {
     return player->targetListLength > 0;
 }
 
+static b8 isBattleItemUsable(s16 itemId) {
+    if (itemId == ITEM_NONE) {
+        return FALSE;
+    }
+
+    ItemData *itemData = &gItemTable[itemId];
+    if (!(itemData->typeFlags & ITEM_TYPE_FLAG_BATTLE_USABLE)) {
+        return FALSE;
+    }
+
+    Actor* player = gBattleStatus.playerActor;
+    gBattleStatus.moveCategory = BTL_MENU_TYPE_ITEMS;
+    gBattleStatus.moveArgument = itemId;
+    gBattleStatus.curTargetListFlags = itemData->targetFlags;
+    create_current_pos_target_list(player);
+    return player->targetListLength > 0;
+}
+
 
 
 void handleBattleQueue() {
@@ -223,10 +241,7 @@ void handleBattleQueue() {
         return;
     }
 
-    Actor* player = gBattleStatus.playerActor;
-    u8 moveChoices[24] = {0};
-    u8 moveCount = 0;
-    enum MoveType moveTypes[] = {MOVE_TYPE_JUMP, MOVE_TYPE_HAMMER, MOVE_TYPE_STAR_POWER};
+    enum MoveType moveTypes[] = {MOVE_TYPE_JUMP, MOVE_TYPE_HAMMER, MOVE_TYPE_STAR_POWER, MOVE_TYPE_ITEMS};
     enum MoveType moveType;
     for (s32 i = 0; i < 20; i++) {
         moveType = moveTypes[rand_int(ARRAY_COUNT(moveTypes) - 1)];
@@ -264,6 +279,14 @@ void handleBattleQueue() {
                 // focus being possible is logically sufficient here
                 validType = isMovePossible(MOVE_FOCUS, &gMoveTable[MOVE_FOCUS]);
                 break;
+            case MOVE_TYPE_ITEMS:
+                for (s32 j = 0; j < ARRAY_COUNT(gPlayerData.invItems); j++) {
+                    if (isBattleItemUsable(gPlayerData.invItems[j])) {
+                        validType = TRUE;
+                        break;
+                    }
+                }
+                break;
             default:
                 // should never reach here
                 return;
@@ -272,6 +295,9 @@ void handleBattleQueue() {
             break;
         }
     }
+
+    s16 moveChoices[24] = {0};
+    u8 moveCount = 0;
 
     // check regular jump and hammer
     if (moveType == MOVE_TYPE_JUMP && isMovePossible(MOVE_JUMP1, &gMoveTable[MOVE_JUMP1])) {
@@ -282,20 +308,22 @@ void handleBattleQueue() {
     }
 
     // check for badge moves
-    for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
-        s16 badge = gPlayerData.equippedBadges[i];
-        if (badge == ITEM_NONE) {
-            continue;
-        }
+    if (moveType == MOVE_TYPE_JUMP || moveType == MOVE_TYPE_HAMMER) {
+        for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
+            s16 badge = gPlayerData.equippedBadges[i];
+            if (badge == ITEM_NONE) {
+                continue;
+            }
 
-        u8 moveId = gItemTable[badge].moveID;
-        MoveData* move = &gMoveTable[moveId];
-        if (move->category != moveType) {
-            continue;
-        }
+            u8 moveId = gItemTable[badge].moveID;
+            MoveData* move = &gMoveTable[moveId];
+            if (move->category != moveType) {
+                continue;
+            }
 
-        if (isMovePossible(moveId, move)) {
-            moveChoices[moveCount++] = moveId;
+            if (isMovePossible(moveId, move)) {
+                moveChoices[moveCount++] = moveId;
+            }
         }
     }
 
@@ -316,23 +344,54 @@ void handleBattleQueue() {
         }
     }
 
+    // check for items
+    if (moveType == MOVE_TYPE_ITEMS) {
+        for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.invItems); i++) {
+            if (isBattleItemUsable(gPlayerData.invItems[i])) {
+                moveChoices[moveCount++] = gPlayerData.invItems[i];
+            }
+        }
+    }
+
     // pick a random target and move
-    s16 moveId = moveChoices[rand_int(moveCount - 1)];
-    MoveData *move = &gMoveTable[moveId];
-    if (move->category == MOVE_TYPE_JUMP) {
-        gBattleStatus.moveCategory = BTL_MENU_TYPE_JUMP;
-        gBattleStatus.moveArgument = gPlayerData.bootsLevel;
-    } else if (move->category == MOVE_TYPE_HAMMER) {
-        gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
-        gBattleStatus.moveArgument = gPlayerData.hammerLevel;
-    } else if (move->category == MOVE_TYPE_STAR_POWER) {
-        gBattleStatus.moveCategory = BTL_MENU_TYPE_STAR_POWERS;
-        gBattleStatus.moveArgument = moveId - MOVE_FOCUS;
-    } else {
+    if (moveCount == 0) {
+        battleQueueMario = FALSE;
         return;
     }
+    s16 moveId = moveChoices[rand_int(moveCount - 1)];
+    MoveData *move;
+    if (moveType == MOVE_TYPE_ITEMS) {
+        move = &gMoveTable[MOVE_ITEMS];
+    } else {
+        move = &gMoveTable[moveId];
+    }
+
     gBattleStatus.selectedMoveID = moveId;
     gBattleStatus.curTargetListFlags = move->flags;
+    switch (move->category) {
+        case MOVE_TYPE_JUMP:
+            gBattleStatus.moveCategory = BTL_MENU_TYPE_JUMP;
+            gBattleStatus.moveArgument = gPlayerData.bootsLevel;
+            break;
+        case MOVE_TYPE_HAMMER:
+            gBattleStatus.moveCategory = BTL_MENU_TYPE_SMASH;
+            gBattleStatus.moveArgument = gPlayerData.hammerLevel;
+            break;
+        case MOVE_TYPE_STAR_POWER:
+            gBattleStatus.moveCategory = BTL_MENU_TYPE_STAR_POWERS;
+            gBattleStatus.moveArgument = moveId - MOVE_FOCUS;
+            break;
+        case MOVE_TYPE_ITEMS:
+            gBattleStatus.moveCategory = BTL_MENU_TYPE_ITEMS;
+            gBattleStatus.moveArgument = moveId;
+            gBattleStatus.selectedMoveID = MOVE_ITEMS;
+            gBattleStatus.curTargetListFlags = gItemTable[moveId].targetFlags | TARGET_FLAG_PRIMARY_ONLY;
+            gBattleStatus.curAttackElement = 0;
+            break;
+        default:
+            return;
+    }
+    Actor* player = gBattleStatus.playerActor;
     create_current_pos_target_list(player);
     player->selectedTargetIndex = rand_int(player->targetListLength - 1);
     clear_windows();
@@ -935,6 +994,6 @@ static void rotateCamera() {
     guRotateF(chaosRotateMtx, (rand_float() * 270.0f) + 45.0f, 0.0f, 0.0f, -1.0f);
 }
 
-static void rotateCameraStop() {
+static void rotateCameraOff() {
     chaosRotateCamera = FALSE;
 }
