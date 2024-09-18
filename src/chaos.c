@@ -45,7 +45,7 @@ static void chaosDrawBox(s32 posX, s32 posY, s32 sizeX, s32 sizeY, int style, s3
              0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, SCREEN_WIDTH, SCREEN_HEIGHT, NULL);
 }
 
-static void chaosDrawAscii(char* text, s32 color, s32 posX, s32 posY) {
+static void chaosDrawAscii(char *text, s32 color, s32 posX, s32 posY) {
     char buf[128] = {
         MSG_CHAR_READ_FUNCTION, MSG_READ_FUNC_SIZE, 12, 12
     };
@@ -111,7 +111,7 @@ static void drawEffectList() {
     }
     #endif
     u8 activeEffects = 0;
-    for (u32 i = 0; i < totalEffectCount; i++) {
+    for (s32 i = 0; i < totalEffectCount; i++) {
         #if CHAOS_DEBUG
         if (i == 0) {
             continue;
@@ -143,7 +143,7 @@ static void drawEffectList() {
     chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y);
     #endif
     index++;
-    for (u32 i = 0; i < totalEffectCount; i++) {
+    for (s32 i = 0; i < totalEffectCount; i++) {
         #if CHAOS_DEBUG
         if (i == 0) {
             continue;
@@ -222,7 +222,7 @@ static void handleMenu() {
 }
 
 void chaosUpdate() {
-    for (u32 i = 0; i < 10; i++) {
+    for (s32 i = 0; i < 10; i++) {
         if (get_game_mode() == badModes[i]) {
             return;
         }
@@ -243,7 +243,7 @@ void chaosUpdate() {
     // select a new effect
     if (effectCountdown == 0) {
         // try 20 times to apply an effect, skip if a valid one can't be found
-        for (u32 i = 0; i < 20; i++) {
+        for (s32 i = 0; i < 20; i++) {
             #if CHAOS_DEBUG
             s32 id = rand_int(totalEffectCount - 2) + 1;
             #else
@@ -259,7 +259,7 @@ void chaosUpdate() {
     }
 
     // update active effects
-    for (u32 i = 0; i < totalEffectCount; i++) {
+    for (s32 i = 0; i < totalEffectCount; i++) {
         b8 shouldTrigger = effectData[i].canTrigger == NULL || effectData[i].canTrigger();
         if (effectData[i].timer > 0 && (shouldTrigger || effectData[i].maxSeconds == 0)) {
             if (effectData[i].timer == 1 && effectData[i].off != NULL) {

@@ -139,8 +139,8 @@ const enum ItemIDs mushroomIds[] = {
 
 static void updateEnemyHpDeltas() {
     b8 hpUpdated = FALSE;
-    for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
-        Actor* enemy = gBattleStatus.enemyActors[i];
+    for (s32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
+        Actor *enemy = gBattleStatus.enemyActors[i];
         if (enemy == NULL || enemyHpDeltas[i] == 0) {
             continue;
         }
@@ -179,7 +179,7 @@ void handleTimers() {
     }
 }
 
-static b8 isMovePossible(u8 moveId, MoveData* move) {
+static b8 isMovePossible(u8 moveId, MoveData *move) {
     if ((move->category == MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.starPower / 0x100)
         || (move->category != MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.curFP)
         || (move->category == MOVE_TYPE_JUMP && (gPlayerData.bootsLevel < 0 || gBattleStatus.jumpLossTurns > 0))
@@ -187,7 +187,7 @@ static b8 isMovePossible(u8 moveId, MoveData* move) {
     {
         return FALSE;
     }
-    Actor* player = gBattleStatus.playerActor;
+    Actor *player = gBattleStatus.playerActor;
     if (move->category == MOVE_TYPE_JUMP) {
         gBattleStatus.moveCategory = BTL_MENU_TYPE_JUMP;
         gBattleStatus.moveArgument = gPlayerData.bootsLevel;
@@ -222,7 +222,7 @@ static b8 isBattleItemUsable(s16 itemId) {
         return FALSE;
     }
 
-    Actor* player = gBattleStatus.playerActor;
+    Actor *player = gBattleStatus.playerActor;
     gBattleStatus.moveCategory = BTL_MENU_TYPE_ITEMS;
     gBattleStatus.moveArgument = itemId;
     gBattleStatus.curTargetListFlags = itemData->targetFlags;
@@ -259,14 +259,14 @@ void handleBattleQueue() {
                 if (validType) {
                     break;
                 }
-                for (u32 j = 0; j < ARRAY_COUNT(gPlayerData.equippedBadges); j++) {
+                for (s32 j = 0; j < ARRAY_COUNT(gPlayerData.equippedBadges); j++) {
                     s16 badge = gPlayerData.equippedBadges[j];
                     if (badge == ITEM_NONE) {
                         continue;
                     }
 
                     u8 moveId = gItemTable[badge].moveID;
-                    MoveData* move = &gMoveTable[moveId];
+                    MoveData *move = &gMoveTable[moveId];
                     if (move->category != MOVE_TYPE_HAMMER) {
                         continue;
                     }
@@ -312,14 +312,14 @@ void handleBattleQueue() {
 
     // check for badge moves
     if (moveType == MOVE_TYPE_JUMP || moveType == MOVE_TYPE_HAMMER) {
-        for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
+        for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
             s16 badge = gPlayerData.equippedBadges[i];
             if (badge == ITEM_NONE) {
                 continue;
             }
 
             u8 moveId = gItemTable[badge].moveID;
-            MoveData* move = &gMoveTable[moveId];
+            MoveData *move = &gMoveTable[moveId];
             if (move->category != moveType) {
                 continue;
             }
@@ -340,7 +340,7 @@ void handleBattleQueue() {
         } else if (isMovePossible(MOVE_PEACH_BEAM, &gMoveTable[MOVE_PEACH_BEAM])) {
             moveChoices[moveCount++] = MOVE_PEACH_BEAM;
         }
-        for (u32 i = 0; i < 7; i++) {
+        for (s32 i = 0; i < 7; i++) {
             if (isMovePossible(MOVE_REFRESH + i, &gMoveTable[MOVE_REFRESH + i])) {
                 moveChoices[moveCount++] = MOVE_REFRESH + i;
             }
@@ -368,7 +368,7 @@ void handleBattleQueue() {
             strategyTypes[strategyCount++] = BTL_MENU_TYPE_RUN_AWAY;
         }
 
-        Actor* partner = gBattleStatus.partnerActor;
+        Actor *partner = gBattleStatus.partnerActor;
         if (partner->koStatus != STATUS_KEY_DAZE && partner->debuff != STATUS_KEY_FROZEN) {
             u8 partnersEnabled = 0;
             for (s32 j = 0; j < ARRAY_COUNT(gPlayerData.partners); j++) {
@@ -461,7 +461,7 @@ void handleBattleQueue() {
     if (move->category == MOVE_TYPE_SWITCH) {
         btl_set_state(BATTLE_STATE_CHANGE_PARTNER);
     } else {
-        Actor* player = gBattleStatus.playerActor;
+        Actor *player = gBattleStatus.playerActor;
         create_current_pos_target_list(player);
         player->selectedTargetIndex = rand_int(player->targetListLength - 1);
         btl_set_state(BATTLE_STATE_PLAYER_MOVE);
@@ -486,7 +486,7 @@ static b8 enemyExists() {
     if (!isBattle()) {
         return FALSE;
     }
-    for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
+    for (s32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
         if (gBattleStatus.enemyActors[i] != NULL) {
             return TRUE;
         }
@@ -496,7 +496,7 @@ static b8 enemyExists() {
 
 static s32 getTotalEquippedBpCost() {
     s32 totalCost = 0;
-    for (u32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
+    for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.equippedBadges); i++) {
         s16 itemID = gPlayerData.equippedBadges[i];
         if (itemID != ITEM_NONE) {
             s32 moveID = gItemTable[itemID].moveID;
@@ -511,7 +511,7 @@ static b8 canEquipBadge() {
     if (availableBp == 0) {
         return FALSE;
     }
-    for (u32 i = 0; i < 128; i++) {
+    for (s32 i = 0; i < 128; i++) {
         s16 badgeId = gPlayerData.badges[i];
         if (badgeId == 0) {
             continue;
@@ -525,7 +525,7 @@ static b8 canEquipBadge() {
 }
 
 static b8 canUnequipBadge() {
-    for (u32 i = 0; i < 64; i++) {
+    for (s32 i = 0; i < 64; i++) {
         if (gPlayerData.equippedBadges[i] != 0) {
             return TRUE;
         }
@@ -538,8 +538,8 @@ static b8 canPointSwap() {
 }
 
 static b8 hasMushroom() {
-    for (u32 i = 0; i < 10; i++) {
-        for (u32 j = 0; j < ARRAY_COUNT(mushroomIds); j++) {
+    for (s32 i = 0; i < 10; i++) {
+        for (s32 j = 0; j < ARRAY_COUNT(mushroomIds); j++) {
             if (gPlayerData.invItems[i] == mushroomIds[j]) {
                 return TRUE;
             }
@@ -553,7 +553,7 @@ static b8 hasMushroom() {
 #if CHAOS_DEBUG
 static void toggleRandomEffects() {
     if (randomEffects) {
-        for (u32 i = 0; i < totalEffectCount; i++) {
+        for (s32 i = 0; i < totalEffectCount; i++) {
             if (effectData[i].timer > 0 && effectData[i].off != NULL) {
                 effectData[i].off();
             }
@@ -622,19 +622,19 @@ static void magnetPosStep(Vec3f *pos) {
 }
 
 static void actorMagnet() {
-    for (u32 i = 0; i < MAX_NPCS; i++) {
+    for (s32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc != NULL) {
             magnetPosStep(&npc->pos);
         }
     }
-    for (u32 i = 0; i < MAX_ENTITIES; i++) {
+    for (s32 i = 0; i < MAX_ENTITIES; i++) {
         Entity *entity = (*gCurrentEntityListPtr)[i];
         if (entity != NULL) {
             magnetPosStep(&entity->pos);
         }
     }
-    for (u32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
+    for (s32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
         ItemEntity *entity = (gCurrentItemEntities)[i];
         if (entity != NULL) {
             magnetPosStep(&entity->pos);
@@ -673,7 +673,7 @@ static void negativeAttack() {
 }
 
 static void randomEnemyHp() {
-    for (u32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
+    for (s32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
         Actor *enemy = gBattleStatus.enemyActors[i];
         if (enemy == NULL || enemy->maxHP == 1) {
             continue;
@@ -736,7 +736,7 @@ static void shuffleBattlePos() {
         actors[actorIdx] = gBattleStatus.partnerActor;
         atHome[actorIdx++] = actorAtHome(gBattleStatus.partnerActor);
     }
-    for (u32 i = 0; i < MAX_ENEMY_ACTORS; i++) {
+    for (s32 i = 0; i < MAX_ENEMY_ACTORS; i++) {
         if (gBattleStatus.enemyActors[i] != NULL) {
             actors[actorIdx] = gBattleStatus.enemyActors[i];
             atHome[actorIdx++] = actorAtHome(gBattleStatus.partnerActor);
@@ -749,11 +749,11 @@ static void shuffleBattlePos() {
     Vec3s oldHealth[26];
     Vec3f newPos[26];
     Vec3s newHealth[26];
-    for (u32 i = 0; i < actorCount; i++) {
+    for (s32 i = 0; i < actorCount; i++) {
         oldPos[i] = actors[i]->homePos;
         oldHealth[i] = actors[i]->healthBarPos;
     }
-    for (u32 i = 0; i < actorCount; i++) {
+    for (s32 i = 0; i < actorCount; i++) {
         u8 oldIdx = rand_int(actorIdx);
         newPos[i] = oldPos[oldIdx];
         newHealth[i] = oldHealth[oldIdx];
@@ -762,7 +762,7 @@ static void shuffleBattlePos() {
     }
 
     // apply new position homes, move them if they're not away from their current home (aka probably attacking)
-    for (u32 i = 0; i < actorCount; i++) {
+    for (s32 i = 0; i < actorCount; i++) {
         actors[i]->homePos.x = newPos[i].x;
         actors[i]->homePos.z = newPos[i].z;
         actors[i]->healthBarPos.x = newPos[i].x;
@@ -783,7 +783,7 @@ static void equipBadge() {
     s32 availableBp = gPlayerData.maxBP - getTotalEquippedBpCost();
     s16 equippableBadges[128];
     u8 count = 0;
-    for (u32 i = 0; i < 128; i++) {
+    for (s32 i = 0; i < 128; i++) {
         s16 badgeId = gPlayerData.badges[i];
         if (badgeId == 0) {
             continue;
@@ -798,7 +798,7 @@ static void equipBadge() {
     }
 
     s16 equipId = equippableBadges[rand_int(count - 1)];
-    for (u32 i = 0; i < 64; i++) {
+    for (s32 i = 0; i < 64; i++) {
         if (gPlayerData.equippedBadges[i] == 0) {
             gPlayerData.equippedBadges[i] = equipId;
             sfx_play_sound(SOUND_MENU_BADGE_EQUIP);
@@ -810,7 +810,7 @@ static void equipBadge() {
 
 static void unequipBadge() {
     s32 eqBadgeCount = 0;
-    for (u32 i = 0; i < 64; i++) {
+    for (s32 i = 0; i < 64; i++) {
         if (gPlayerData.equippedBadges[i] == 0) {
             break;
         } else {
@@ -860,7 +860,7 @@ static void perilSound() {
 static void squishActor(s8 id, enum ActorType actorType, Vec3f *scale) {
     b8 existingData = FALSE;
     struct ActorScaleData *scaleData = NULL;
-    for (u32 i = 0; i < ACTOR_DATA_COUNT; i++) {
+    for (s32 i = 0; i < ACTOR_DATA_COUNT; i++) {
         if (actorScaleBuffer[i].id == id && actorScaleBuffer[i].actorType == actorType) {
             existingData = TRUE;
             scaleData = &actorScaleBuffer[i];
@@ -887,14 +887,14 @@ static void squishActor(s8 id, enum ActorType actorType, Vec3f *scale) {
 }
 
 static void squish() {
-    for (u32 i = 0; i < MAX_NPCS; i++) {
+    for (s32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc == NULL) {
             continue;
         }
         squishActor(npc->npcID, ACTOR_NPC, &npc->scale);
     }
-    for (u32 i = 0; i < MAX_ENEMY_ACTORS; i++) {
+    for (s32 i = 0; i < MAX_ENEMY_ACTORS; i++) {
         Actor *enemy = gBattleStatus.enemyActors[i];
         if (enemy == NULL) {
             continue;
@@ -907,7 +907,7 @@ static void squish() {
 }
 
 static void squishOff() {
-    for (u32 i = 0; i < ACTOR_DATA_COUNT; i++) {
+    for (s32 i = 0; i < ACTOR_DATA_COUNT; i++) {
         if (actorScaleBuffer[i].id == -1) {
             continue;
         }
@@ -1044,8 +1044,8 @@ static void badMusicOff() {
 static void expireMushroom() {
     s32 invIdx[10];
     u8 count = 0;
-    for (u32 i = 0; i < 10; i++) {
-        for (u32 j = 0; j < ARRAY_COUNT(mushroomIds); j++) {
+    for (s32 i = 0; i < 10; i++) {
+        for (s32 j = 0; j < ARRAY_COUNT(mushroomIds); j++) {
             if (gPlayerData.invItems[i] == mushroomIds[j]) {
                 invIdx[count++] = i;
                 break;
