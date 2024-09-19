@@ -170,6 +170,9 @@ HitResult calc_item_damage_enemy(void) {
             battleStatus->lastAttackDamage = 0;
         }
     } else {
+        if (chaosHealingTouch) {
+            attackDamage *= -1;
+        }
         target->damageCounter += attackDamage;
         target->hpChangeCounter -= attackDamage;
         battleStatus->lastAttackDamage = 0;
@@ -432,13 +435,25 @@ HitResult calc_item_damage_enemy(void) {
                 show_immune_bonk(state->goalPos.x, state->goalPos.y, state->goalPos.z, 0, 1, 3);
             }
         } else if (!partImmuneToElement) {
-            if (battleStatus->curAttackElement & (DAMAGE_TYPE_MULTIPLE_POPUPS | DAMAGE_TYPE_SMASH)) {
-                show_next_damage_popup(state->goalPos.x, state->goalPos.y, state->goalPos.z, battleStatus->lastAttackDamage, 0);
+            if (battleStatus->lastAttackDamage < 0) {
+                fx_recover(
+                    0, state->goalPos.x, state->goalPos.y + 20, state->goalPos.z, abs(battleStatus->lastAttackDamage)
+                );
             } else {
-                show_primary_damage_popup(state->goalPos.x, state->goalPos.y, state->goalPos.z, battleStatus->lastAttackDamage, 0);
-            }
-            if (!(targetPart->targetFlags & ACTOR_PART_TARGET_NO_DAMAGE)) {
-                show_damage_fx(target, state->goalPos.x, state->goalPos.y, state->goalPos.z, battleStatus->lastAttackDamage);
+                if (battleStatus->curAttackElement & (DAMAGE_TYPE_MULTIPLE_POPUPS | DAMAGE_TYPE_SMASH)) {
+                    show_next_damage_popup(
+                        state->goalPos.x, state->goalPos.y, state->goalPos.z, battleStatus->lastAttackDamage, 0
+                    );
+                } else {
+                    show_primary_damage_popup(
+                        state->goalPos.x, state->goalPos.y, state->goalPos.z, battleStatus->lastAttackDamage, 0
+                    );
+                }
+                if (!(targetPart->targetFlags & ACTOR_PART_TARGET_NO_DAMAGE)) {
+                    show_damage_fx(
+                        target, state->goalPos.x, state->goalPos.y, state->goalPos.z, battleStatus->lastAttackDamage
+                    );
+                }
             }
         }
     }
@@ -456,8 +471,12 @@ HitResult calc_item_damage_enemy(void) {
         }
     }
 
-    if ((battleStatus->lastAttackDamage <= 0 && !wasStatusInflicted) || (targetPart->flags & ACTOR_FLAG_DAMAGE_IMMUNE)) {
+    if ((battleStatus->lastAttackDamage == 0 && !wasStatusInflicted) || (targetPart->flags & ACTOR_FLAG_DAMAGE_IMMUNE)) {
         sfx_play_sound_at_position(SOUND_IMMUNE, SOUND_SPACE_DEFAULT, state->goalPos.x, state->goalPos.y, state->goalPos.z);
+    } else if (battleStatus->lastAttackDamage < 0) {
+        sfx_play_sound_at_position(
+            SOUND_START_RECOVERY, SOUND_SPACE_DEFAULT, state->goalPos.x, state->goalPos.y, state->goalPos.z
+        );
     }
 
     if ((battleStatus->curAttackStatus & STATUS_FLAG_SLEEP) && wasStatusInflicted) {

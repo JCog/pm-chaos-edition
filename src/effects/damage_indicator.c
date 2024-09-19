@@ -82,6 +82,7 @@ void damage_indicator_main(s32 arg0, f32 posX, f32 posY, f32 posZ, f32 starsRadi
     s32 i;
 
     // limit number of stars that can appear
+    damageAmt = abs(damageAmt);
     if (damageAmt > 20) {
         damageAmt = 20;
     }
