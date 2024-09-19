@@ -28,13 +28,11 @@ const enum GameMode badModes[] = {
     GAME_MODE_GAME_OVER, GAME_MODE_FILE_SELECT, GAME_MODE_END_FILE_SELECT, GAME_MODE_INTRO, GAME_MODE_DEMO
 };
 
-#if CHAOS_DEBUG
-static u8 menuEffect = 0;
-static u8 menuTimer = 10;
-#endif
 
 b8 chaosMenuOpen = FALSE;
-static u32 effectCountdown = 1;
+static u8 menuEffect = 0;
+static u8 menuTimer = 10;
+static u32 effectCountdown = 2;
 static b8 reloading = FALSE;
 static u8 reloadDelay = 0;
 static u16 reloadCooldown = 0;
@@ -45,7 +43,7 @@ static void chaosDrawBox(s32 posX, s32 posY, s32 sizeX, s32 sizeY, int style, s3
              0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, SCREEN_WIDTH, SCREEN_HEIGHT, NULL);
 }
 
-static void chaosDrawAscii(char *text, s32 color, s32 posX, s32 posY) {
+static void chaosDrawAscii(const char *text, s32 color, s32 posX, s32 posY) {
     char buf[128] = {
         MSG_CHAR_READ_FUNCTION, MSG_READ_FUNC_SIZE, 12, 12
     };
@@ -112,43 +110,37 @@ static void drawEffectList() {
     #endif
     u8 activeEffects = 0;
     for (s32 i = 0; i < totalEffectCount; i++) {
-        #if CHAOS_DEBUG
-        if (i == 0) {
+        if (CHAOS_DEBUG && i == 0) {
             continue;
         }
-        #endif
         if (effectData[i].timer > 0) {
             activeEffects++;
         }
     }
     char fmtBuf[64];
     u8 index = 0;
-    #if CHAOS_DEBUG
-    if (randomEffects) {
+    if (CHAOS_DEBUG && randomEffects) {
         index++;
     }
-    #endif
     chaosDrawBox(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT_BASE + 10 * (activeEffects + index), WINDOW_STYLE_4, 192);
-    #if CHAOS_DEBUG
-    sprintf(fmtBuf, "-- %2ds - %2d %s --", menuTimer, menuEffect, effectData[menuEffect].name);
-    chaosDrawAscii(fmtBuf, 0, MENU_TEXT_X, MENU_TEXT_Y);
-    if (randomEffects) {
+    if (CHAOS_DEBUG) {
+        sprintf(fmtBuf, "-- %2ds - %2d %s --", menuTimer, menuEffect, effectData[menuEffect].name);
+        chaosDrawAscii(fmtBuf, 0, MENU_TEXT_X, MENU_TEXT_Y);
+        if (randomEffects) {
+            sprintf(fmtBuf, "%2lu", effectCountdown / 30);
+            chaosDrawAscii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y + 10);
+            chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10);
+        }
+    } else {
         sprintf(fmtBuf, "%2lu", effectCountdown / 30);
-        chaosDrawAscii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y + 10);
-        chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y + 10);
+        chaosDrawAscii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y);
+        chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y);
     }
-    #else
-    sprintf(fmtBuf, "%2lu", effectCountdown / 30);
-    chaosDrawAscii("Chaos Timer", 0, MENU_TEXT_X, MENU_TEXT_Y);
-    chaosDrawAscii(fmtBuf, 0, MENU_TIMER_OFFSET, MENU_TEXT_Y);
-    #endif
     index++;
     for (s32 i = 0; i < totalEffectCount; i++) {
-        #if CHAOS_DEBUG
-        if (i == 0) {
+        if (CHAOS_DEBUG && i == 0) {
             continue;
         }
-        #endif
         ChaosEffectData *effect = &effectData[i];
         if (effect->timer > 0) {
             if (effect->maxSeconds == 0) {
@@ -171,16 +163,16 @@ static void activateEffect(s32 effectId) {
     if (effect->maxSeconds == 0) {
         effect->timer = 90;
     } else {
-        #if CHAOS_DEBUG
         if (randomEffects) {
             effect->timer = rand_int((effect->maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
         } else {
             effect->timer = menuTimer * 30;
         }
-        #else
-        effect->timer = rand_int((effect->maxSeconds - MIN_EFFECT_LENGTH) * 30) + MIN_EFFECT_LENGTH_FRAMES;
-        #endif
     }
+}
+
+static b8 canTriggerEffect(ChaosEffectData *effect) {
+    return effect->canTrigger == NULL || effect->canTrigger();
 }
 
 static void handleMenu() {
@@ -195,36 +187,36 @@ static void handleMenu() {
         chaosMenuOpen = !chaosMenuOpen;
         return;
     }
-    #if CHAOS_DEBUG
-    if (!chaosMenuOpen) {
-        return;
-    }
-    if (held & BUTTON_D_LEFT) {
-        menuEffect += totalEffectCount - 1;
-        menuEffect %= totalEffectCount;
-    } else if (held & BUTTON_D_RIGHT) {
-        menuEffect++;
-        menuEffect %= totalEffectCount;
-    } else if (held & BUTTON_D_UP) {
-        if (menuEffect < 255) {
-            menuTimer += 5;
+    if (CHAOS_DEBUG) {
+        if (!chaosMenuOpen) {
+            return;
         }
-    } else if (held & BUTTON_D_DOWN) {
-        if (menuTimer > 0) {
-            menuTimer -= 5;
-        }
-    } else if (pressed & BUTTON_R) {
-        ChaosEffectData *effect = &effectData[menuEffect];
-        if (effect->canTrigger == NULL || effect->canTrigger()) {
-            // prevent untoggling certain commands while they're active
-            if (effect->timer > 0) {
-                effect->timer = menuTimer * 30;
-            } else {
-                activateEffect(menuEffect);
+        if (held & BUTTON_D_LEFT) {
+            menuEffect += totalEffectCount - 1;
+            menuEffect %= totalEffectCount;
+        } else if (held & BUTTON_D_RIGHT) {
+            menuEffect++;
+            menuEffect %= totalEffectCount;
+        } else if (held & BUTTON_D_UP) {
+            if (menuEffect < 255) {
+                menuTimer += 5;
+            }
+        } else if (held & BUTTON_D_DOWN) {
+            if (menuTimer > 0) {
+                menuTimer -= 5;
+            }
+        } else if (pressed & BUTTON_R) {
+            ChaosEffectData* effect = &effectData[menuEffect];
+            if (canTriggerEffect(effect)) {
+                // prevent untoggling certain commands while they're active
+                if (effect->timer > 0 && effect->maxSeconds > 0) {
+                    effect->timer = menuTimer * 30;
+                } else {
+                    activateEffect(menuEffect);
+                }
             }
         }
     }
-    #endif
 }
 
 void chaosUpdate() {
@@ -233,13 +225,9 @@ void chaosUpdate() {
             return;
         }
     }
-    #if CHAOS_DEBUG
     if (randomEffects) {
         effectCountdown--;
     }
-    #else
-    effectCountdown--;
-    #endif
 
     handleMenu();
     updateReload();
@@ -250,13 +238,14 @@ void chaosUpdate() {
     if (effectCountdown == 0) {
         // try 20 times to apply an effect, skip if a valid one can't be found
         for (s32 i = 0; i < 20; i++) {
-            #if CHAOS_DEBUG
-            s32 id = rand_int(totalEffectCount - 2) + 1;
-            #else
-            s32 id = rand_int(totalEffectCount - 1);
-            #endif
-            ChaosEffectData *effect = &effectData[i];
-            if (effect->timer > 0 || (effect->canTrigger != NULL && !effect->canTrigger())) {
+            s32 id;
+            if (CHAOS_DEBUG) {
+                id = rand_int(totalEffectCount - 2) + 1;
+            } else {
+                id = rand_int(totalEffectCount - 1);
+            }
+            ChaosEffectData *effect = &effectData[id];
+            if (effect->timer > 0 || !canTriggerEffect(effect)) {
                 continue;
             }
             activateEffect(id);
@@ -268,8 +257,8 @@ void chaosUpdate() {
     // update active effects
     for (s32 i = 0; i < totalEffectCount; i++) {
         ChaosEffectData *effect = &effectData[i];
-        b8 shouldTrigger = effect->canTrigger == NULL || effect->canTrigger();
-        if (effect->timer > 0 && (shouldTrigger || effect->maxSeconds == 0)) {
+        // also updates timer for instantaneous effects
+        if (effect->timer > 0 && (canTriggerEffect(effect) || effect->maxSeconds == 0)) {
             if (effect->timer == 1 && effect->off != NULL) {
                 effect->off();
             } else if (effect->everyFrame){

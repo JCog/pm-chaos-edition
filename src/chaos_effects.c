@@ -21,9 +21,8 @@ typedef struct ActorScaleData {
 
 // conditionals
 static b8 isOverworld(void);
-static b8 isBattle(void);
 static b8 canTouchLava(void);
-static b8 enemyExists(void);
+static b8 isValidBattle(void);
 static b8 canEquipBadge(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
@@ -91,10 +90,10 @@ ChaosEffectData effectData[] = {
     {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
     {"Rotate Mario",            TRUE,   0,  60, rotateMario,            rotateMarioOff,     isOverworld},
     // battle
-    {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     enemyExists},
-    {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               enemyExists},
-    {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               enemyExists},
-    {"Random Mario Move",       FALSE,  0,  0,  randomMarioMove,        NULL,               enemyExists},
+    {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     isValidBattle},
+    {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               isValidBattle},
+    {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isValidBattle},
+    {"Random Mario Move",       FALSE,  0,  0,  randomMarioMove,        NULL,               isValidBattle},
     // anywhere
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
@@ -117,9 +116,7 @@ ChaosEffectData effectData[] = {
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
-#if CHAOS_DEBUG
-b8 randomEffects = FALSE;
-#endif
+b8 randomEffects = !CHAOS_DEBUG;
 
 u32 frameCount = 0;
 s16 chaosEnemyHpUpdateTimer = 0;
@@ -258,7 +255,7 @@ static b8 isBattleItemUsable(s16 itemId) {
 
 
 void handleBattleQueue() {
-    if (!isBattle()) {
+    if (!isValidBattle()) {
         battleQueueMario = FALSE;
         return;
     }
@@ -503,13 +500,8 @@ static b8 canTouchLava() {
     return isOverworld() && gPlayerStatus.actionState <= ACTION_STATE_RUN;
 }
 
-static b8 isBattle() {
-    return gGameStatus.isBattle && gPlayerData.curPartner != PARTNER_GOOMPA
-        && !(gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE);
-}
-
-static b8 enemyExists() {
-    if (!isBattle()) {
+static b8 isValidBattle() {
+    if (!gGameStatus.isBattle || gPlayerData.curPartner == PARTNER_GOOMPA || gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE) {
         return FALSE;
     }
     for (s32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {

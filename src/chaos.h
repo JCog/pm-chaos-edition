@@ -18,9 +18,7 @@ typedef struct ChaosEffectData {
 
 extern ChaosEffectData effectData[];
 extern const u8 totalEffectCount;
-#if CHAOS_DEBUG
 extern b8 randomEffects;
-#endif
 
 void handleTimers(void);
 void handleBattleQueue(void);
