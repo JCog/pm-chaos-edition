@@ -43,6 +43,8 @@ static void topDownCam(void);
 static void intangibleEnemies(void);
 static void spinAngle(void);
 static void lava(void);
+static void rotateMario(void);
+static void rotateMarioOff(void);
 // battle
 static void negativeAttack(void);
 static void randomEnemyHp(void);
@@ -84,6 +86,7 @@ struct ChaosEffectData effectData[] = {
     {"Intangible Enemies",      FALSE,  0,  60, intangibleEnemies,      intangibleEnemies,  isOverworld},
     {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
     {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
+    {"Rotate Mario",            TRUE,   0,  60, rotateMario,            rotateMarioOff,     isOverworld},
     // battle
     {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     enemyExists},
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               enemyExists},
@@ -129,6 +132,7 @@ Matrix4f chaosRotateMtx = {0};
 b8 chaosBackgroundChanged = TRUE;
 u16 savedPalette[256];
 BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
+b8 chaosRotating = FALSE;
 
 static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
@@ -138,6 +142,11 @@ static s16 perilTimer = 0;
 static s16 badMusicTimer = 0;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
+static f32 marioFlipYaw = 0.0f;
+static f32 marioPitch = 0.0f;
+static f32 marioSpriteFacingAngle = 0.0f;
+static f32 yawSpeed;
+static f32 pitchSpeed;
 
 const enum ItemIDs mushroomIds[] = {
     ITEM_MUSHROOM, ITEM_VOLT_SHROOM, ITEM_SUPER_SHROOM, ITEM_ULTRA_SHROOM, ITEM_LIFE_SHROOM, ITEM_HONEY_SHROOM,
@@ -676,6 +685,42 @@ static void lava() {
     set_action_state(ACTION_STATE_HIT_LAVA);
 }
 
+static void rotateMario() {
+    if (!chaosRotating) {
+        chaosRotating = TRUE;
+        marioPitch = gPlayerStatus.pitch;
+        marioFlipYaw = gPlayerStatus.flipYaw[gCurrentCameraID];
+        marioSpriteFacingAngle = gPlayerStatus.spriteFacingAngle;
+        pitchSpeed = rand_float() * 6 + 4;
+        yawSpeed = rand_float() * 6 + 4;
+        if (rand_int(100) < 50) {
+            pitchSpeed *= -1;
+        }
+        if (rand_int(100) < 50) {
+            yawSpeed *= -1;
+        }
+    }
+    marioPitch += pitchSpeed;
+    marioFlipYaw += yawSpeed;
+    marioSpriteFacingAngle += yawSpeed;
+    if (marioFlipYaw >= 360) {
+        marioFlipYaw -= 360;
+    }
+    if (marioSpriteFacingAngle >= 360) {
+        marioSpriteFacingAngle -= 360;
+    }
+    if (marioPitch >= 360) {
+        marioPitch -= 360;
+    }
+    gPlayerStatus.pitch = marioPitch;
+    gPlayerStatus.spriteFacingAngle = marioSpriteFacingAngle;
+    gPlayerStatus.flipYaw[gCurrentCameraID] = marioFlipYaw;
+}
+
+static void rotateMarioOff() {
+    chaosRotating = FALSE;
+}
+
 static void negativeAttack() {
     chaosHealingTouch = !chaosHealingTouch;
 }
@@ -1064,6 +1109,7 @@ static void expireMushroom() {
     if (count > 0) {
         s32 idx = invIdx[rand_int(count - 1)];
         gPlayerData.invItems[idx] = ITEM_DRIED_SHROOM;
+        sfx_play_sound(SOUND_HIT_BONES); // best sound I can find so far, but could be better
     }
 }
 

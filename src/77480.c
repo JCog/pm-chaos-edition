@@ -1408,7 +1408,7 @@ void player_update_sprite(void) {
     }
 
     trueAnim = playerStatus->anim;
-    if (!(playerStatus->flags & PS_FLAG_SPINNING)) {
+    if (!(playerStatus->flags & PS_FLAG_SPINNING) && !chaosRotating) {
         sprIndex = (playerStatus->anim >> 0x10) & 0xFF;
 
         if (playerStatus->actionState == ACTION_STATE_TORNADO_JUMP || playerStatus->flags & PS_FLAG_ROTATION_LOCKED) {

@@ -123,6 +123,7 @@ extern b8 chaosBackgroundChanged;
 extern Matrix4f chaosRotateMtx;
 extern s16 chaosEnemyHpUpdateTimer;
 extern s8 chaosBadMusic;
+extern b8 chaosRotating;
 
 #if VERSION_PAL
 extern s32 gCurrentLanguage;
