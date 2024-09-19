@@ -67,6 +67,8 @@ static void badMusicOff(void);
 static void expireMushroom(void);
 static void rotateCamera(void);
 static void rotateCameraOff(void);
+static void corruptBg(void);
+static void corruptBgOff(void);
 
 struct ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -103,6 +105,7 @@ struct ChaosEffectData effectData[] = {
     {"Bad Music",               TRUE,   0,  60, badMusic,               badMusicOff,        NULL},
     {"Mushroom Expires",        FALSE,  0,  0,  expireMushroom,         NULL,               hasMushroom},
     {"Rotate Camera",           FALSE,  0,  60, rotateCamera,           rotateCameraOff,    NULL},
+    {"Corrupt Background",      TRUE,   0,  60, corruptBg,              corruptBgOff,       NULL},
 };
 
 u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -123,6 +126,10 @@ b8 chaosFpSoundPlayed = FALSE;
 b8 chaosBadMusic = FALSE;
 b8 chaosRotateCamera = FALSE;
 Matrix4f chaosRotateMtx = {0};
+b8 chaosBackgroundChanged = TRUE;
+u16 savedPalette[256];
+BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
+
 static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
 static s16 hpSoundTimer = 0;
@@ -479,7 +486,8 @@ static b8 canTouchLava() {
 }
 
 static b8 isBattle() {
-    return gGameStatus.isBattle;
+    return gGameStatus.isBattle && gPlayerData.curPartner != PARTNER_GOOMPA
+        && !(gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE);
 }
 
 static b8 enemyExists() {
@@ -1066,4 +1074,35 @@ static void rotateCamera() {
 
 static void rotateCameraOff() {
     chaosRotateCamera = FALSE;
+}
+
+static void corruptBg() {
+    if (chaosBackgroundChanged) {
+        // save the uncorrupted background anytime the game changes it
+        for (s32 i = 0; i < 256; i++) {
+            bgSaved.palette[i] = gBackgroundImage.palette[i];
+        }
+        bgSaved.startX = gBackgroundImage.startX;
+        bgSaved.startY = gBackgroundImage.startY;
+        bgSaved.width = gBackgroundImage.width;
+        bgSaved.height = gBackgroundImage.height;
+        chaosBackgroundChanged = FALSE;
+    }
+
+    // corrupt one random byte of the background palette
+    BackgroundHeader* bg = &gBackgroundImage;
+    u8* pal = (u8*)bg->palette;
+    u8 randPalByteOffset = rand_int(511);
+
+    pal[randPalByteOffset] = rand_int(255);
+}
+
+static void corruptBgOff() {
+    for (s32 i = 0; i < 256; i++) {
+        gBackgroundImage.palette[i] = bgSaved.palette[i];
+    }
+    gBackgroundImage.startX = bgSaved.startX;
+    gBackgroundImage.startY = bgSaved.startY;
+    gBackgroundImage.width = bgSaved.width;
+    gBackgroundImage.height = bgSaved.height;
 }

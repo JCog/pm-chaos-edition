@@ -45,6 +45,7 @@ void set_background(BackgroundHeader* bg) {
     gGameStatusPtr->backgroundRaster = bg->raster;
     gGameStatusPtr->backgroundPalette = bg->palette;
     gGameStatusPtr->backgroundFlags |= BACKGROUND_FLAG_TEXTURE;
+    chaosBackgroundChanged = TRUE;
 }
 
 void set_background_size(s16 startX, s16 startY, s16 sizeX, s16 sizeY) {
