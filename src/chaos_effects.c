@@ -71,6 +71,9 @@ static void rotateCamera(void);
 static void rotateCameraOff(void);
 static void corruptBg(void);
 static void corruptBgOff(void);
+static void reverseAnalog(void);
+static void shuffleButtons(void);
+static void shuffleButtonsOff(void);
 
 struct ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -109,6 +112,8 @@ struct ChaosEffectData effectData[] = {
     {"Mushroom Expires",        FALSE,  0,  0,  expireMushroom,         NULL,               hasMushroom},
     {"Rotate Camera",           FALSE,  0,  60, rotateCamera,           rotateCameraOff,    NULL},
     {"Corrupt Background",      TRUE,   0,  60, corruptBg,              corruptBgOff,       NULL},
+    {"Reverse Analog Stick",    FALSE,  0,  60, reverseAnalog,          reverseAnalog,      NULL},
+    {"Shuffle Buttons",         FALSE,  0,  60, shuffleButtons,         shuffleButtonsOff,  NULL},
 };
 
 u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -130,9 +135,10 @@ b8 chaosBadMusic = FALSE;
 b8 chaosRotateCamera = FALSE;
 Matrix4f chaosRotateMtx = {0};
 b8 chaosBackgroundChanged = TRUE;
-u16 savedPalette[256];
-BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
 b8 chaosRotating = FALSE;
+b8 chaosReverseAnalog = FALSE;
+b8 chaosShuffleButtons = FALSE;
+enum Buttons chaosButtonMap[9] = {0};
 
 static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
@@ -142,6 +148,8 @@ static s16 perilTimer = 0;
 static s16 badMusicTimer = 0;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
 static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
+static u16 savedPalette[256];
+static BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
 static f32 marioFlipYaw = 0.0f;
 static f32 marioPitch = 0.0f;
 static f32 marioSpriteFacingAngle = 0.0f;
@@ -1151,4 +1159,31 @@ static void corruptBgOff() {
     gBackgroundImage.startY = bgSaved.startY;
     gBackgroundImage.width = bgSaved.width;
     gBackgroundImage.height = bgSaved.height;
+}
+
+static void reverseAnalog() {
+    chaosReverseAnalog = !chaosReverseAnalog;
+}
+
+static void shuffleButtons(void) {
+    chaosButtonMap[0] = BUTTON_C_RIGHT;
+    chaosButtonMap[1] = BUTTON_C_LEFT;
+    chaosButtonMap[2] = BUTTON_C_DOWN;
+    chaosButtonMap[3] = BUTTON_C_UP;
+    chaosButtonMap[4] = BUTTON_R;
+    chaosButtonMap[5] = BUTTON_START;
+    chaosButtonMap[6] = BUTTON_Z;
+    chaosButtonMap[7] = BUTTON_B;
+    chaosButtonMap[8] = BUTTON_A;
+    for (s32 i = 0; i < ARRAY_COUNT(chaosButtonMap) - 1; i++) {
+        s32 idx = rand_int(ARRAY_COUNT(chaosButtonMap) - i - 1) + i;
+        enum Buttons temp = chaosButtonMap[i];
+        chaosButtonMap[i] = chaosButtonMap[idx];
+        chaosButtonMap[idx] = temp;
+    }
+    chaosShuffleButtons = TRUE;
+}
+
+static void shuffleButtonsOff() {
+    chaosShuffleButtons = FALSE;
 }

@@ -124,6 +124,9 @@ extern Matrix4f chaosRotateMtx;
 extern s16 chaosEnemyHpUpdateTimer;
 extern s8 chaosBadMusic;
 extern b8 chaosRotating;
+extern b8 chaosReverseAnalog;
+extern b8 chaosShuffleButtons;
+extern enum Buttons chaosButtonMap[9];
 
 #if VERSION_PAL
 extern s32 gCurrentLanguage;

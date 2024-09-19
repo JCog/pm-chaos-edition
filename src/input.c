@@ -7,6 +7,10 @@ BSS s16 D_8009A6A2;
 BSS s16 D_8009A6A4;
 BSS s16 D_8009A6A6;
 
+const enum Buttons unshuffledButtons[] = {
+    BUTTON_C_RIGHT, BUTTON_C_LEFT, BUTTON_C_DOWN, BUTTON_C_UP, BUTTON_R, BUTTON_START, BUTTON_Z, BUTTON_B, BUTTON_A
+};
+
 void func_800287F0(void) {
     gGameStatusPtr->curButtons[0] = 0;
     gGameStatusPtr->pressedButtons[0] = 0;
@@ -85,11 +89,28 @@ void update_input(void) {
             stickY = 0;
         }
     }
+    if (chaosReverseAnalog) {
+        stickX *= -1;
+        stickY *= -1;
+    }
 
     gGameStatusPtr->stickX[0] = stickX;
     gGameStatusPtr->stickY[0] = stickY;
 
     buttons = contData->button;
+    if (chaosShuffleButtons) {
+        // keep d-pad, L, and stick values, but shuffle everything else
+        s32 shuffled = buttons
+            & ~(BUTTON_C_RIGHT | BUTTON_C_LEFT | BUTTON_C_DOWN | BUTTON_C_UP | BUTTON_R | BUTTON_START | BUTTON_Z
+                | BUTTON_B | BUTTON_A);
+        for (s32 i = 0; i < ARRAY_COUNT(unshuffledButtons); i++) {
+            if (buttons & unshuffledButtons[i]) {
+                shuffled |= chaosButtonMap[i];
+            }
+        }
+        buttons = shuffled;
+    }
+
     cond1 = FALSE;
     if (stickX > 0x20) {
         cond1 = TRUE;
