@@ -501,7 +501,9 @@ static b8 canTouchLava() {
 }
 
 static b8 isValidBattle() {
-    if (!gGameStatus.isBattle || gPlayerData.curPartner == PARTNER_GOOMPA || gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE) {
+    if (!gGameStatus.isBattle || gPlayerData.curPartner == PARTNER_GOOMPA
+        || gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE || evt_get_variable(NULL, GB_StoryProgress) == STORY_INTRO)
+    {
         return FALSE;
     }
     for (s32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
