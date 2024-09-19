@@ -6,24 +6,24 @@
 
 #define ACTOR_DATA_COUNT 64
 
-enum ActorType {
+typedef enum ActorType {
     ACTOR_NPC,
     ACTOR_ENEMY,
     ACTOR_BATTLE_PARTNER,
-};
+} ActorType;
 
-struct ActorScaleData {
+typedef struct ActorScaleData {
     s16 id;
-    enum ActorType actorType;
+    ActorType actorType;
     Vec3f originalScale;
     Vec3f curScale;
-};
+} ActorScaleData;
 
 // conditionals
 static b8 isOverworld(void);
 static b8 isBattle(void);
 static b8 canTouchLava(void);
-static b8 enemyExists();
+static b8 enemyExists(void);
 static b8 canEquipBadge(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
@@ -75,7 +75,7 @@ static void reverseAnalog(void);
 static void shuffleButtons(void);
 static void shuffleButtonsOff(void);
 
-struct ChaosEffectData effectData[] = {
+ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
     {"Toggle Random Effects",   FALSE,  0,  0,  toggleRandomEffects,    NULL,               NULL},
     #endif
@@ -116,7 +116,7 @@ struct ChaosEffectData effectData[] = {
     {"Shuffle Buttons",         FALSE,  0,  60, shuffleButtons,         shuffleButtonsOff,  NULL},
 };
 
-u8 totalEffectCount = ARRAY_COUNT(effectData);
+const u8 totalEffectCount = ARRAY_COUNT(effectData);
 #if CHAOS_DEBUG
 b8 randomEffects = FALSE;
 #endif
@@ -147,7 +147,7 @@ static s16 fpSoundTimer = 0;
 static s16 perilTimer = 0;
 static s16 badMusicTimer = 0;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
-static struct ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
+static ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 static u16 savedPalette[256];
 static BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
 static f32 marioFlipYaw = 0.0f;
@@ -165,12 +165,13 @@ static void updateEnemyHpDeltas() {
     b8 hpUpdated = FALSE;
     for (s32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
         Actor *enemy = gBattleStatus.enemyActors[i];
-        if (enemy == NULL || enemyHpDeltas[i] == 0) {
+        s16 *hpDelta = &enemyHpDeltas[i];
+        if (enemy == NULL || *hpDelta == 0) {
             continue;
         }
-        s16 diff = enemyHpDeltas[i] > 0 ? 1 : -1;
+        s16 diff = *hpDelta > 0 ? 1 : -1;
         enemy->curHP += diff;
-        enemyHpDeltas[i] -= diff;
+        *hpDelta -= diff;
         hpUpdated = TRUE;
     }
     if (hpUpdated) {
@@ -579,10 +580,11 @@ static b8 hasMushroom() {
 static void toggleRandomEffects() {
     if (randomEffects) {
         for (s32 i = 0; i < totalEffectCount; i++) {
-            if (effectData[i].timer > 0 && effectData[i].off != NULL) {
-                effectData[i].off();
+            ChaosEffectData *effect = &effectData[i];
+            if (effect->timer > 0 && effect->off != NULL) {
+                effect->off();
             }
-            effectData[i].timer = 0;
+            effect->timer = 0;
         }
     }
     randomEffects = !randomEffects;
@@ -918,16 +920,17 @@ static void perilSound() {
     }
 }
 
-static void squishActor(s8 id, enum ActorType actorType, Vec3f *scale) {
+static void squishActor(s8 id, ActorType actorType, Vec3f *scale) {
     b8 existingData = FALSE;
-    struct ActorScaleData *scaleData = NULL;
+    ActorScaleData *scaleData = NULL;
     for (s32 i = 0; i < ACTOR_DATA_COUNT; i++) {
-        if (actorScaleBuffer[i].id == id && actorScaleBuffer[i].actorType == actorType) {
+        ActorScaleData *scaleBuffer = &actorScaleBuffer[i];
+        if (scaleBuffer->id == id && scaleBuffer->actorType == actorType) {
             existingData = TRUE;
-            scaleData = &actorScaleBuffer[i];
+            scaleData = scaleBuffer;
             break;
-        } else if (actorScaleBuffer[i].id == -1){
-            scaleData = &actorScaleBuffer[i];
+        } else if (scaleBuffer->id == -1){
+            scaleData = scaleBuffer;
             break;
         }
     }
@@ -969,35 +972,36 @@ static void squish() {
 
 static void squishOff() {
     for (s32 i = 0; i < ACTOR_DATA_COUNT; i++) {
-        if (actorScaleBuffer[i].id == -1) {
+        ActorScaleData *scaleBuffer = &actorScaleBuffer[i];
+        if (scaleBuffer->id == -1) {
             continue;
         }
-        switch (actorScaleBuffer[i].actorType) {
+        switch (scaleBuffer->actorType) {
             case ACTOR_NPC: {
-                Npc *npc = get_npc_safe(actorScaleBuffer[i].id);
+                Npc *npc = get_npc_safe(scaleBuffer->id);
                 if (npc != NULL) {
-                    npc->scale.x = actorScaleBuffer[i].originalScale.x;
-                    npc->scale.z = actorScaleBuffer[i].originalScale.z;
-                    npc->scale.y = actorScaleBuffer[i].originalScale.y;
+                    npc->scale.x = scaleBuffer->originalScale.x;
+                    npc->scale.z = scaleBuffer->originalScale.z;
+                    npc->scale.y = scaleBuffer->originalScale.y;
                 }
                 break;
             }
             case ACTOR_ENEMY: {
-                Actor *enemy = gBattleStatus.enemyActors[actorScaleBuffer[i].id];
+                Actor *enemy = gBattleStatus.enemyActors[scaleBuffer->id];
                 if (enemy != NULL) {
-                    enemy->scale.x = actorScaleBuffer[i].originalScale.x;
-                    enemy->scale.z = actorScaleBuffer[i].originalScale.z;
-                    enemy->scale.y = actorScaleBuffer[i].originalScale.y;
+                    enemy->scale.x = scaleBuffer->originalScale.x;
+                    enemy->scale.z = scaleBuffer->originalScale.z;
+                    enemy->scale.y = scaleBuffer->originalScale.y;
                 }
                 break;
             }
             case ACTOR_BATTLE_PARTNER: {
-                gBattleStatus.partnerActor->scale.x = actorScaleBuffer[i].originalScale.x;
-                gBattleStatus.partnerActor->scale.z = actorScaleBuffer[i].originalScale.z;
-                gBattleStatus.partnerActor->scale.y = actorScaleBuffer[i].originalScale.y;
+                gBattleStatus.partnerActor->scale.x = scaleBuffer->originalScale.x;
+                gBattleStatus.partnerActor->scale.z = scaleBuffer->originalScale.z;
+                gBattleStatus.partnerActor->scale.y = scaleBuffer->originalScale.y;
             }
         }
-        actorScaleBuffer[i].id = -1;
+        scaleBuffer->id = -1;
     }
 }
 

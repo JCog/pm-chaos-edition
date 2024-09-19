@@ -6,7 +6,7 @@
 
 #define NAMESPACE chaos
 
-struct ChaosEffectData {
+typedef struct ChaosEffectData {
     const char *name;
     b8 everyFrame;
     s16 timer;
@@ -14,10 +14,10 @@ struct ChaosEffectData {
     void (*func)();
     void (*off)();
     b8 (*canTrigger)();
-};
+} ChaosEffectData;
 
-extern struct ChaosEffectData effectData[];
-extern u8 totalEffectCount;
+extern ChaosEffectData effectData[];
+extern const u8 totalEffectCount;
 #if CHAOS_DEBUG
 extern b8 randomEffects;
 #endif
