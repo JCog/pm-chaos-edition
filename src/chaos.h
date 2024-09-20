@@ -2,7 +2,6 @@
 #define _PAPERMARIO_CHAOS_EDITION_CHAOS_H_
 
 #include "common.h"
-#include "dx/config.h"
 
 #define NAMESPACE chaos
 

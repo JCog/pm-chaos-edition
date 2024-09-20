@@ -6377,4 +6377,14 @@ enum LandingCamAdjustMode {
     LANDING_CAM_ALWAYS_ADJUST = 2,
 };
 
+typedef enum ChaosTimer {
+    TIMER_ENEMY_HP_UPDATE,
+    TIMER_HP_SOUND,
+    TIMER_FP_SOUND,
+    TIMER_PERIL_SOUND,
+    TIMER_BAD_MUSIC,
+    TIMER_REMEMBER_THIS,
+    TIMER_MAX
+} ChaosTimer;
+
 #endif
