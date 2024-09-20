@@ -279,6 +279,10 @@ void gfx_draw_frame(void) {
     gDPFullSync(gMainGfxPos++);
     gSPEndDisplayList(gMainGfxPos++);
 
+    if (chaosRememberThis) {
+        return;
+    }
+
     nuGfxTaskStart(gDisplayContext->mainGfx, (u32)(gMainGfxPos - gDisplayContext->mainGfx) * 8, NU_GFX_UCODE_F3DEX2,
                    NU_SC_TASK_LODABLE | NU_SC_SWAPBUFFER);
     gCurrentDisplayContextIndex = gCurrentDisplayContextIndex ^ 1;

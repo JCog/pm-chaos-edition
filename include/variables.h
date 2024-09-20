@@ -127,6 +127,7 @@ extern b8 chaosRotating;
 extern b8 chaosReverseAnalog;
 extern b8 chaosShuffleButtons;
 extern enum Buttons chaosButtonMap[9];
+extern b8 chaosRememberThis;
 
 #if VERSION_PAL
 extern s32 gCurrentLanguage;

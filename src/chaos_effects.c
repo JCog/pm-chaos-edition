@@ -3,8 +3,10 @@
 #include "inventory.h"
 #include "script_api/battle.h"
 #include "world/actions.h"
+#include "gcc/memory.h"
 
 #define ACTOR_DATA_COUNT 64
+#define FB_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * 2)
 
 typedef enum ActorType {
     ACTOR_NPC,
@@ -27,6 +29,7 @@ static b8 canEquipBadge(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
 static b8 hasMushroom(void);
+static b8 canRememberThis(void);
 
 #if CHAOS_DEBUG
 static void toggleRandomEffects(void);
@@ -73,6 +76,7 @@ static void corruptBgOff(void);
 static void reverseAnalog(void);
 static void shuffleButtons(void);
 static void shuffleButtonsOff(void);
+static void rememberThis(void);
 
 ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -90,7 +94,7 @@ ChaosEffectData effectData[] = {
     {"Lava",                    FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
     {"Rotate Mario",            TRUE,   0,  60, rotateMario,            rotateMarioOff,     isOverworld},
     // battle
-    {"Healing Touch",           FALSE,  0,  60, negativeAttack,         negativeAttack,     isValidBattle},
+    {"Healing Touch",           FALSE,  0,  10, negativeAttack,         negativeAttack,     isValidBattle},
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               isValidBattle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isValidBattle},
     {"Random Mario Move",       FALSE,  0,  0,  randomMarioMove,        NULL,               isValidBattle},
@@ -113,6 +117,7 @@ ChaosEffectData effectData[] = {
     {"Corrupt Background",      TRUE,   0,  60, corruptBg,              corruptBgOff,       NULL},
     {"Reverse Analog Stick",    FALSE,  0,  60, reverseAnalog,          reverseAnalog,      NULL},
     {"Shuffle Buttons",         FALSE,  0,  60, shuffleButtons,         shuffleButtonsOff,  NULL},
+    {"Remember This?",          FALSE,  0,  0,  rememberThis,           NULL,               canRememberThis},
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -136,6 +141,7 @@ b8 chaosRotating = FALSE;
 b8 chaosReverseAnalog = FALSE;
 b8 chaosShuffleButtons = FALSE;
 enum Buttons chaosButtonMap[9] = {0};
+b8 chaosRememberThis = FALSE;
 
 static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
@@ -143,6 +149,7 @@ static s16 hpSoundTimer = 0;
 static s16 fpSoundTimer = 0;
 static s16 perilTimer = 0;
 static s16 badMusicTimer = 0;
+static s16 rememberThisTimer = 0;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
 static ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 static u16 savedPalette[256];
@@ -150,8 +157,9 @@ static BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
 static f32 marioFlipYaw = 0.0f;
 static f32 marioPitch = 0.0f;
 static f32 marioSpriteFacingAngle = 0.0f;
-static f32 yawSpeed;
-static f32 pitchSpeed;
+static f32 yawSpeed = 0.0f;
+static f32 pitchSpeed = 0.0f;
+static u16 *chaosSavedFrame = NULL;
 
 const enum ItemIDs mushroomIds[] = {
     ITEM_MUSHROOM, ITEM_VOLT_SHROOM, ITEM_SUPER_SHROOM, ITEM_ULTRA_SHROOM, ITEM_LIFE_SHROOM, ITEM_HONEY_SHROOM,
@@ -184,12 +192,14 @@ static void decTimer(s16 *timer) {
 }
 
 void handleTimers() {
+    // timers decrement until hitting -1
     frameCount = gPlayerData.frameCounter / 2;
     decTimer(&chaosEnemyHpUpdateTimer);
     decTimer(&hpSoundTimer);
     decTimer(&fpSoundTimer);
     decTimer(&perilTimer);
     decTimer(&badMusicTimer);
+    decTimer(&rememberThisTimer);
     if (chaosEnemyHpUpdateTimer == 30) {
         updateEnemyHpDeltas();
     }
@@ -198,6 +208,14 @@ void handleTimers() {
     }
     if (fpSoundTimer == 0 && !chaosFpSoundPlayed) {
         sfx_play_sound(SOUND_FLOWER_PICKUP);
+    }
+    if (rememberThisTimer == 130) {
+        chaosRememberThis = TRUE;
+        osViSwapBuffer(chaosSavedFrame);
+        bgm_push_song(SONG_ITEM_UPGRADE, 1);
+    } else if (rememberThisTimer == 0) {
+        chaosRememberThis = FALSE;
+        bgm_pop_song();
     }
 }
 
@@ -566,6 +584,10 @@ static b8 hasMushroom() {
         }
     }
     return FALSE;
+}
+
+static b8 canRememberThis() {
+    return rememberThisTimer < 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1184,4 +1206,12 @@ static void shuffleButtons(void) {
 
 static void shuffleButtonsOff() {
     chaosShuffleButtons = FALSE;
+}
+
+static void rememberThis(void) {
+    // very hacky location but I'm running into issues creating a proper framebuffer - possibly shifting related?
+    chaosSavedFrame = (u16*)((osMemSize | 0xA0000000) - FB_SIZE);
+    memcpy(chaosSavedFrame, osViGetCurrentFramebuffer(), FB_SIZE);
+    rememberThisTimer = rand_int(30 * 60 * 5); // 5 minutes
+    // TODO: edit text onto frame
 }
