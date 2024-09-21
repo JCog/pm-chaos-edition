@@ -1254,7 +1254,7 @@ static void shuffleButtonsOff(ChaosEffectData *effect) {
     chaosShuffleButtons = FALSE;
 }
 
-static void randomButton(ChaosEffectData*) {
+static void randomButton(ChaosEffectData *effect) {
     chaosRandomButton = TRUE;
 }
 
@@ -1266,7 +1266,7 @@ static void rememberThis(ChaosEffectData *effect) {
     // TODO: edit text onto frame
 }
 
-static void shuffleUpgrades(ChaosEffectData*) {
+static void shuffleUpgrades(ChaosEffectData *effect) {
     u8 upgradeCount = 0;
     u8 partnerCount = 0;
     PartnerData *partners[ARRAY_COUNT(gPlayerData.partners) * 2];
