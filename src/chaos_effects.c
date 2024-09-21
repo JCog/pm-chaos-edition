@@ -6,6 +6,7 @@
 #include "script_api/battle.h"
 #include "world/actions.h"
 
+#define TIMER_DISABLED -32768
 #define ACTOR_DATA_COUNT 64
 #define FB_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * 2)
 
@@ -59,6 +60,7 @@ static void randomMarioMove(ChaosEffectData*);
 static void equipBadge(ChaosEffectData*);
 static void unequipBadge(ChaosEffectData*);
 static void perilSound(ChaosEffectData*);
+static void perilSoundOff(ChaosEffectData*);
 static void squish(ChaosEffectData*);
 static void squishOff(ChaosEffectData*);
 static void allSfxAttackFx(ChaosEffectData*);
@@ -104,7 +106,7 @@ ChaosEffectData effectData[] = {
     // anywhere
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
-    {"Peril Sound",             TRUE,   0,  30, perilSound,             NULL,               NULL},
+    {"Peril Sound",             TRUE,   0,  30, perilSound,             perilSoundOff,      NULL},
     {"Squish",                  TRUE,   0,  60, squish,                 squishOff,          NULL},
     {"All SFX AttackFX",        FALSE,  0,  30, allSfxAttackFx,         allSfxAttackFx,     NULL},
     {"Hide Models",             FALSE,  0,  90, hideModels,             hideModels,         NULL},
@@ -146,12 +148,13 @@ enum Buttons chaosButtonMap[9] = {0};
 b8 chaosRememberThis = FALSE;
 
 static b8 rewindSaved = FALSE;
-static s16 rewindTime = 0;
+static s16 rewindTime = TIMER_DISABLED;
 static Vec3f rewindPos;
-static s16 knockbackTime = 0;
+static s16 knockbackTime = TIMER_DISABLED;
 static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
+static s16 perilTime = TIMER_DISABLED;
 static ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 static u16 savedPalette[256];
 static BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
@@ -601,7 +604,7 @@ static void toggleRandomEffects(ChaosEffectData* effect) {
 #endif
 
 static void posRewind(ChaosEffectData *effect) {
-    if (rewindTime == 0) {
+    if (rewindTime == TIMER_DISABLED) {
         rewindSaved = FALSE;
         rewindTime = effect->timer;
     }
@@ -609,11 +612,10 @@ static void posRewind(ChaosEffectData *effect) {
     // prevent loading a position from a previous map
     if (get_game_mode() == GAME_MODE_CHANGE_MAP) {
         rewindSaved = FALSE;
-        rewindTime--;
         return;
     }
 
-    if (effect->timer == rewindTime) {
+    if (effect->timer <= rewindTime) {
         if (rewindSaved) {
             gPlayerStatus.pos = rewindPos;
             rewindTime -= rand_int(60) + 1;
@@ -622,14 +624,11 @@ static void posRewind(ChaosEffectData *effect) {
             rewindTime -= rand_int(30) + 1;
         }
         rewindSaved = !rewindSaved;
-        if (rewindTime < 1) {
-            rewindTime = 1;
-        }
     }
 }
 
 static void posRewindOff(ChaosEffectData *effect) {
-    rewindTime = 0;
+    rewindTime = TIMER_DISABLED;
 }
 
 static void levitate(ChaosEffectData *effect) {
@@ -702,21 +701,18 @@ static void actorChase(ChaosEffectData *effect) {
 }
 
 static void knockback(ChaosEffectData *effect) {
-    if (knockbackTime == 0) {
+    if (knockbackTime == TIMER_DISABLED) {
         knockbackTime = effect->timer;
     }
 
     if (effect->timer == knockbackTime) {
         set_action_state(ACTION_STATE_KNOCKBACK);
         knockbackTime -= rand_int(90) + 30;
-        if (knockbackTime < 1) {
-            knockbackTime = 1;
-        }
     }
 }
 
 static void knockbackOff(ChaosEffectData *effect) {
-    knockbackTime = 0;
+    knockbackTime = TIMER_DISABLED;
 }
 
 static void slowGo(ChaosEffectData *effect) {
@@ -958,10 +954,18 @@ static void pointSwap(ChaosEffectData *effect) {
 }
 
 static void perilSound(ChaosEffectData *effect) {
-    if (chaosTimers[TIMER_PERIL_SOUND] <= 0) {
-        sfx_play_sound(SOUND_PERIL);
-        chaosTimers[TIMER_PERIL_SOUND] = 15 + rand_int(25);
+    if (perilTime == TIMER_DISABLED) {
+        perilTime = effect->timer;
     }
+
+    if (effect->timer == perilTime) {
+        sfx_play_sound(SOUND_PERIL);
+        perilTime -= 15 + rand_int(25);
+    }
+}
+
+static void perilSoundOff(ChaosEffectData *effect) {
+    perilTime = TIMER_DISABLED;
 }
 
 static void squishActor(s8 id, ActorType actorType, Vec3f *scale) {
