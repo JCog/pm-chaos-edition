@@ -25,6 +25,7 @@ typedef struct ActorScaleData {
 
 // conditionals
 static b8 isOverworld(void);
+static b8 canKnockback(void);
 static b8 canTouchLava(void);
 static b8 isValidBattle(void);
 static b8 canEquipBadge(void);
@@ -89,9 +90,9 @@ ChaosEffectData effectData[] = {
     #endif
     // overworld
     {"Rewind",                  TRUE,   0,  60, posRewind,              posRewindOff,       isOverworld},
-    {"Levitate",                TRUE,   0,  10, levitate,               levitateOff,        isOverworld},
+    {"Levitate",                TRUE,   0,  20, levitate,               levitateOff,        isOverworld},
     {"Actor Chase",             TRUE,   0,  20, actorChase,             NULL,               isOverworld},
-    {"Knockback",               TRUE,   0,  60, knockback,              knockbackOff,       isOverworld},
+    {"Knockback",               TRUE,   0,  60, knockback,              knockbackOff,       canKnockback},
     {"Slow Go",                 FALSE,  0,  60, slowGo,                 slowGo,             isOverworld},
     {"Top-Down Cam",            FALSE,  0,  60, topDownCam,             topDownCam,         isOverworld},
     {"Intangible Enemies",      FALSE,  0,  30, intangibleEnemies,      intangibleEnemies,  isOverworld},
@@ -129,6 +130,7 @@ const u8 totalEffectCount = ARRAY_COUNT(effectData);
 b8 randomEffects = !CHAOS_DEBUG;
 
 s16 chaosTimers[TIMER_MAX] = {0};
+b8 chaosLevitating = FALSE;
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
 b8 chaosHealingTouch = FALSE;
@@ -152,7 +154,6 @@ static s16 rewindTime = TIMER_DISABLED;
 static Vec3f rewindPos;
 static s16 knockbackTime = TIMER_DISABLED;
 static b8 battleQueueMario = FALSE;
-static f32 prevHeight = -10000.0f;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
 static s16 perilTime = TIMER_DISABLED;
 static ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
@@ -505,8 +506,14 @@ void handleBattleQueue() {
     battleQueueMario = FALSE;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 static b8 isOverworld() {
     return !gGameStatus.isBattle;
+}
+
+static b8 canKnockback() {
+    return !gGameStatus.isBattle && !chaosLevitating;
 }
 
 static b8 canTouchLava() {
@@ -632,36 +639,24 @@ static void posRewindOff(ChaosEffectData *effect) {
 }
 
 static void levitate(ChaosEffectData *effect) {
-    Vec3f raycast = gPlayerStatus.pos;
-    f32 rayLength = 10;
-    player_raycast_down(&(raycast.x), &(raycast.y), &(raycast.z), &rayLength);
-    if (rayLength < 10) {
-        gPlayerStatus.pos.y = prevHeight = raycast.y + 10.0f;
-    } else if (prevHeight < gPlayerStatus.pos.y) {
-        prevHeight = gPlayerStatus.pos.y;
-    } else {
-        gPlayerStatus.pos.y = prevHeight;
+    if (!chaosLevitating) {
+        chaosLevitating = TRUE;
     }
 
-    gPlayerStatus.flags |= 1 << 1;
-    gPlayerStatus.flags &= ~(1 << 2);
+    gPlayerStatus.curSpeed = 0.0f;
+    gPlayerStatus.flags |= PS_FLAG_JUMPING;
+    gPlayerStatus.flags &= ~(PS_FLAG_FALLING);
     gPlayerStatus.timeInAir = 1;
-    gPlayerStatus.gravityIntegrator[0] = 0;
-    gPlayerStatus.gravityIntegrator[1] = 0;
-    gPlayerStatus.gravityIntegrator[2] = 0;
-    gPlayerStatus.gravityIntegrator[3] = 0;
 
-    if (gGameStatus.peachFlags & (1 << 0)) {
+    gPlayerStatus.pos.y += 0.2f;
+
+    if (gGameStatus.peachFlags & (PEACH_FLAG_IS_PEACH)) {
         PlayerActionsTable[5].flag = TRUE;
     }
 }
 
 static void levitateOff(ChaosEffectData *effect) {
-    gPlayerStatus.gravityIntegrator[0] = 0.154342994094f;
-    gPlayerStatus.gravityIntegrator[1] = -0.350080013275f;
-    gPlayerStatus.gravityIntegrator[2] = -0.182262003422f;
-    gPlayerStatus.gravityIntegrator[3] = 0.0115200001746f;
-    prevHeight = -10000.0f;
+    chaosLevitating = FALSE;
 }
 
 static void magnetPosStep(Vec3f *pos) {

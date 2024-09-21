@@ -111,6 +111,7 @@ extern PlayerData gPlayerData;
 
 extern s16 chaosTimers[TIMER_MAX];
 extern b8 chaosMenuOpen;
+extern b8 chaosLevitating;
 extern b8 chaosSlowGo;
 extern b8 chaosTopDownCam;
 extern b8 chaosHealingTouch;

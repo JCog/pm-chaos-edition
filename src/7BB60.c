@@ -263,7 +263,9 @@ void phys_update_jump(void) {
     if (playerStatus->gravityIntegrator[0] > playerStatus->maxJumpSpeed) {
         playerStatus->gravityIntegrator[0] = playerStatus->maxJumpSpeed;
     }
-    playerStatus->pos.y += playerStatus->gravityIntegrator[0];
+    if (!chaosLevitating) {
+        playerStatus->pos.y += playerStatus->gravityIntegrator[0];
+    }
 }
 
 f32 GravityParamsStartJump[] = { 15.7566404343f, -7.38624f, 3.44693994522f, -0.75f };
@@ -435,6 +437,11 @@ void phys_player_land(void) {
 
 f32 integrate_gravity(void) {
     PlayerStatus* playerStatus = &gPlayerStatus;
+
+    if (chaosLevitating) {
+        playerStatus->gravityIntegrator[0] = 0;
+        return 0.0f;
+    }
 
     if (playerStatus->flags & PS_FLAG_ENTERING_BATTLE) {
         playerStatus->gravityIntegrator[2] += playerStatus->gravityIntegrator[3] / 1.7f;
