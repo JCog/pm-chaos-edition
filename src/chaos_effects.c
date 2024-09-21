@@ -1,5 +1,6 @@
 #include "chaos.h"
 #include "dx/config.h"
+#include "game_modes.h"
 #include "gcc/memory.h"
 #include "inventory.h"
 #include "script_api/battle.h"
@@ -32,61 +33,63 @@ static b8 hasMushroom(void);
 static b8 canRememberThis(void);
 
 #if CHAOS_DEBUG
-static void toggleRandomEffects(void);
+static void toggleRandomEffects(ChaosEffectData*);
 #endif
 // overworld
-static void posRewind(void);
-static void levitate(void);
-static void levitateStop(void);
-static void actorChase(void);
-static void knockback(void);
-static void slowGo(void);
-static void topDownCam(void);
-static void intangibleEnemies(void);
-static void spinAngle(void);
-static void lava(void);
-static void rotateMario(void);
-static void rotateMarioOff(void);
+static void posRewind(ChaosEffectData*);
+static void posRewindOff(ChaosEffectData*);
+static void levitate(ChaosEffectData*);
+static void levitateOff(ChaosEffectData*);
+static void actorChase(ChaosEffectData*);
+static void knockback(ChaosEffectData*);
+static void knockbackOff(ChaosEffectData*);
+static void slowGo(ChaosEffectData*);
+static void topDownCam(ChaosEffectData*);
+static void intangibleEnemies(ChaosEffectData*);
+static void spinAngle(ChaosEffectData*);
+static void lava(ChaosEffectData*);
+static void rotateMario(ChaosEffectData*);
+static void rotateMarioOff(ChaosEffectData*);
 // battle
-static void negativeAttack(void);
-static void randomEnemyHp(void);
-static void shuffleBattlePos(void);
-static void randomMarioMove(void);
+static void negativeAttack(ChaosEffectData*);
+static void randomEnemyHp(ChaosEffectData*);
+static void shuffleBattlePos(ChaosEffectData*);
+static void randomMarioMove(ChaosEffectData*);
 // anywhere
-static void equipBadge(void);
-static void unequipBadge(void);
-static void perilSound(void);
-static void squish(void);
-static void squishOff(void);
-static void allSfxAttackFx(void);
-static void hideModels(void);
-static void pointSwap(void);
-static void randomHp(void);
-static void randomFp(void);
-static void addRemoveCoins(void);
-static void addRemoveStarPoints(void);
-static void randomTattle(void);
-static void badMusic(void);
-static void badMusicOff(void);
-static void expireMushroom(void);
-static void rotateCamera(void);
-static void rotateCameraOff(void);
-static void corruptBg(void);
-static void corruptBgOff(void);
-static void reverseAnalog(void);
-static void shuffleButtons(void);
-static void shuffleButtonsOff(void);
-static void rememberThis(void);
+static void equipBadge(ChaosEffectData*);
+static void unequipBadge(ChaosEffectData*);
+static void perilSound(ChaosEffectData*);
+static void squish(ChaosEffectData*);
+static void squishOff(ChaosEffectData*);
+static void allSfxAttackFx(ChaosEffectData*);
+static void hideModels(ChaosEffectData*);
+static void pointSwap(ChaosEffectData*);
+static void randomHp(ChaosEffectData*);
+static void randomFp(ChaosEffectData*);
+static void addRemoveCoins(ChaosEffectData*);
+static void addRemoveStarPoints(ChaosEffectData*);
+static void randomTattle(ChaosEffectData*);
+static void badMusic(ChaosEffectData*);
+static void badMusicOff(ChaosEffectData*);
+static void expireMushroom(ChaosEffectData*);
+static void rotateCamera(ChaosEffectData*);
+static void rotateCameraOff(ChaosEffectData*);
+static void corruptBg(ChaosEffectData*);
+static void corruptBgOff(ChaosEffectData*);
+static void reverseAnalog(ChaosEffectData*);
+static void shuffleButtons(ChaosEffectData*);
+static void shuffleButtonsOff(ChaosEffectData*);
+static void rememberThis(ChaosEffectData*);
 
 ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
     {"Toggle Random Effects",   FALSE,  0,  0,  toggleRandomEffects,    NULL,               NULL},
     #endif
     // overworld
-    {"Rewind",                  TRUE,   0,  60, posRewind,              NULL,               isOverworld},
-    {"Levitate",                TRUE,   0,  10, levitate,               levitateStop,       isOverworld},
+    {"Rewind",                  TRUE,   0,  60, posRewind,              posRewindOff,       isOverworld},
+    {"Levitate",                TRUE,   0,  10, levitate,               levitateOff,        isOverworld},
     {"Actor Chase",             TRUE,   0,  20, actorChase,             NULL,               isOverworld},
-    {"Knockback",               TRUE,   0,  60, knockback,              NULL,               isOverworld},
+    {"Knockback",               TRUE,   0,  60, knockback,              knockbackOff,       isOverworld},
     {"Slow Go",                 FALSE,  0,  60, slowGo,                 slowGo,             isOverworld},
     {"Top-Down Cam",            FALSE,  0,  60, topDownCam,             topDownCam,         isOverworld},
     {"Intangible Enemies",      FALSE,  0,  30, intangibleEnemies,      intangibleEnemies,  isOverworld},
@@ -123,7 +126,6 @@ ChaosEffectData effectData[] = {
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
 b8 randomEffects = !CHAOS_DEBUG;
 
-u32 frameCount = 0;
 s16 chaosTimers[TIMER_MAX] = {0};
 b8 chaosSlowGo = FALSE;
 b8 chaosTopDownCam = FALSE;
@@ -143,6 +145,10 @@ b8 chaosShuffleButtons = FALSE;
 enum Buttons chaosButtonMap[9] = {0};
 b8 chaosRememberThis = FALSE;
 
+static b8 rewindSaved = FALSE;
+static s16 rewindTime = 0;
+static Vec3f rewindPos;
+static s16 knockbackTime = 0;
 static b8 battleQueueMario = FALSE;
 static f32 prevHeight = -10000.0f;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
@@ -181,12 +187,12 @@ static void updateEnemyHpDeltas() {
 }
 
 void handleTimers() {
-    frameCount = gPlayerData.frameCounter / 2;
     for (s32 i = 0; i < TIMER_MAX; i++) {
         if (chaosTimers[i] >= 0) {
             chaosTimers[i]--;
         }
     }
+
     if (chaosTimers[TIMER_ENEMY_HP_UPDATE] == 30) {
         updateEnemyHpDeltas();
     }
@@ -580,30 +586,53 @@ static b8 canRememberThis() {
 ////////////////////////////////////////////////////////////////////////////////
 
 #if CHAOS_DEBUG
-static void toggleRandomEffects() {
+static void toggleRandomEffects(ChaosEffectData* effect) {
     if (randomEffects) {
         for (s32 i = 0; i < totalEffectCount; i++) {
-            ChaosEffectData *effect = &effectData[i];
-            if (effect->timer > 0 && effect->off != NULL) {
-                effect->off();
+            ChaosEffectData *nextEffect = &effectData[i];
+            if (nextEffect->timer > 0 && nextEffect->off != NULL) {
+                nextEffect->off(nextEffect);
             }
-            effect->timer = 0;
+            nextEffect->timer = 0;
         }
     }
     randomEffects = !randomEffects;
 }
 #endif
 
-static void posRewind() {
-    static Vec3f savedPos;
-    if (frameCount % 30 == 20) {
-        savedPos = gPlayerStatus.pos;
-    } else if (frameCount % 30 == 0) {
-        gPlayerStatus.pos = savedPos;
+static void posRewind(ChaosEffectData *effect) {
+    if (rewindTime == 0) {
+        rewindSaved = FALSE;
+        rewindTime = effect->timer;
+    }
+
+    // prevent loading a position from a previous map
+    if (get_game_mode() == GAME_MODE_CHANGE_MAP) {
+        rewindSaved = FALSE;
+        rewindTime--;
+        return;
+    }
+
+    if (effect->timer == rewindTime) {
+        if (rewindSaved) {
+            gPlayerStatus.pos = rewindPos;
+            rewindTime -= rand_int(60) + 1;
+        } else {
+            rewindPos = gPlayerStatus.pos;
+            rewindTime -= rand_int(30) + 1;
+        }
+        rewindSaved = !rewindSaved;
+        if (rewindTime < 1) {
+            rewindTime = 1;
+        }
     }
 }
 
-static void levitate() {
+static void posRewindOff(ChaosEffectData *effect) {
+    rewindTime = 0;
+}
+
+static void levitate(ChaosEffectData *effect) {
     Vec3f raycast = gPlayerStatus.pos;
     f32 rayLength = 10;
     player_raycast_down(&(raycast.x), &(raycast.y), &(raycast.z), &rayLength);
@@ -628,7 +657,7 @@ static void levitate() {
     }
 }
 
-static void levitateStop() {
+static void levitateOff(ChaosEffectData *effect) {
     gPlayerStatus.gravityIntegrator[0] = 0.154342994094f;
     gPlayerStatus.gravityIntegrator[1] = -0.350080013275f;
     gPlayerStatus.gravityIntegrator[2] = -0.182262003422f;
@@ -651,7 +680,7 @@ static void magnetPosStep(Vec3f *pos) {
     pos->z += temp * zDiff;
 }
 
-static void actorChase() {
+static void actorChase(ChaosEffectData *effect) {
     for (s32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc != NULL) {
@@ -672,33 +701,45 @@ static void actorChase() {
     }
 }
 
-static void knockback() {
-    if (frameCount % 60 == 0) {
+static void knockback(ChaosEffectData *effect) {
+    if (knockbackTime == 0) {
+        knockbackTime = effect->timer;
+    }
+
+    if (effect->timer == knockbackTime) {
         set_action_state(ACTION_STATE_KNOCKBACK);
+        knockbackTime -= rand_int(90) + 30;
+        if (knockbackTime < 1) {
+            knockbackTime = 1;
+        }
     }
 }
 
-static void slowGo() {
+static void knockbackOff(ChaosEffectData *effect) {
+    knockbackTime = 0;
+}
+
+static void slowGo(ChaosEffectData *effect) {
     chaosSlowGo = !chaosSlowGo;
 }
 
-static void topDownCam() {
+static void topDownCam(ChaosEffectData *effect) {
     chaosTopDownCam = !chaosTopDownCam;
 }
 
-static void intangibleEnemies() {
+static void intangibleEnemies(ChaosEffectData *effect) {
     gGameStatus.debugEnemyContact = !gGameStatus.debugEnemyContact;
 }
 
-static void spinAngle() {
+static void spinAngle(ChaosEffectData *effect) {
     chaosSpinAngle = !chaosSpinAngle;
 }
 
-static void lava() {
+static void lava(ChaosEffectData *effect) {
     set_action_state(ACTION_STATE_HIT_LAVA);
 }
 
-static void rotateMario() {
+static void rotateMario(ChaosEffectData *effect) {
     if (!chaosRotating) {
         chaosRotating = TRUE;
         marioPitch = gPlayerStatus.pitch;
@@ -730,15 +771,15 @@ static void rotateMario() {
     gPlayerStatus.flipYaw[gCurrentCameraID] = marioFlipYaw;
 }
 
-static void rotateMarioOff() {
+static void rotateMarioOff(ChaosEffectData *effect) {
     chaosRotating = FALSE;
 }
 
-static void negativeAttack() {
+static void negativeAttack(ChaosEffectData *effect) {
     chaosHealingTouch = !chaosHealingTouch;
 }
 
-static void randomEnemyHp() {
+static void randomEnemyHp(ChaosEffectData *effect) {
     for (s32 i = 0; i < ARRAY_COUNT(gBattleStatus.enemyActors); i++) {
         Actor *enemy = gBattleStatus.enemyActors[i];
         if (enemy == NULL || enemy->maxHP == 1) {
@@ -792,7 +833,7 @@ static b8 actorAtHome(Actor *actor) {
     return TRUE;
 }
 
-static void shuffleBattlePos() {
+static void shuffleBattlePos(ChaosEffectData *effect) {
     Actor *actors[26] = {0};
     b8 atHome[26] = {0};
     u8 actorIdx = 0;
@@ -841,11 +882,11 @@ static void shuffleBattlePos() {
     start_script(&N(EVS_Shuffle_Sparkles), EVT_PRIORITY_A, 0);
 }
 
-static void randomMarioMove(void) {
+static void randomMarioMove(ChaosEffectData *effect) {
     battleQueueMario = TRUE;
 }
 
-static void equipBadge() {
+static void equipBadge(ChaosEffectData *effect) {
     s32 availableBp = gPlayerData.maxBP - getTotalEquippedBpCost();
     s16 equippableBadges[128];
     u8 count = 0;
@@ -874,7 +915,7 @@ static void equipBadge() {
 
 }
 
-static void unequipBadge() {
+static void unequipBadge(ChaosEffectData *effect) {
     s32 eqBadgeCount = 0;
     for (s32 i = 0; i < 64; i++) {
         if (gPlayerData.equippedBadges[i] == 0) {
@@ -898,7 +939,7 @@ static void unequipBadge() {
     }
 }
 
-static void pointSwap() {
+static void pointSwap(ChaosEffectData *effect) {
     s8 curHpTemp = gPlayerData.curHP;
     gPlayerData.curHP = gPlayerData.curFP;
     gPlayerData.curFP = curHpTemp;
@@ -916,7 +957,7 @@ static void pointSwap() {
     chaosTimers[TIMER_FP_SOUND] = 20;
 }
 
-static void perilSound() {
+static void perilSound(ChaosEffectData *effect) {
     if (chaosTimers[TIMER_PERIL_SOUND] <= 0) {
         sfx_play_sound(SOUND_PERIL);
         chaosTimers[TIMER_PERIL_SOUND] = 15 + rand_int(25);
@@ -953,7 +994,7 @@ static void squishActor(s8 id, ActorType actorType, Vec3f *scale) {
     }
 }
 
-static void squish() {
+static void squish(ChaosEffectData *effect) {
     for (s32 i = 0; i < MAX_NPCS; i++) {
         Npc *npc = (*gCurrentNpcListPtr)[i];
         if (npc == NULL) {
@@ -973,7 +1014,7 @@ static void squish() {
     }
 }
 
-static void squishOff() {
+static void squishOff(ChaosEffectData *effect) {
     for (s32 i = 0; i < ACTOR_DATA_COUNT; i++) {
         ActorScaleData *scaleBuffer = &actorScaleBuffer[i];
         if (scaleBuffer->id == -1) {
@@ -1008,15 +1049,15 @@ static void squishOff() {
     }
 }
 
-static void allSfxAttackFx() {
+static void allSfxAttackFx(ChaosEffectData *effect) {
     chaosAllSfxAttackFx = !chaosAllSfxAttackFx;
 }
 
-static void hideModels() {
+static void hideModels(ChaosEffectData *effect) {
     chaosHideModels = !chaosHideModels;
 }
 
-static void randomHp() {
+static void randomHp(ChaosEffectData *effect) {
     s8 oldHp = gPlayerData.curHP;
     while (gPlayerData.curHP == oldHp) {
         gPlayerData.curHP = rand_int(gPlayerData.curMaxHP - 1) + 1;
@@ -1025,7 +1066,7 @@ static void randomHp() {
     chaosTimers[TIMER_HP_SOUND] = 20;
 }
 
-static void randomFp() {
+static void randomFp(ChaosEffectData *effect) {
     s8 oldFp = gPlayerData.curFP;
     while (gPlayerData.curFP == oldFp) {
         gPlayerData.curFP = rand_int(gPlayerData.curMaxFP);
@@ -1034,7 +1075,7 @@ static void randomFp() {
     chaosTimers[TIMER_FP_SOUND] = 20;
 }
 
-static void addRemoveCoins() {
+static void addRemoveCoins(ChaosEffectData *effect) {
     s32 coins = rand_int(99) + 1;
     if (rand_int(1)) {
         coins *= -1;
@@ -1044,7 +1085,7 @@ static void addRemoveCoins() {
     open_status_bar_quickly();
 }
 
-static void addRemoveStarPoints() {
+static void addRemoveStarPoints(ChaosEffectData *effect) {
     s32 sp = rand_int(24) + 1;
     if (rand_int(1)) {
         sp *= -1;
@@ -1091,11 +1132,11 @@ EvtScript N(EVS_Random_Tattle) = {
     End
 };
 
-static void randomTattle() {
+static void randomTattle(ChaosEffectData *effect) {
     start_script(&N(EVS_Random_Tattle), EVT_PRIORITY_A, 0);
 }
 
-static void badMusic() {
+static void badMusic(ChaosEffectData *effect) {
     if (chaosBadMusic == 0) {
         chaosTimers[TIMER_BAD_MUSIC] = 5 * 30;
         chaosBadMusic = 1;
@@ -1105,11 +1146,11 @@ static void badMusic() {
     }
 }
 
-static void badMusicOff() {
+static void badMusicOff(ChaosEffectData *effect) {
     chaosBadMusic = 0;
 }
 
-static void expireMushroom() {
+static void expireMushroom(ChaosEffectData *effect) {
     s32 invIdx[10];
     u8 count = 0;
     for (s32 i = 0; i < 10; i++) {
@@ -1128,16 +1169,16 @@ static void expireMushroom() {
     }
 }
 
-static void rotateCamera() {
+static void rotateCamera(ChaosEffectData *effect) {
     chaosRotateCamera = TRUE;
     guRotateF(chaosRotateMtx, (rand_float() * 270.0f) + 45.0f, 0.0f, 0.0f, -1.0f);
 }
 
-static void rotateCameraOff() {
+static void rotateCameraOff(ChaosEffectData *effect) {
     chaosRotateCamera = FALSE;
 }
 
-static void corruptBg() {
+static void corruptBg(ChaosEffectData *effect) {
     if (chaosBackgroundChanged) {
         // save the uncorrupted background anytime the game changes it
         for (s32 i = 0; i < 256; i++) {
@@ -1158,7 +1199,7 @@ static void corruptBg() {
     pal[randPalByteOffset] = rand_int(255);
 }
 
-static void corruptBgOff() {
+static void corruptBgOff(ChaosEffectData *effect) {
     for (s32 i = 0; i < 256; i++) {
         gBackgroundImage.palette[i] = bgSaved.palette[i];
     }
@@ -1168,11 +1209,11 @@ static void corruptBgOff() {
     gBackgroundImage.height = bgSaved.height;
 }
 
-static void reverseAnalog() {
+static void reverseAnalog(ChaosEffectData *effect) {
     chaosReverseAnalog = !chaosReverseAnalog;
 }
 
-static void shuffleButtons(void) {
+static void shuffleButtons(ChaosEffectData *effect) {
     chaosButtonMap[0] = BUTTON_C_RIGHT;
     chaosButtonMap[1] = BUTTON_C_LEFT;
     chaosButtonMap[2] = BUTTON_C_DOWN;
@@ -1191,11 +1232,11 @@ static void shuffleButtons(void) {
     chaosShuffleButtons = TRUE;
 }
 
-static void shuffleButtonsOff() {
+static void shuffleButtonsOff(ChaosEffectData *effect) {
     chaosShuffleButtons = FALSE;
 }
 
-static void rememberThis(void) {
+static void rememberThis(ChaosEffectData *effect) {
     // very hacky location but I'm running into issues creating a proper framebuffer - possibly shifting related?
     chaosSavedFrame = (u16*)((osMemSize | 0xA0000000) - FB_SIZE);
     memcpy(chaosSavedFrame, osViGetCurrentFramebuffer(), FB_SIZE);

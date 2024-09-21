@@ -157,7 +157,7 @@ static void drawEffectList() {
 static void activateEffect(s32 effectId) {
     ChaosEffectData *effect = &effectData[effectId];
     if (!effect->everyFrame) {
-        effect->func();
+        effect->func(effect);
     }
     if (effect->maxSeconds == 0) {
         effect->timer = 90;
@@ -259,9 +259,9 @@ void chaosUpdate() {
         // also updates timer for instantaneous effects
         if (effect->timer > 0 && (canTriggerEffect(effect) || effect->maxSeconds == 0)) {
             if (effect->timer == 1 && effect->off != NULL) {
-                effect->off();
+                effect->off(effect);
             } else if (effect->everyFrame){
-                effect->func();
+                effect->func(effect);
             }
             effect->timer--;
         }

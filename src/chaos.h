@@ -10,8 +10,8 @@ typedef struct ChaosEffectData {
     b8 everyFrame;
     s16 timer;
     s8 maxSeconds;
-    void (*func)();
-    void (*off)();
+    void (*func)(struct ChaosEffectData*);
+    void (*off)(struct ChaosEffectData*);
     b8 (*canTrigger)();
 } ChaosEffectData;
 
