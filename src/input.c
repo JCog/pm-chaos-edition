@@ -7,7 +7,7 @@ BSS s16 D_8009A6A2;
 BSS s16 D_8009A6A4;
 BSS s16 D_8009A6A6;
 
-const enum Buttons unshuffledButtons[] = {
+const enum Buttons primaryButtons[] = {
     BUTTON_C_RIGHT, BUTTON_C_LEFT, BUTTON_C_DOWN, BUTTON_C_UP, BUTTON_R, BUTTON_START, BUTTON_Z, BUTTON_B, BUTTON_A
 };
 
@@ -98,13 +98,26 @@ void update_input(void) {
     gGameStatusPtr->stickY[0] = stickY;
 
     buttons = contData->button;
+    if (chaosRandomButton) {
+        s32 idx = rand_int(ARRAY_COUNT(primaryButtons) - 1);
+        for (s32 i = 0; i < ARRAY_COUNT(primaryButtons); i++) {
+            if (!(buttons & primaryButtons[idx])) {
+                osSyncPrintf("%x\n", primaryButtons[idx]);
+                buttons |= primaryButtons[idx];
+                break;
+            }
+            idx++;
+            idx %= ARRAY_COUNT(primaryButtons);
+        }
+        chaosRandomButton = FALSE;
+    }
     if (chaosShuffleButtons) {
         // keep d-pad, L, and stick values, but shuffle everything else
         s32 shuffled = buttons
             & ~(BUTTON_C_RIGHT | BUTTON_C_LEFT | BUTTON_C_DOWN | BUTTON_C_UP | BUTTON_R | BUTTON_START | BUTTON_Z
                 | BUTTON_B | BUTTON_A);
-        for (s32 i = 0; i < ARRAY_COUNT(unshuffledButtons); i++) {
-            if (buttons & unshuffledButtons[i]) {
+        for (s32 i = 0; i < ARRAY_COUNT(primaryButtons); i++) {
+            if (buttons & primaryButtons[i]) {
                 shuffled |= chaosButtonMap[i];
             }
         }

@@ -83,6 +83,7 @@ static void corruptBgOff(ChaosEffectData*);
 static void reverseAnalog(ChaosEffectData*);
 static void shuffleButtons(ChaosEffectData*);
 static void shuffleButtonsOff(ChaosEffectData*);
+static void randomButton(ChaosEffectData*);
 static void rememberThis(ChaosEffectData*);
 static void shuffleUpgrades(ChaosEffectData*);
 
@@ -125,6 +126,7 @@ ChaosEffectData effectData[] = {
     {"Corrupt Background",      TRUE,   0,  90, corruptBg,              corruptBgOff,       NULL},
     {"Reverse Analog Stick",    FALSE,  0,  90, reverseAnalog,          reverseAnalog,      NULL},
     {"Shuffle Buttons",         FALSE,  0,  90, shuffleButtons,         shuffleButtonsOff,  NULL},
+    {"Random Button",           FALSE,  0,  0,  randomButton,           NULL,               NULL},
     {"Remember This?",          FALSE,  0,  0,  rememberThis,           NULL,               canRememberThis},
     {"Shuffle Upgrades",        FALSE,  0,  0,  shuffleUpgrades,        NULL,               canShuffleUpgrades},
 };
@@ -150,6 +152,7 @@ b8 chaosRotating = FALSE;
 b8 chaosReverseAnalog = FALSE;
 b8 chaosShuffleButtons = FALSE;
 enum Buttons chaosButtonMap[9] = {0};
+b8 chaosRandomButton = FALSE;
 b8 chaosRememberThis = FALSE;
 
 static b8 rewindSaved = FALSE;
@@ -1249,6 +1252,10 @@ static void shuffleButtons(ChaosEffectData *effect) {
 
 static void shuffleButtonsOff(ChaosEffectData *effect) {
     chaosShuffleButtons = FALSE;
+}
+
+static void randomButton(ChaosEffectData*) {
+    chaosRandomButton = TRUE;
 }
 
 static void rememberThis(ChaosEffectData *effect) {
