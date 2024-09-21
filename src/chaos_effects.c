@@ -33,6 +33,7 @@ static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
 static b8 hasMushroom(void);
 static b8 canRememberThis(void);
+static b8 canShuffleUpgrades(void);
 
 #if CHAOS_DEBUG
 static void toggleRandomEffects(ChaosEffectData*);
@@ -83,6 +84,7 @@ static void reverseAnalog(ChaosEffectData*);
 static void shuffleButtons(ChaosEffectData*);
 static void shuffleButtonsOff(ChaosEffectData*);
 static void rememberThis(ChaosEffectData*);
+static void shuffleUpgrades(ChaosEffectData*);
 
 ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -124,6 +126,7 @@ ChaosEffectData effectData[] = {
     {"Reverse Analog Stick",    FALSE,  0,  90, reverseAnalog,          reverseAnalog,      NULL},
     {"Shuffle Buttons",         FALSE,  0,  90, shuffleButtons,         shuffleButtonsOff,  NULL},
     {"Remember This?",          FALSE,  0,  0,  rememberThis,           NULL,               canRememberThis},
+    {"Shuffle Upgrades",        FALSE,  0,  0,  shuffleUpgrades,        NULL,               canShuffleUpgrades},
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -591,6 +594,19 @@ static b8 hasMushroom() {
 
 static b8 canRememberThis() {
     return chaosTimers[TIMER_REMEMBER_THIS] < 0;
+}
+
+static b8 canShuffleUpgrades() {
+    u8 upgradeCount = 0;
+    u8 partnerCount = 0;
+    for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.partners); i++) {
+        PartnerData *partner = &gPlayerData.partners[i];
+        if (partner->enabled) {
+            partnerCount++;
+            upgradeCount += partner->level;
+        }
+    }
+    return upgradeCount != 0 && upgradeCount != partnerCount * 2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1241,4 +1257,26 @@ static void rememberThis(ChaosEffectData *effect) {
     memcpy(chaosSavedFrame, osViGetCurrentFramebuffer(), FB_SIZE);
     chaosTimers[TIMER_REMEMBER_THIS] = rand_int(30 * 60 * 5); // 5 minutes
     // TODO: edit text onto frame
+}
+
+static void shuffleUpgrades(ChaosEffectData*) {
+    u8 upgradeCount = 0;
+    u8 partnerCount = 0;
+    PartnerData *partners[ARRAY_COUNT(gPlayerData.partners) * 2];
+    for (s32 i = 0; i < ARRAY_COUNT(gPlayerData.partners); i++) {
+        PartnerData *partner = &gPlayerData.partners[i];
+        if (partner->enabled) {
+            upgradeCount += partner->level;
+            partner->level = 0;
+            partners[partnerCount++] = partner;
+            partners[partnerCount++] = partner;
+        }
+    }
+
+    for (s32 i = 0; i < upgradeCount; i++) {
+        s32 idx = rand_int(--partnerCount);
+        partners[idx]->level++;
+        partners[idx] = partners[partnerCount];
+    }
+    sfx_play_sound(SOUND_GROW);
 }
