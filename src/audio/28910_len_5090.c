@@ -1,4 +1,5 @@
 #include "audio.h"
+#include "chaos.h"
 
 BSS void (*CurrentSeqCmdHandler)(BGMPlayer*, BGMPlayerTrack*);
 

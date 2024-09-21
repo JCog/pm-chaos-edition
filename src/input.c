@@ -1,5 +1,6 @@
 #include "common.h"
 #include "nu/nusys.h"
+#include "chaos.h"
 
 OSContPad D_8009A5B8;
 BSS s16 D_8009A6A0;

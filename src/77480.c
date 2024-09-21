@@ -6,6 +6,7 @@
 #include "world/partner/watt.h"
 #include "sprite/player.h"
 #include "dx/debug_menu.h"
+#include "chaos.h"
 
 #ifdef SHIFT
 #define inspect_icon_VRAM inspect_icon_VRAM

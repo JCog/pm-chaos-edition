@@ -2,6 +2,7 @@
 #include "world/partners.h"
 #include "sprite/player.h"
 #include "dx/debug_menu.h"
+#include "chaos.h"
 
 CollisionStatus gCollisionStatus;
 f32 JumpedOnSwitchX;

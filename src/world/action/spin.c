@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects.h"
 #include "sprite/player.h"
+#include "chaos.h"
 
 extern s32 gSpinHistoryBufferPos;
 extern s32 gSpinHistoryPosY[5];

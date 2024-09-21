@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "dx/profiling.h"
 #include "dx/debug_menu.h"
+#include "chaos.h"
 
 void render_models(void);
 void execute_render_tasks(void);

@@ -4,6 +4,7 @@
 #include "script_api/battle.h"
 #include "sprite/player.h"
 #include "dx/debug_menu.h"
+#include "chaos.h"
 
 b32 dispatch_damage_event_player(s32 damageAmount, s32 event, b32 noHitSound);
 b32 dispatch_hazard_event_player(s32 damageAmount, s32 event);

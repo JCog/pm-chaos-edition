@@ -1,4 +1,5 @@
 #include "common.h"
+#include "chaos.h"
 
 BSS CamConfiguration gCurrentCamConfiguration;
 BSS f32 D_800A08DC;

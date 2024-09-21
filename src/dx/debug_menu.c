@@ -4,6 +4,7 @@
 #include "battle/battle.h"
 #include "hud_element.h"
 #include "qsort.h"
+#include "chaos.h"
 
 // layout
 

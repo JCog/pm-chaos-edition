@@ -1,5 +1,6 @@
 #include "common.h"
 #include "audio.h"
+#include "chaos.h"
 
 #define MAX_SOUND_INSTANCES 10
 
