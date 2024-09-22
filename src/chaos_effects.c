@@ -25,6 +25,7 @@ typedef struct ActorScaleData {
 
 // conditionals
 static b8 isOverworld(void);
+static b8 canLevitate(void);
 static b8 canActorChase(void);
 static b8 canKnockback(void);
 static b8 canTouchLava(void);
@@ -35,6 +36,7 @@ static b8 canPointSwap(void);
 static b8 hasMushroom(void);
 static b8 canRememberThis(void);
 static b8 canShuffleUpgrades(void);
+static b8 canSpawnItem(void);
 
 #if CHAOS_DEBUG
 static void toggleRandomEffects(ChaosEffectData*);
@@ -97,7 +99,7 @@ ChaosEffectData effectData[] = {
     #endif
     // overworld
     {"Rewind",                  TRUE,   0,  60, posRewind,              posRewindOff,       isOverworld},
-    {"Levitate",                TRUE,   0,  20, levitate,               levitateOff,        isOverworld},
+    {"Levitate",                TRUE,   0,  15, levitate,               levitateOff,        canLevitate},
     {"Actor Chase",             TRUE,   0,  20, actorChase,             NULL,               canActorChase},
     {"Knockback",               TRUE,   0,  60, knockback,              knockbackOff,       canKnockback},
     {"Slow Go",                 FALSE,  0,  60, slowGo,                 slowGo,             isOverworld},
@@ -134,7 +136,7 @@ ChaosEffectData effectData[] = {
     {"Random Button",           FALSE,  0,  0,  randomButton,           NULL,               NULL},
     {"Remember This?",          FALSE,  0,  0,  rememberThis,           NULL,               canRememberThis},
     {"Shuffle Upgrades",        FALSE,  0,  0,  shuffleUpgrades,        NULL,               canShuffleUpgrades},
-    {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               isOverworld},
+    {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               canSpawnItem},
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -526,6 +528,10 @@ static b8 isOverworld() {
     return !gGameStatus.isBattle;
 }
 
+static b8 canLevitate() {
+    return !gGameStatus.isBattle && gPlayerStatus.actionState != ACTION_STATE_KNOCKBACK;
+}
+
 static b8 canActorChase() {
     return !gGameStatus.isBattle && !(gPlayerStatus.flags & PS_FLAG_INPUT_DISABLED);
 }
@@ -622,6 +628,18 @@ static b8 canShuffleUpgrades() {
         }
     }
     return upgradeCount != 0 && upgradeCount != partnerCount * 2;
+}
+
+static b8 canSpawnItem() {
+    if (gGameStatus.isBattle) {
+        return FALSE;
+    }
+    for (s32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
+        if (gCurrentItemEntities[i] == NULL) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
