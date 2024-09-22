@@ -88,6 +88,7 @@ static void shuffleButtonsOff(ChaosEffectData*);
 static void randomButton(ChaosEffectData*);
 static void rememberThis(ChaosEffectData*);
 static void shuffleUpgrades(ChaosEffectData*);
+static void spawnJunk(ChaosEffectData* effect);
 
 ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -132,6 +133,7 @@ ChaosEffectData effectData[] = {
     {"Random Button",           FALSE,  0,  0,  randomButton,           NULL,               NULL},
     {"Remember This?",          FALSE,  0,  0,  rememberThis,           NULL,               canRememberThis},
     {"Shuffle Upgrades",        FALSE,  0,  0,  shuffleUpgrades,        NULL,               canShuffleUpgrades},
+    {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               isOverworld},
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -1300,4 +1302,10 @@ static void shuffleUpgrades(ChaosEffectData *effect) {
         partners[idx] = partners[partnerCount];
     }
     sfx_play_sound(SOUND_GROW);
+}
+
+static void spawnJunk(ChaosEffectData *effect) {
+    enum ItemIDs junkItems[] = {ITEM_MYSTERY, ITEM_PEBBLE, ITEM_DRIED_SHROOM, ITEM_DUSTY_HAMMER, ITEM_MISTAKE};
+    make_item_entity(junkItems[rand_int(ARRAY_COUNT(junkItems) - 1)], gPlayerStatus.pos.x, gPlayerStatus.pos.y + 19.0f,
+        gPlayerStatus.pos.z, ITEM_SPAWN_MODE_FALL, 0, 0, 0);
 }
