@@ -25,6 +25,7 @@ typedef struct ActorScaleData {
 
 // conditionals
 static b8 isOverworld(void);
+static b8 canActorChase(void);
 static b8 canKnockback(void);
 static b8 canTouchLava(void);
 static b8 isValidBattle(void);
@@ -97,7 +98,7 @@ ChaosEffectData effectData[] = {
     // overworld
     {"Rewind",                  TRUE,   0,  60, posRewind,              posRewindOff,       isOverworld},
     {"Levitate",                TRUE,   0,  20, levitate,               levitateOff,        isOverworld},
-    {"Actor Chase",             TRUE,   0,  20, actorChase,             NULL,               isOverworld},
+    {"Actor Chase",             TRUE,   0,  20, actorChase,             NULL,               canActorChase},
     {"Knockback",               TRUE,   0,  60, knockback,              knockbackOff,       canKnockback},
     {"Slow Go",                 FALSE,  0,  60, slowGo,                 slowGo,             isOverworld},
     {"Top-Down Cam",            FALSE,  0,  60, topDownCam,             topDownCam,         isOverworld},
@@ -523,6 +524,10 @@ void handleBattleQueue() {
 
 static b8 isOverworld() {
     return !gGameStatus.isBattle;
+}
+
+static b8 canActorChase() {
+    return !gGameStatus.isBattle && !(gPlayerStatus.flags & PS_FLAG_INPUT_DISABLED);
 }
 
 static b8 canKnockback() {

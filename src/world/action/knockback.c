@@ -49,13 +49,16 @@ void action_update_knockback(void) {
 
         playerStatus->pos.y += playerStatus->gravityIntegrator[0];
 
-        if (playerStatus->gravityIntegrator[0] < 0.0f) {
+        if (playerStatus->gravityIntegrator[0] <= 0.0f) {
             playerStatus->actionSubstate = SUBSTATE_FALLING;
             playerStatus->flags |= PS_FLAG_FALLING;
         }
     } else {
         s32 colliderID;
 
+        if (playerStatus->gravityIntegrator[0] == 0.0f) {
+            LOAD_INTEGRATOR_FALL(playerStatus->gravityIntegrator);
+        }
         playerStatus->pos.y = player_check_collision_below(player_fall_distance(), &colliderID);
 
         if (colliderID > NO_COLLIDER) {

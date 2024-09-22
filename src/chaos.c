@@ -31,7 +31,7 @@ const enum GameMode badModes[] = {
 b8 chaosMenuOpen = FALSE;
 static u8 menuEffect = 0;
 static u8 menuTimer = 10;
-static u32 effectCountdown = 2;
+static s32 effectCountdown = 2;
 static b8 reloading = FALSE;
 static u8 reloadDelay = 0;
 static u16 reloadCooldown = 0;
@@ -248,7 +248,7 @@ void chaosUpdate() {
                 continue;
             }
             activateEffect(id);
-            effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES);
+            effectCountdown = rand_int(MAX_EFFECT_INTERVAL_FRAMES) + 1;
             break;
         }
     }
