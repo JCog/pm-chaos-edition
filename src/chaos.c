@@ -206,7 +206,12 @@ static void handleMenu() {
             }
         } else if (pressed & BUTTON_R) {
             ChaosEffectData* effect = &effectData[menuEffect];
-            if (canTriggerEffect(effect)) {
+            if (effect->timer > 0 && effect->maxSeconds != 0) {
+                effect->timer = 0;
+                if (effect->off != NULL) {
+                    effect->off(effect);
+                }
+            } else if (canTriggerEffect(effect)) {
                 // prevent untoggling certain commands while they're active
                 if (effect->timer > 0 && effect->maxSeconds > 0) {
                     effect->timer = menuTimer * 30;
