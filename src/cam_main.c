@@ -79,6 +79,10 @@ void update_cameras(void) {
                 guMtxCatF(chaosRotateMtx, cam->perspectiveMatrix, cam->perspectiveMatrix);
             }
 
+            if (chaosZoomedOut) {
+                guMtxCatF(chaosZoomedOutMtx, cam->perspectiveMatrix, cam->perspectiveMatrix);
+            }
+
             guMtxCatF(cam->viewMtxPlayer, cam->perspectiveMatrix, cam->perspectiveMatrix);
         } else {
             f32 w = cam->viewportW;

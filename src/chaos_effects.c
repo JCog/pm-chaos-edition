@@ -78,6 +78,8 @@ static void badMusicOff(ChaosEffectData*);
 static void expireMushroom(ChaosEffectData*);
 static void rotateCamera(ChaosEffectData*);
 static void rotateCameraOff(ChaosEffectData*);
+static void zoomOut(ChaosEffectData* effect);
+static void zoomOutOff(ChaosEffectData* effect);
 static void corruptBg(ChaosEffectData*);
 static void corruptBgOff(ChaosEffectData*);
 static void reverseAnalog(ChaosEffectData*);
@@ -123,6 +125,7 @@ ChaosEffectData effectData[] = {
     {"Bad Music",               TRUE,   0,  90, badMusic,               badMusicOff,        NULL},
     {"Mushroom Expires",        FALSE,  0,  0,  expireMushroom,         NULL,               hasMushroom},
     {"Rotate Camera",           FALSE,  0,  90, rotateCamera,           rotateCameraOff,    NULL},
+    {"Game for Ants",           FALSE,  0,  90, zoomOut,                zoomOutOff,         NULL},
     {"Corrupt Background",      TRUE,   0,  90, corruptBg,              corruptBgOff,       NULL},
     {"Reverse Analog Stick",    FALSE,  0,  90, reverseAnalog,          reverseAnalog,      NULL},
     {"Shuffle Buttons",         FALSE,  0,  90, shuffleButtons,         shuffleButtonsOff,  NULL},
@@ -154,6 +157,8 @@ b8 chaosShuffleButtons = FALSE;
 enum Buttons chaosButtonMap[9] = {0};
 b8 chaosRandomButton = FALSE;
 b8 chaosRememberThis = FALSE;
+b8 chaosZoomedOut = FALSE;
+Matrix4f chaosZoomedOutMtx = {0};
 
 static b8 rewindSaved = FALSE;
 static s16 rewindTime = TIMER_DISABLED;
@@ -1194,6 +1199,15 @@ static void rotateCamera(ChaosEffectData *effect) {
 
 static void rotateCameraOff(ChaosEffectData *effect) {
     chaosRotateCamera = FALSE;
+}
+
+static void zoomOut(ChaosEffectData *effect) {
+    chaosZoomedOut = TRUE;
+    guScaleF(chaosZoomedOutMtx, 0.1f, 0.1f, 1.0f);
+}
+
+static void zoomOutOff(ChaosEffectData *effect) {
+    chaosZoomedOut = FALSE;
 }
 
 static void corruptBg(ChaosEffectData *effect) {

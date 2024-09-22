@@ -40,6 +40,8 @@ extern b8 chaosSpinAngle;
 extern b8 chaosHpSoundPlayed;
 extern b8 chaosFpSoundPlayed;
 extern b8 chaosRotateCamera;
+extern b8 chaosZoomedOut;
+extern Matrix4f chaosZoomedOutMtx;
 extern b8 chaosBackgroundChanged;
 extern Matrix4f chaosRotateMtx;
 extern s8 chaosBadMusic;
