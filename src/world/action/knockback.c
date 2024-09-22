@@ -28,9 +28,18 @@ void action_update_knockback(void) {
 
         gCameras[CAM_DEFAULT].moveFlags |= CAMERA_MOVE_IGNORE_PLAYER_Y;
 
-        ReturnAngle = atan2(playerStatus->pos.x, playerStatus->pos.z, playerStatus->lastGoodPos.x,
-                           playerStatus->lastGoodPos.z);
-        playerStatus->curSpeed = get_xz_dist_to_player(playerStatus->lastGoodPos.x, playerStatus->lastGoodPos.z) / 18.0f;
+        if ((s16)playerStatus->pos.x == playerStatus->lastGoodPos.x
+            && (s16)playerStatus->pos.z == playerStatus->lastGoodPos.z)
+        {
+            ReturnAngle =
+                playerStatus->curYaw >= 180.0f ? playerStatus->curYaw - 180.0f : playerStatus->curYaw + 180.0f;
+            playerStatus->curSpeed = 2.0f;
+        } else {
+            ReturnAngle = atan2(playerStatus->pos.x, playerStatus->pos.z, playerStatus->lastGoodPos.x,
+                                playerStatus->lastGoodPos.z);
+            playerStatus->curSpeed =
+                get_xz_dist_to_player(playerStatus->lastGoodPos.x, playerStatus->lastGoodPos.z) / 18.0f;
+        }
     }
 
     sin_cos_rad(DEG_TO_RAD(ReturnAngle), &dx, &dy);
