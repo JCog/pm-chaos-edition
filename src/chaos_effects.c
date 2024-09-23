@@ -971,16 +971,11 @@ static void unequipBadge(ChaosEffectData *effect) {
 }
 
 static void pointSwap(ChaosEffectData *effect) {
+    // intentionally allowing this to set values greater than max and HP to 0
+    // certain actions like pausing will enforce cap, but should be stable -- will change if proven otherwise
     s8 curHpTemp = gPlayerData.curHP;
     gPlayerData.curHP = gPlayerData.curFP;
     gPlayerData.curFP = curHpTemp;
-    // intentionally allowing this to set your HP to 0, should be stable -- will change if proven otherwise
-    if (gPlayerData.curHP > gPlayerData.curMaxHP) {
-        gPlayerData.curHP = gPlayerData.curMaxHP;
-    }
-    if (gPlayerData.curFP > gPlayerData.curMaxFP) {
-        gPlayerData.curFP = gPlayerData.curMaxFP;
-    }
     sfx_play_sound(SOUND_JUMP_COMBO_8);
     chaosHpSoundPlayed = FALSE;
     chaosFpSoundPlayed = FALSE;
@@ -1098,8 +1093,8 @@ static void hideModels(ChaosEffectData *effect) {
 
 static void randomHp(ChaosEffectData *effect) {
     s8 oldHp = gPlayerData.curHP;
-    while (gPlayerData.curHP == oldHp) {
-        gPlayerData.curHP = rand_int(gPlayerData.curMaxHP - 1) + 1;
+    while (gPlayerData.curHP == oldHp || gPlayerData.curHP > gPlayerData.curMaxHP || gPlayerData.curHP < 1) {
+        gPlayerData.curHP = oldHp + rand_int(20) - 10;
     }
     chaosHpSoundPlayed = FALSE;
     chaosTimers[TIMER_HP_SOUND] = 20;
@@ -1107,8 +1102,8 @@ static void randomHp(ChaosEffectData *effect) {
 
 static void randomFp(ChaosEffectData *effect) {
     s8 oldFp = gPlayerData.curFP;
-    while (gPlayerData.curFP == oldFp) {
-        gPlayerData.curFP = rand_int(gPlayerData.curMaxFP);
+    while (gPlayerData.curFP == oldFp || gPlayerData.curFP > gPlayerData.curMaxFP || gPlayerData.curFP < 0) {
+        gPlayerData.curFP = oldFp + rand_int(20) - 10;
     }
     chaosFpSoundPlayed = FALSE;
     chaosTimers[TIMER_FP_SOUND] = 20;
