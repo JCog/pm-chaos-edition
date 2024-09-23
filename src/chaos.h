@@ -52,6 +52,8 @@ typedef struct ChaosStatus {
     enum Buttons buttonMap[9];
     b8 randomButton;
     b8 rememberThis;
+    b8 cantJump;
+    b8 cantHammer;
 } ChaosStatus;
 
 extern ChaosStatus chaosStatus;

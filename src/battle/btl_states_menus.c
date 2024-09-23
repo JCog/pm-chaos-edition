@@ -2,6 +2,7 @@
 #include "hud_element.h"
 #include "battle/action_cmd.h"
 #include "sprite/player.h"
+#include "chaos.h"
 
 #include "sprite/npc/Goompa.h"
 #include "sprite/npc/BattleGoombario.h"
@@ -2392,7 +2393,7 @@ void btl_state_update_player_menu(void) {
                 BattleMenu_OptionEnabled[entryIdx] = FALSE;
                 battle_menu_isMessageDisabled[entryIdx] = BTL_MSG_NO_JUMP_TARGET;
             }
-            if (!(battleStatus->enabledMenusFlags & BTL_MENU_ENABLED_JUMP)) {
+            if (!(battleStatus->enabledMenusFlags & BTL_MENU_ENABLED_JUMP) || chaosStatus.cantJump) {
                 BattleMenu_HudScripts[entryIdx] = battle_menu_JumpHudScripts[0].disabled;
                 BattleMenu_OptionEnabled[entryIdx] = FALSE;
                 battle_menu_isMessageDisabled[entryIdx] = BTL_MSG_CANT_SELECT_NOW;
@@ -2418,7 +2419,7 @@ void btl_state_update_player_menu(void) {
                     BattleMenu_OptionEnabled[entryIdx] = FALSE;
                     battle_menu_isMessageDisabled[entryIdx] = BTL_MSG_NO_HAMMER_TARGET;
                 }
-                if (!(battleStatus->enabledMenusFlags & BTL_MENU_ENABLED_SMASH)) {
+                if (!(battleStatus->enabledMenusFlags & BTL_MENU_ENABLED_SMASH) || chaosStatus.cantHammer) {
                     BattleMenu_HudScripts[entryIdx] = battle_menu_HammerHudScripts[0].disabled;
                     BattleMenu_OptionEnabled[entryIdx] = FALSE;
                     battle_menu_isMessageDisabled[entryIdx] = BTL_MSG_CANT_SELECT_NOW;

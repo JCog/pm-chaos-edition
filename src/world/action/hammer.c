@@ -2,6 +2,7 @@
 #include "effects.h"
 #include "sprite.h"
 #include "sprite/player.h"
+#include "chaos.h"
 
 enum {
     SUBSTATE_HAMMER_0   = 0,
@@ -269,6 +270,11 @@ void action_update_hammer(void) {
         sfx_play_sound_at_player(soundID, SOUND_SPACE_DEFAULT);
         HammerHit->unk_0C = 0;
         HammerHit->unk_14 = 0;
+    }
+
+    if (chaosStatus.cantHammer && HammerHit->timer == 2) {
+        set_action_state(ACTION_STATE_IDLE);
+        return;
     }
 
     playerStatus->flags &= ~PS_FLAG_HAMMER_CHECK;

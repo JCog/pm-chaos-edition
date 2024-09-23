@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sprite/player.h"
+#include "chaos.h"
 
 extern f32 JumpedOnSwitchX;
 extern f32 JumpedOnSwitchZ;
@@ -23,7 +24,11 @@ void initialize_jump(void) {
     playerStatus->jumpFromPos.z = playerStatus->pos.z;
     playerStatus->jumpFromHeight = playerStatus->pos.y;
 
-    phys_init_integrator_for_current_state();
+    if (chaosStatus.cantJump) {
+        gravity_use_fall_parms();
+    } else {
+        phys_init_integrator_for_current_state();
+    }
 
     if (playerStatus->animFlags & PA_FLAG_8BIT_MARIO) {
         anim = ANIM_MarioW3_8bit_Jump;

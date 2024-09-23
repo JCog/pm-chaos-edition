@@ -83,6 +83,8 @@ static void randomButton(ChaosEffectData*);
 static void rememberThis(ChaosEffectData*);
 static void shuffleUpgrades(ChaosEffectData*);
 static void spawnJunk(ChaosEffectData* effect);
+static void preventJump(ChaosEffectData* effect);
+static void preventHammer(ChaosEffectData* effect);
 
 ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -130,6 +132,8 @@ ChaosEffectData effectData[] = {
     {"Remember This?",          FALSE,  0,  0,  rememberThis,           NULL,               canRememberThis},
     {"Shuffle Upgrades",        FALSE,  0,  0,  shuffleUpgrades,        NULL,               canShuffleUpgrades},
     {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               canSpawnItem},
+    {"Can't Jump",              FALSE,  0,  60, preventJump,            preventJump,        NULL},
+    {"Can't Hammer",            FALSE,  0,  60, preventHammer,          preventHammer,      NULL},
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -209,8 +213,10 @@ void handleTimers() {
 static b8 isMovePossible(u8 moveId, MoveData *move) {
     if ((move->category == MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.starPower / 0x100)
         || (move->category != MOVE_TYPE_STAR_POWER && move->costFP > gPlayerData.curFP)
-        || (move->category == MOVE_TYPE_JUMP && (gPlayerData.bootsLevel < 0 || gBattleStatus.jumpLossTurns > 0))
-        || (move->category == MOVE_TYPE_HAMMER && (gPlayerData.hammerLevel < 0 || gBattleStatus.hammerLossTurns > 0)))
+        || (move->category == MOVE_TYPE_JUMP
+            && (gPlayerData.bootsLevel < 0 || gBattleStatus.jumpLossTurns > 0 || chaosStatus.cantJump))
+        || (move->category == MOVE_TYPE_HAMMER
+            && (gPlayerData.hammerLevel < 0 || gBattleStatus.hammerLossTurns > 0 || chaosStatus.cantHammer)))
     {
         return FALSE;
     }
@@ -1243,5 +1249,23 @@ static void shuffleUpgrades(ChaosEffectData *effect) {
 static void spawnJunk(ChaosEffectData *effect) {
     enum ItemIDs junkItems[] = {ITEM_MYSTERY, ITEM_PEBBLE, ITEM_DRIED_SHROOM, ITEM_DUSTY_HAMMER, ITEM_MISTAKE};
     make_item_entity(junkItems[rand_int(ARRAY_COUNT(junkItems) - 1)], gPlayerStatus.pos.x, gPlayerStatus.pos.y + 19.0f,
-        gPlayerStatus.pos.z, ITEM_SPAWN_MODE_FALL, 0, 0, 0);
+                     gPlayerStatus.pos.z, ITEM_SPAWN_MODE_FALL, 0, 0, 0);
+}
+
+static void preventJump(ChaosEffectData *effect) {
+    chaosStatus.cantJump = !chaosStatus.cantJump;
+    if (gGameStatus.isBattle && gBattleState == BATTLE_STATE_PLAYER_MENU) {
+        // TODO: make this more robust
+        clear_windows();
+        gBattleSubState = BTL_SUBSTATE_PLAYER_MENU_CREATE_MAIN_MENU;
+    }
+}
+
+static void preventHammer(ChaosEffectData *effect) {
+    chaosStatus.cantHammer = !chaosStatus.cantHammer;
+    if (gGameStatus.isBattle && gBattleState == BATTLE_STATE_PLAYER_MENU) {
+        // TODO: make this more robust
+        clear_windows();
+        gBattleSubState = BTL_SUBSTATE_PLAYER_MENU_CREATE_MAIN_MENU;
+    }
 }
