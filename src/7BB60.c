@@ -623,6 +623,9 @@ void collision_main_lateral(void) {
                         if (playerStatus->flags & PS_FLAG_ENTERING_BATTLE) {
                             speed *= 0.5f;
                         }
+                        if (chaosStatus.turbo && speed != 0.0f) {
+                            speed = 5;
+                        }
                     }
                     sin_cos_rad(DEG_TO_RAD(yaw), &sinTheta, &cosTheta);
 

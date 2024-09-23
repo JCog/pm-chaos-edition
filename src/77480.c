@@ -635,6 +635,11 @@ void update_player(void) {
     }
     #endif
 
+    if (chaosStatus.turbo) {
+        gPlayerStatus.walkSpeed = 10.0f;
+        gPlayerStatus.runSpeed = 20.0f;
+    }
+
     update_partner_timers();
 
     if ((playerStatus->timeInAir > 100) || (playerStatus->pos.y < -2000.0f)) {

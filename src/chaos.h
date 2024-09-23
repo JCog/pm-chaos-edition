@@ -35,6 +35,7 @@ typedef struct ChaosStatus {
     b8 allSfxAttackFx;
     b8 hideModels;
     b8 spinAngle;
+    b8 turbo;
     f32 playerPitch;
     f32 playerSpriteAngle;
     s16 playerPitchOffset;

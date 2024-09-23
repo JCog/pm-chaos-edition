@@ -43,14 +43,16 @@ static void topDownCam(ChaosEffectData*);
 static void intangibleEnemies(ChaosEffectData*);
 static void spinAngle(ChaosEffectData*);
 static void lava(ChaosEffectData*);
-static void rotatePlayer(ChaosEffectData*);
-static void rotatePlayerOff(ChaosEffectData*);
+static void turbo(ChaosEffectData*);
+static void turboOff(ChaosEffectData*);
 // battle
 static void negativeAttack(ChaosEffectData*);
 static void randomEnemyHp(ChaosEffectData*);
 static void shuffleBattlePos(ChaosEffectData*);
 static void randomMarioMove(ChaosEffectData*);
 // anywhere
+static void rotatePlayer(ChaosEffectData*);
+static void rotatePlayerOff(ChaosEffectData*);
 static void equipBadge(ChaosEffectData*);
 static void unequipBadge(ChaosEffectData*);
 static void perilSound(ChaosEffectData*);
@@ -97,17 +99,18 @@ ChaosEffectData effectData[] = {
     {"Intangible Enemies",      FALSE,  0,  30, intangibleEnemies,      intangibleEnemies,  isOverworld},
     {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
     {"The Floor is Lava",       FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
+    {"Turbo",                   FALSE,  0,  60, turbo,                  turboOff,           isOverworld},
     // battle
     {"Healing Touch",           FALSE,  0,  10, negativeAttack,         negativeAttack,     isValidBattle},
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               isValidBattle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isValidBattle},
     {"Random Mario Move",       FALSE,  0,  0,  randomMarioMove,        NULL,               isValidBattle},
     // anywhere
-    {"Rotate Player",           TRUE,   0,  60, rotatePlayer,           rotatePlayerOff,    NULL},
+    {"Rotate Player",           TRUE,   0,  90, rotatePlayer,           rotatePlayerOff,    NULL},
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
     {"Peril Sound",             TRUE,   0,  30, perilSound,             perilSoundOff,      NULL},
-    {"Squish",                  TRUE,   0,  60, squish,                 squishOff,          NULL},
+    {"Squish",                  TRUE,   0,  90, squish,                 squishOff,          NULL},
     {"All SFX AttackFX",        FALSE,  0,  30, allSfxAttackFx,         allSfxAttackFx,     NULL},
     {"Hide Models",             FALSE,  0,  90, hideModels,             hideModels,         NULL},
     {"Point Swap",              FALSE,  0,  0,  pointSwap,              NULL,               canPointSwap},
@@ -779,31 +782,14 @@ static void lava(ChaosEffectData *effect) {
     set_action_state(ACTION_STATE_HIT_LAVA);
 }
 
-static void rotatePlayer(ChaosEffectData *effect) {
-    if (!playerRotating) {
-        playerRotating = TRUE;
-        chaosStatus.playerPitch = 0;
-        chaosStatus.playerSpriteAngle = 0;
-        chaosStatus.playerPitchOffset = 14;
-        pitchSpeed = rand_float() * 8 + 2;
-        yawSpeed = rand_float() * 8 + 2;
-        if (rand_int(100) < 50) {
-            pitchSpeed *= -1;
-        }
-        if (rand_int(100) < 50) {
-            yawSpeed *= -1;
-        }
-    }
-
-    chaosStatus.playerPitch += pitchSpeed;
-    chaosStatus.playerSpriteAngle += yawSpeed;
+static void turbo(ChaosEffectData *effect) {
+    chaosStatus.turbo = TRUE;
 }
 
-static void rotatePlayerOff(ChaosEffectData *effect) {
-    playerRotating = FALSE;
-    chaosStatus.playerPitch = 0.0f;
-    chaosStatus.playerSpriteAngle = 0.0f;
-    chaosStatus.playerPitchOffset = 0;
+static void turboOff(ChaosEffectData *effect) {
+    chaosStatus.turbo = FALSE;
+    gPlayerStatus.walkSpeed = 2.0f;
+    gPlayerStatus.runSpeed = 4.0f;
 }
 
 static void negativeAttack(ChaosEffectData *effect) {
@@ -901,6 +887,33 @@ static void shuffleBattlePos(ChaosEffectData *effect) {
 
 static void randomMarioMove(ChaosEffectData *effect) {
     battleQueueMario = TRUE;
+}
+
+static void rotatePlayer(ChaosEffectData *effect) {
+    if (!playerRotating) {
+        playerRotating = TRUE;
+        chaosStatus.playerPitch = 0;
+        chaosStatus.playerSpriteAngle = 0;
+        chaosStatus.playerPitchOffset = 14;
+        pitchSpeed = rand_float() * 8 + 2;
+        yawSpeed = rand_float() * 8 + 2;
+        if (rand_int(100) < 50) {
+            pitchSpeed *= -1;
+        }
+        if (rand_int(100) < 50) {
+            yawSpeed *= -1;
+        }
+    }
+
+    chaosStatus.playerPitch += pitchSpeed;
+    chaosStatus.playerSpriteAngle += yawSpeed;
+}
+
+static void rotatePlayerOff(ChaosEffectData *effect) {
+    playerRotating = FALSE;
+    chaosStatus.playerPitch = 0.0f;
+    chaosStatus.playerSpriteAngle = 0.0f;
+    chaosStatus.playerPitchOffset = 0;
 }
 
 static void equipBadge(ChaosEffectData *effect) {
