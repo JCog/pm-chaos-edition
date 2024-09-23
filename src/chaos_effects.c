@@ -789,31 +789,6 @@ static void randomEnemyHp(ChaosEffectData *effect) {
     }
 }
 
-EvtScript N(EVS_Shuffle_Sparkles) = {
-    Call(PlaySound, SOUND_MULTIPLE_STAR_SPIRITS_APPEAR)
-    Call(GetActorPos, ACTOR_PLAYER, LVar0, LVar1, LVar2)
-    Add(LVar1, 15)
-    PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
-    Call(ActorExists, ACTOR_PARTNER, LVar0)
-    IfEq(LVar0, TRUE)
-        Call(GetActorPos, ACTOR_PARTNER, LVar0, LVar1, LVar2)
-        Add(LVar1, 15)
-        PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
-    EndIf
-    Set(LVar3, ACTOR_ENEMY0)
-    Loop(MAX_ENEMY_ACTORS)
-        Call(ActorExists, LVar3, LVar0)
-        IfEq(LVar0, TRUE)
-            Call(GetActorPos, LVar3, LVar0, LVar1, LVar2)
-            Add(LVar1, 15)
-            PlayEffect(EFFECT_SPARKLES, 0, LVar0, LVar1, LVar2, 10)
-            Add(LVar3, 1)
-        EndIf
-    EndLoop
-    Return
-    End
-};
-
 static b8 actorAtHome(Actor *actor) {
     // actors can dance around, so checking in a range
     if (fabsf(actor->homePos.x - actor->curPos.x) > 20) {
@@ -864,7 +839,12 @@ static void shuffleBattlePos(ChaosEffectData *effect) {
     }
 
     // apply new position homes, move them if they're not away from their current home (aka probably attacking)
+    b8 moveOccured = FALSE;
     for (s32 i = 0; i < actorCount; i++) {
+        if (actors[i]->homePos.x == newPos[i].x) {
+            continue;
+        }
+        moveOccured = TRUE;
         actors[i]->homePos.x = newPos[i].x;
         actors[i]->homePos.z = newPos[i].z;
         actors[i]->healthBarPos.x = newPos[i].x;
@@ -872,9 +852,15 @@ static void shuffleBattlePos(ChaosEffectData *effect) {
         if (atHome[i]) {
             actors[i]->curPos.x = newPos[i].x;
             actors[i]->curPos.z = newPos[i].z;
+            fx_sparkles(0, newPos[i].x, actors[i]->curPos.y + 15, newPos[i].z, 10);
         }
     }
-    start_script(&N(EVS_Shuffle_Sparkles), EVT_PRIORITY_A, 0);
+    if (moveOccured) {
+        sfx_play_sound(SOUND_MULTIPLE_STAR_SPIRITS_APPEAR);
+    } else {
+        // not the most efficient, but works fine and makes sure at least two actors get swapped
+        shuffleBattlePos(effect);
+    }
 }
 
 static void randomMarioMove(ChaosEffectData *effect) {
