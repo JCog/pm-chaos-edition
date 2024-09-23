@@ -3,6 +3,7 @@
 #include "effects.h"
 #include "battle/battle.h"
 #include "sprite/npc/BattleWatt.h"
+#include "chaos.h"
 
 enum StandardPalettes {
     STANDARD_PAL_POISON     = 1,
@@ -1842,16 +1843,16 @@ end:
 
     guTranslateF(mtxPivotOn,
         -player->rotPivotOffset.x * player->scalingFactor,
-        -player->rotPivotOffset.y * player->scalingFactor,
+        -(player->rotPivotOffset.y + chaosPlayerPitchOffset) * player->scalingFactor,
         -player->rotPivotOffset.z * player->scalingFactor);
     guTranslateF(mtxPivotOff,
         player->rotPivotOffset.x * player->scalingFactor,
-        player->rotPivotOffset.y * player->scalingFactor,
+        (player->rotPivotOffset.y + chaosPlayerPitchOffset) * player->scalingFactor,
         player->rotPivotOffset.z * player->scalingFactor);
 
     guRotateF(mtxRotX, player->rot.x, 1.0f, 0.0f, 0.0f);
-    guRotateF(mtxRotY, player->rot.y, 0.0f, 1.0f, 0.0f);
-    guRotateF(mtxRotZ, player->rot.z, 0.0f, 0.0f, 1.0f);
+    guRotateF(mtxRotY, clamp_angle(player->rot.y + chaosPlayerSpriteAngle), 0.0f, 1.0f, 0.0f);
+    guRotateF(mtxRotZ, clamp_angle(player->rot.z + chaosPlayerPitch), 0.0f, 0.0f, 1.0f);
     guMtxCatF(mtxRotY, mtxRotX, mtxTemp);
     guMtxCatF(mtxTemp, mtxRotZ, mtxRotation);
 

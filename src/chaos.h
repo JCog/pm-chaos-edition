@@ -39,6 +39,7 @@ extern b8 chaosHideModels;
 extern b8 chaosSpinAngle;
 extern f32 chaosPlayerPitch;
 extern f32 chaosPlayerSpriteAngle;
+extern s16 chaosPlayerPitchOffset;
 extern b8 chaosHpSoundPlayed;
 extern b8 chaosFpSoundPlayed;
 extern b8 chaosRotateCamera;

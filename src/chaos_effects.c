@@ -107,13 +107,13 @@ ChaosEffectData effectData[] = {
     {"Intangible Enemies",      FALSE,  0,  30, intangibleEnemies,      intangibleEnemies,  isOverworld},
     {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
     {"The Floor is Lava",       FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
-    {"Rotate Player",           TRUE,   0,  60, rotatePlayer,           rotatePlayerOff,    isOverworld},
     // battle
     {"Healing Touch",           FALSE,  0,  10, negativeAttack,         negativeAttack,     isValidBattle},
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               isValidBattle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isValidBattle},
     {"Random Mario Move",       FALSE,  0,  0,  randomMarioMove,        NULL,               isValidBattle},
     // anywhere
+    {"Rotate Player",           TRUE,   0,  60, rotatePlayer,           rotatePlayerOff,    NULL},
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
     {"Unequip Badge",           FALSE,  0,  0,  unequipBadge,           NULL,               canUnequipBadge},
     {"Peril Sound",             TRUE,   0,  30, perilSound,             perilSoundOff,      NULL},
@@ -152,6 +152,7 @@ b8 chaosHideModels = FALSE;
 b8 chaosSpinAngle = FALSE;
 f32 chaosPlayerPitch = 0.0f;
 f32 chaosPlayerSpriteAngle = 0.0f;
+s16 chaosPlayerPitchOffset = 0;
 b8 chaosHpSoundPlayed = FALSE;
 b8 chaosFpSoundPlayed = FALSE;
 b8 chaosBadMusic = FALSE;
@@ -783,6 +784,7 @@ static void rotatePlayer(ChaosEffectData *effect) {
         playerRotating = TRUE;
         chaosPlayerPitch = 0;
         chaosPlayerSpriteAngle = 0;
+        chaosPlayerPitchOffset = 14;
         pitchSpeed = rand_float() * 8 + 2;
         yawSpeed = rand_float() * 8 + 2;
         if (rand_int(100) < 50) {
@@ -801,6 +803,7 @@ static void rotatePlayerOff(ChaosEffectData *effect) {
     playerRotating = FALSE;
     chaosPlayerPitch = 0.0f;
     chaosPlayerSpriteAngle = 0.0f;
+    chaosPlayerPitchOffset = 0;
 }
 
 static void negativeAttack(ChaosEffectData *effect) {
