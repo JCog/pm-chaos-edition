@@ -7,7 +7,6 @@
 #include "world/actions.h"
 
 #define TIMER_DISABLED -32768
-#define ACTOR_DATA_COUNT 64
 #define FB_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * 2)
 
 // conditionals
@@ -496,7 +495,8 @@ static b8 isOverworld() {
 }
 
 static b8 canLevitate() {
-    return !gGameStatus.isBattle && gPlayerStatus.actionState != ACTION_STATE_KNOCKBACK;
+    return !gGameStatus.isBattle && gPlayerStatus.actionState != ACTION_STATE_KNOCKBACK
+        && gPlayerStatus.actionState != ACTION_STATE_RIDE;
 }
 
 static b8 canActorChase() {
@@ -504,7 +504,7 @@ static b8 canActorChase() {
 }
 
 static b8 canKnockback() {
-    return !gGameStatus.isBattle && !chaosStatus.levitating;
+    return !gGameStatus.isBattle && !chaosStatus.levitating && gPlayerStatus.actionState != ACTION_STATE_RIDE;
 }
 
 static b8 canTouchLava() {
@@ -633,7 +633,7 @@ static void posRewind(ChaosEffectData *effect) {
     }
 
     // prevent loading a position from a previous map
-    if (get_game_mode() == GAME_MODE_CHANGE_MAP) {
+    if (get_game_mode() == GAME_MODE_CHANGE_MAP || gPlayerStatus.actionState == ACTION_STATE_RIDE) {
         rewindSaved = FALSE;
         return;
     }
