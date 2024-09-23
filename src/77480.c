@@ -1409,7 +1409,7 @@ void player_update_sprite(void) {
     }
 
     trueAnim = playerStatus->anim;
-    if (!(playerStatus->flags & PS_FLAG_SPINNING) && !chaosRotating) {
+    if (!(playerStatus->flags & PS_FLAG_SPINNING)) {
         sprIndex = (playerStatus->anim >> 0x10) & 0xFF;
 
         if (playerStatus->actionState == ACTION_STATE_TORNADO_JUMP || playerStatus->flags & PS_FLAG_ROTATION_LOCKED) {
@@ -1554,21 +1554,22 @@ void appendGfx_player(void* data) {
     if (playerStatus->actionState == ACTION_STATE_SLIDING) {
         guScaleF(spE0, SPRITE_WORLD_SCALE_D, SPRITE_WORLD_SCALE_D, SPRITE_WORLD_SCALE_D);
         guRotateF(sp20, temp_f0, 0.0f, 1.0f, 0.0f);
+        guRotateF(sp20, clamp_angle(chaosPlayerPitch), 0.0f, 0.0f, 1.0f);
         guMtxCatF(spE0, sp20, sp20);
-        guRotateF(spA0, playerStatus->spriteFacingAngle, 0.0f, 1.0f, 0.0f);
+        guRotateF(spA0, clamp_angle(playerStatus->spriteFacingAngle + chaosPlayerSpriteAngle), 0.0f, 1.0f, 0.0f);
         guMtxCatF(sp20, spA0, sp20);
         guTranslateF(sp60, playerStatus->pos.x, playerStatus->pos.y - 1.0f, playerStatus->pos.z);
         guMtxCatF(sp20, sp60, sp20);
         spr_draw_player_sprite(PLAYER_SPRITE_MAIN, 0, 0, 0, sp20);
     } else {
         guRotateF(spA0, temp_f0, 0.0f, -1.0f, 0.0f);
-        guRotateF(sp20, clamp_angle(playerStatus->pitch), 0.0f, 0.0f, 1.0f);
+        guRotateF(sp20, clamp_angle(playerStatus->pitch + chaosPlayerPitch), 0.0f, 0.0f, 1.0f);
         guMtxCatF(spA0, sp20, sp20);
         guTranslateF(sp60, 0.0f, -playerStatus->colliderHeight * 0.5f, 0.0f);
         guMtxCatF(sp60, sp20, sp20);
         guRotateF(spA0, temp_f0, 0.0f, 1.0f, 0.0f);
         guMtxCatF(sp20, spA0, sp20);
-        guRotateF(spA0, playerStatus->spriteFacingAngle, 0.0f, 1.0f, 0.0f);
+        guRotateF(spA0, clamp_angle(playerStatus->spriteFacingAngle + chaosPlayerSpriteAngle), 0.0f, 1.0f, 0.0f);
         guMtxCatF(sp20, spA0, sp20);
         guTranslateF(sp60, 0.0f, playerStatus->colliderHeight * 0.5f, 0.0f);
         guMtxCatF(sp20, sp60, sp20);
@@ -1640,8 +1641,8 @@ void appendGfx_player_spin(void* data) {
 
             set_player_imgfx_all(PLAYER_SPRITE_MAIN, IMGFX_SET_COLOR, tint, tint, tint, 255, 0);
 
-            guRotateF(rotation, yaw, 0.0f, -1.0f, 0.0f);
-            guRotateF(mtx, clamp_angle(playerStatus->pitch), 0.0f, 0.0f, 1.0f);
+            guRotateF(rotation, clamp_angle(yaw + chaosPlayerSpriteAngle), 0.0f, -1.0f, 0.0f);
+            guRotateF(mtx, clamp_angle(playerStatus->pitch + chaosPlayerPitch), 0.0f, 0.0f, 1.0f);
             guMtxCatF(rotation, mtx, mtx);
             px = playerStatus->pos.x;
             py = playerStatus->pos.y;

@@ -54,8 +54,8 @@ static void topDownCam(ChaosEffectData*);
 static void intangibleEnemies(ChaosEffectData*);
 static void spinAngle(ChaosEffectData*);
 static void lava(ChaosEffectData*);
-static void rotateMario(ChaosEffectData*);
-static void rotateMarioOff(ChaosEffectData*);
+static void rotatePlayer(ChaosEffectData*);
+static void rotatePlayerOff(ChaosEffectData*);
 // battle
 static void negativeAttack(ChaosEffectData*);
 static void randomEnemyHp(ChaosEffectData*);
@@ -107,7 +107,7 @@ ChaosEffectData effectData[] = {
     {"Intangible Enemies",      FALSE,  0,  30, intangibleEnemies,      intangibleEnemies,  isOverworld},
     {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
     {"The Floor is Lava",       FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
-    {"Rotate Mario",            TRUE,   0,  60, rotateMario,            rotateMarioOff,     isOverworld},
+    {"Rotate Player",           TRUE,   0,  60, rotatePlayer,           rotatePlayerOff,    isOverworld},
     // battle
     {"Healing Touch",           FALSE,  0,  10, negativeAttack,         negativeAttack,     isValidBattle},
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               isValidBattle},
@@ -150,13 +150,14 @@ b8 chaosHealingTouch = FALSE;
 b8 chaosAllSfxAttackFx = FALSE;
 b8 chaosHideModels = FALSE;
 b8 chaosSpinAngle = FALSE;
+f32 chaosPlayerPitch = 0.0f;
+f32 chaosPlayerSpriteAngle = 0.0f;
 b8 chaosHpSoundPlayed = FALSE;
 b8 chaosFpSoundPlayed = FALSE;
 b8 chaosBadMusic = FALSE;
 b8 chaosRotateCamera = FALSE;
 Matrix4f chaosRotateMtx = {0};
 b8 chaosBackgroundChanged = TRUE;
-b8 chaosRotating = FALSE;
 b8 chaosReverseAnalog = FALSE;
 b8 chaosShuffleButtons = FALSE;
 enum Buttons chaosButtonMap[9] = {0};
@@ -169,15 +170,13 @@ static b8 rewindSaved = FALSE;
 static s16 rewindTime = TIMER_DISABLED;
 static Vec3f rewindPos;
 static s16 knockbackTime = TIMER_DISABLED;
+static b8 playerRotating = FALSE;
 static b8 battleQueueMario = FALSE;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
 static s16 perilTime = TIMER_DISABLED;
 static ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 static u16 savedPalette[256];
 static BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
-static f32 marioFlipYaw = 0.0f;
-static f32 marioPitch = 0.0f;
-static f32 marioSpriteFacingAngle = 0.0f;
 static f32 yawSpeed = 0.0f;
 static f32 pitchSpeed = 0.0f;
 static u16 *chaosSavedFrame = NULL;
@@ -709,14 +708,14 @@ static void levitateOff(ChaosEffectData *effect) {
 }
 
 static void magnetPosStep(Vec3f *pos) {
-    f32 speed = 3;
-    Vec3f marioPos = gPlayerStatus.pos;
-    if (dist3D(marioPos.x, marioPos.y, marioPos.z, pos->x, pos->y, pos->z) <= speed) {
+    const f32 speed = 3;
+    Vec3f *marioPos = &gPlayerStatus.pos;
+    if (dist3D(marioPos->x, marioPos->y, marioPos->z, pos->x, pos->y, pos->z) <= speed) {
         return;
     }
-    f32 xDiff = marioPos.x - pos->x;
-    f32 yDiff = marioPos.y - pos->y;
-    f32 zDiff = marioPos.z - pos->z;
+    f32 xDiff = marioPos->x - pos->x;
+    f32 yDiff = marioPos->y - pos->y;
+    f32 zDiff = marioPos->z - pos->z;
     f32 temp = speed / sqrtf(SQ(xDiff) + SQ(yDiff) + SQ(zDiff));
     pos->x += temp * xDiff;
     pos->y += temp * yDiff;
@@ -737,9 +736,9 @@ static void actorChase(ChaosEffectData *effect) {
         }
     }
     for (s32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
-        ItemEntity *entity = (gCurrentItemEntities)[i];
-        if (entity != NULL) {
-            magnetPosStep(&entity->pos);
+        ItemEntity *itemEntity = (gCurrentItemEntities)[i];
+        if (itemEntity != NULL) {
+            magnetPosStep(&itemEntity->pos);
         }
     }
 }
@@ -779,14 +778,13 @@ static void lava(ChaosEffectData *effect) {
     set_action_state(ACTION_STATE_HIT_LAVA);
 }
 
-static void rotateMario(ChaosEffectData *effect) {
-    if (!chaosRotating) {
-        chaosRotating = TRUE;
-        marioPitch = gPlayerStatus.pitch;
-        marioFlipYaw = gPlayerStatus.flipYaw[gCurrentCameraID];
-        marioSpriteFacingAngle = gPlayerStatus.spriteFacingAngle;
-        pitchSpeed = rand_float() * 6 + 4;
-        yawSpeed = rand_float() * 6 + 4;
+static void rotatePlayer(ChaosEffectData *effect) {
+    if (!playerRotating) {
+        playerRotating = TRUE;
+        chaosPlayerPitch = 0;
+        chaosPlayerSpriteAngle = 0;
+        pitchSpeed = rand_float() * 8 + 2;
+        yawSpeed = rand_float() * 8 + 2;
         if (rand_int(100) < 50) {
             pitchSpeed *= -1;
         }
@@ -794,25 +792,15 @@ static void rotateMario(ChaosEffectData *effect) {
             yawSpeed *= -1;
         }
     }
-    marioPitch += pitchSpeed;
-    marioFlipYaw += yawSpeed;
-    marioSpriteFacingAngle += yawSpeed;
-    if (marioFlipYaw >= 360) {
-        marioFlipYaw -= 360;
-    }
-    if (marioSpriteFacingAngle >= 360) {
-        marioSpriteFacingAngle -= 360;
-    }
-    if (marioPitch >= 360) {
-        marioPitch -= 360;
-    }
-    gPlayerStatus.pitch = marioPitch;
-    gPlayerStatus.spriteFacingAngle = marioSpriteFacingAngle;
-    gPlayerStatus.flipYaw[gCurrentCameraID] = marioFlipYaw;
+
+    chaosPlayerPitch += pitchSpeed;
+    chaosPlayerSpriteAngle += yawSpeed;
 }
 
-static void rotateMarioOff(ChaosEffectData *effect) {
-    chaosRotating = FALSE;
+static void rotatePlayerOff(ChaosEffectData *effect) {
+    playerRotating = FALSE;
+    chaosPlayerPitch = 0.0f;
+    chaosPlayerSpriteAngle = 0.0f;
 }
 
 static void negativeAttack(ChaosEffectData *effect) {
