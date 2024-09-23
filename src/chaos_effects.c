@@ -11,6 +11,7 @@
 
 // conditionals
 static b8 isOverworld(void);
+static b8 canTeleport(void);
 static b8 canLevitate(void);
 static b8 canActorChase(void);
 static b8 canKnockback(void);
@@ -30,6 +31,8 @@ static void toggleRandomEffects(ChaosEffectData*);
 // overworld
 static void posRewind(ChaosEffectData*);
 static void posRewindOff(ChaosEffectData*);
+static void teleport(ChaosEffectData*);
+static void teleportOff(ChaosEffectData*);
 static void levitate(ChaosEffectData*);
 static void levitateOff(ChaosEffectData*);
 static void actorChase(ChaosEffectData*);
@@ -85,6 +88,7 @@ ChaosEffectData effectData[] = {
     #endif
     // overworld
     {"Rewind",                  TRUE,   0,  60, posRewind,              posRewindOff,       isOverworld},
+    {"Teleport",                TRUE,   0,  60, teleport,               teleportOff,        canTeleport},
     {"Levitate",                TRUE,   0,  15, levitate,               levitateOff,        canLevitate},
     {"Actor Chase",             TRUE,   0,  20, actorChase,             NULL,               canActorChase},
     {"Knockback",               TRUE,   0,  60, knockback,              knockbackOff,       canKnockback},
@@ -133,6 +137,7 @@ ChaosStatus chaosStatus = {.backgroundChanged = TRUE};
 static b8 rewindSaved = FALSE;
 static s16 rewindTime = TIMER_DISABLED;
 static Vec3f rewindPos;
+static s16 teleportTime = TIMER_DISABLED;
 static s16 knockbackTime = TIMER_DISABLED;
 static b8 playerRotating = FALSE;
 static b8 battleQueueMario = FALSE;
@@ -494,6 +499,10 @@ static b8 isOverworld() {
     return !gGameStatus.isBattle;
 }
 
+static b8 canTeleport() {
+    return get_game_mode() == GAME_MODE_WORLD && !(gPlayerStatus.flags & PS_FLAG_INPUT_DISABLED);
+}
+
 static b8 canLevitate() {
     return !gGameStatus.isBattle && gPlayerStatus.actionState != ACTION_STATE_KNOCKBACK
         && gPlayerStatus.actionState != ACTION_STATE_RIDE;
@@ -652,6 +661,33 @@ static void posRewind(ChaosEffectData *effect) {
 
 static void posRewindOff(ChaosEffectData *effect) {
     rewindTime = TIMER_DISABLED;
+}
+
+static void teleport(ChaosEffectData *effect) {
+    if (teleportTime == TIMER_DISABLED) {
+        teleportTime = effect->timer;
+    }
+
+    if (effect->timer == teleportTime) {
+        f32 newX, newZ;
+        HitID wall = 1;
+        while (wall > 0) {
+            f32 distance = rand_float() * 90.0f + 10.0f;
+            f32 direction = rand_float() * 360;
+            newX = gPlayerStatus.pos.x;
+            newZ = gPlayerStatus.pos.z;
+            wall = player_test_move_with_slipping(&gPlayerStatus, &newX, &gPlayerStatus.pos.y, &newZ, distance,
+                                                  direction);
+        }
+        gPlayerStatus.pos.x = newX;
+        gPlayerStatus.pos.z = newZ;
+        sfx_play_sound(SOUND_STAR_SPIRIT_APPEAR_A);
+        teleportTime -= rand_int(89) + 1;
+    }
+}
+
+static void teleportOff(ChaosEffectData *effect) {
+    teleportTime = TIMER_DISABLED;
 }
 
 static void levitate(ChaosEffectData *effect) {
