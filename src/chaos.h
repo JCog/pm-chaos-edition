@@ -31,6 +31,7 @@ typedef struct ChaosStatus {
     b8 slowGo;
     b8 topDownCam;
     b8 healingTouch;
+    Vec3f squishScale;
     b8 allSfxAttackFx;
     b8 hideModels;
     b8 spinAngle;

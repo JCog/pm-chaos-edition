@@ -10,19 +10,6 @@
 #define ACTOR_DATA_COUNT 64
 #define FB_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * 2)
 
-typedef enum ActorType {
-    ACTOR_NPC,
-    ACTOR_ENEMY,
-    ACTOR_BATTLE_PARTNER,
-} ActorType;
-
-typedef struct ActorScaleData {
-    s16 id;
-    ActorType actorType;
-    Vec3f originalScale;
-    Vec3f curScale;
-} ActorScaleData;
-
 // conditionals
 static b8 isOverworld(void);
 static b8 canLevitate(void);
@@ -152,7 +139,6 @@ static b8 playerRotating = FALSE;
 static b8 battleQueueMario = FALSE;
 static s16 enemyHpDeltas[ARRAY_COUNT(gBattleStatus.enemyActors)];
 static s16 perilTime = TIMER_DISABLED;
-static ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 static u16 savedPalette[256];
 static BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
 static f32 pitchSpeed = 0.0f;
@@ -976,89 +962,18 @@ static void perilSoundOff(ChaosEffectData *effect) {
     perilTime = TIMER_DISABLED;
 }
 
-static void squishActor(s8 id, ActorType actorType, Vec3f *scale) {
-    b8 existingData = FALSE;
-    ActorScaleData *scaleData = NULL;
-    for (s32 i = 0; i < ACTOR_DATA_COUNT; i++) {
-        ActorScaleData *scaleBuffer = &actorScaleBuffer[i];
-        if (scaleBuffer->id == id && scaleBuffer->actorType == actorType) {
-            existingData = TRUE;
-            scaleData = scaleBuffer;
-            break;
-        } else if (scaleBuffer->id == -1){
-            scaleData = scaleBuffer;
-            break;
-        }
-    }
-    if (existingData) {
-        scaleData->curScale.x += 0.03f;
-        scaleData->curScale.z += 0.03f;
-        scaleData->curScale.y -= 0.0005f;
-        scale->x = scaleData->curScale.x;
-        scale->z = scaleData->curScale.z;
-        scale->y = scaleData->curScale.y;
-    } else if (scaleData != NULL) {
-        scaleData->id = id;
-        scaleData->actorType = actorType;
-        scaleData->originalScale.x = scaleData->curScale.x = scale->x;
-        scaleData->originalScale.z = scaleData->curScale.z = scale->z;
-        scaleData->originalScale.y = scaleData->curScale.y = scale->y;
-    }
-}
-
 static void squish(ChaosEffectData *effect) {
-    for (s32 i = 0; i < MAX_NPCS; i++) {
-        Npc *npc = (*gCurrentNpcListPtr)[i];
-        if (npc == NULL) {
-            continue;
-        }
-        squishActor(npc->npcID, ACTOR_NPC, &npc->scale);
-    }
-    for (s32 i = 0; i < MAX_ENEMY_ACTORS; i++) {
-        Actor *enemy = gBattleStatus.enemyActors[i];
-        if (enemy == NULL) {
-            continue;
-        }
-        squishActor(i, ACTOR_ENEMY, &enemy->scale);
-    }
-    if (gBattleStatus.partnerActor != NULL) {
-        squishActor(gBattleStatus.partnerActor->actorID, ACTOR_BATTLE_PARTNER, &gBattleStatus.partnerActor->scale);
+    if (chaosStatus.squishScale.x < 10) {
+        chaosStatus.squishScale.x += 0.03f;
+        chaosStatus.squishScale.y -= 0.0005f;
+        chaosStatus.squishScale.z += 0.03f;
     }
 }
 
 static void squishOff(ChaosEffectData *effect) {
-    for (s32 i = 0; i < ACTOR_DATA_COUNT; i++) {
-        ActorScaleData *scaleBuffer = &actorScaleBuffer[i];
-        if (scaleBuffer->id == -1) {
-            continue;
-        }
-        switch (scaleBuffer->actorType) {
-            case ACTOR_NPC: {
-                Npc *npc = get_npc_safe(scaleBuffer->id);
-                if (npc != NULL) {
-                    npc->scale.x = scaleBuffer->originalScale.x;
-                    npc->scale.z = scaleBuffer->originalScale.z;
-                    npc->scale.y = scaleBuffer->originalScale.y;
-                }
-                break;
-            }
-            case ACTOR_ENEMY: {
-                Actor *enemy = gBattleStatus.enemyActors[scaleBuffer->id];
-                if (enemy != NULL) {
-                    enemy->scale.x = scaleBuffer->originalScale.x;
-                    enemy->scale.z = scaleBuffer->originalScale.z;
-                    enemy->scale.y = scaleBuffer->originalScale.y;
-                }
-                break;
-            }
-            case ACTOR_BATTLE_PARTNER: {
-                gBattleStatus.partnerActor->scale.x = scaleBuffer->originalScale.x;
-                gBattleStatus.partnerActor->scale.z = scaleBuffer->originalScale.z;
-                gBattleStatus.partnerActor->scale.y = scaleBuffer->originalScale.y;
-            }
-        }
-        scaleBuffer->id = -1;
-    }
+    chaosStatus.squishScale.x = 0.0f;
+    chaosStatus.squishScale.y = 0.0f;
+    chaosStatus.squishScale.z = 0.0f;
 }
 
 static void allSfxAttackFx(ChaosEffectData *effect) {

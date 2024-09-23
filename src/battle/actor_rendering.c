@@ -948,9 +948,9 @@ void appendGfx_npc_actor(b32 isPartner, s32 actorIndex) {
     guMtxCatF(mtxRotY, mtxRotX, mtxTemp);
     guMtxCatF(mtxTemp, mtxRotZ, mtxRotation);
     guScaleF(mtxScale,
-        actor->scale.x * SPRITE_WORLD_SCALE_D * actor->scalingFactor,
-        actor->scale.y * SPRITE_WORLD_SCALE_D * actor->scalingFactor,
-        actor->scale.z * SPRITE_WORLD_SCALE_D);
+        (actor->scale.x + chaosStatus.squishScale.x) * SPRITE_WORLD_SCALE_D * actor->scalingFactor,
+        (actor->scale.y + chaosStatus.squishScale.y) * SPRITE_WORLD_SCALE_D * actor->scalingFactor,
+        (actor->scale.z + chaosStatus.squishScale.z) * SPRITE_WORLD_SCALE_D);
     guScaleF(mtxScaleMod, actor->scaleModifier.x, actor->scaleModifier.y, actor->scaleModifier.z);
     guMtxCatF(mtxPivotOn, mtxScale, mtxTemp);
     guMtxCatF(mtxTemp, mtxScaleMod, mtxScale);

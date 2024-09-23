@@ -6,6 +6,7 @@
 #include "world/partners.h"
 #include "sprite/npc/WorldWatt.h"
 #include "dx/debug_menu.h"
+#include "chaos.h"
 
 s16 gNpcCount;
 static NpcList gWorldNpcList;
@@ -810,6 +811,7 @@ void appendGfx_npc(void* data) {
     Npc* npc = data;
     Matrix4f mtx1, mtx2;
     f32 renderYaw = npc_get_render_yaw(npc);
+    Vec3f *squishScale = &chaosStatus.squishScale;
 
     guTranslateF(mtx1, npc->pos.x, npc->pos.y + npc->verticalRenderOffset, npc->pos.z);
     if (npc->flags & NPC_FLAG_UPSIDE_DOWN) {
@@ -850,9 +852,11 @@ void appendGfx_npc(void* data) {
     if (npc->scale.x * SPRITE_WORLD_SCALE_D != 1.0f
         || (npc->scale.y * npc->verticalStretch) * SPRITE_WORLD_SCALE_D != 1.0f
         || npc->scale.z * SPRITE_WORLD_SCALE_D != 1.0f
+        || squishScale->x != 0.0f
     ) {
-        guScaleF(mtx2, npc->scale.x * SPRITE_WORLD_SCALE_D, (npc->scale.y * npc->verticalStretch) * SPRITE_WORLD_SCALE_D,
-                 npc->scale.z * SPRITE_WORLD_SCALE_D);
+        guScaleF(mtx2, (npc->scale.x + squishScale->x) * SPRITE_WORLD_SCALE_D,
+                 ((npc->scale.y + squishScale->y) * npc->verticalStretch) * SPRITE_WORLD_SCALE_D,
+                 (npc->scale.z + squishScale->z) * SPRITE_WORLD_SCALE_D);
         guMtxCatF(mtx2, mtx1, mtx1);
     }
 
