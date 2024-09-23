@@ -1144,7 +1144,7 @@ void au_bgm_player_update_playing(BGMPlayer *player) {
                         if (opcode < 0xD4) {
                             notePitch = (opcode & 0x7F);
                             if (!track->isDrumTrack) {
-                                switch (chaosBadMusic) {
+                                switch (chaosStatus.badMusic) {
                                     case 0:
                                         break;
                                     case 1:

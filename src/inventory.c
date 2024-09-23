@@ -803,7 +803,7 @@ void update_status_bar(void) {
                 if (gGameStatusPtr->frameCounter % 4 == 0) {
                     statusBar->displayHP++;
                     sfx_play_sound(SOUND_HEART_PICKUP);
-                    chaosHpSoundPlayed = TRUE;
+                    chaosStatus.hpSoundPlayed = TRUE;
                 }
             } else if (gGameStatusPtr->frameCounter % 4 == 0) {
                 statusBar->displayHP++;
@@ -823,7 +823,7 @@ void update_status_bar(void) {
                 if (gGameStatusPtr->frameCounter % 4 == 0) {
                     statusBar->displayFP++;
                     sfx_play_sound(SOUND_FLOWER_PICKUP);
-                    chaosFpSoundPlayed = TRUE;
+                    chaosStatus.fpSoundPlayed = TRUE;
                 }
             } else if (gGameStatusPtr->frameCounter % 4 == 0) {
                 statusBar->displayFP++;
@@ -1757,7 +1757,7 @@ s32 is_ability_active(s32 ability) {
     s32 ret;
     s32 i;
 
-    if (chaosSlowGo && ability == ABILITY_SLOW_GO) {
+    if (chaosStatus.slowGo && ability == ABILITY_SLOW_GO) {
         return 1;
     }
 
@@ -2070,7 +2070,7 @@ s32 is_ability_active(s32 ability) {
                 }
                 break;
             case ABILITY_PEEKABOO:
-                if (badgeMoveID == MOVE_PEEKABOO || chaosTimers[TIMER_ENEMY_HP_UPDATE] > 0) {
+                if (badgeMoveID == MOVE_PEEKABOO || chaosStatus.timers[TIMER_ENEMY_HP_UPDATE] > 0) {
                     ret++;
                 }
                 break;

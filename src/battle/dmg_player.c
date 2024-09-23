@@ -619,7 +619,7 @@ HitResult calc_player_damage_enemy(void) {
 
             battleStatus->lastAttackDamage = 0;
         } else {
-            if (chaosHealingTouch) {
+            if (chaosStatus.healingTouch) {
                 currentAttackDamage *= -1;
             }
             target->damageCounter += currentAttackDamage;

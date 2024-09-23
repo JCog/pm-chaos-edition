@@ -24,39 +24,45 @@ typedef struct ChaosEffectData {
     b8 (*canTrigger)();
 } ChaosEffectData;
 
+typedef struct ChaosStatus {
+    s16 timers[TIMER_MAX];
+    b8 menuOpen;
+    b8 levitating;
+    b8 slowGo;
+    b8 topDownCam;
+    b8 healingTouch;
+    b8 allSfxAttackFx;
+    b8 hideModels;
+    b8 spinAngle;
+    f32 playerPitch;
+    f32 playerSpriteAngle;
+    s16 playerPitchOffset;
+    b8 hpSoundPlayed;
+    b8 fpSoundPlayed;
+    b8 rotateCamera;
+    b8 zoomedOut;
+    Matrix4f rotateMtx;
+    Matrix4f zoomedOutMtx;
+    b8 backgroundChanged;
+    s8 badMusic;
+    b8 reverseAnalog;
+    b8 shuffleButtons;
+    enum Buttons buttonMap[9];
+    b8 randomButton;
+    b8 rememberThis;
+} ChaosStatus;
+
+extern ChaosStatus chaosStatus;
+
 extern ChaosEffectData effectData[];
 extern const u8 totalEffectCount;
 extern b8 randomEffects;
 
-extern s16 chaosTimers[TIMER_MAX];
-extern b8 chaosMenuOpen;
-extern b8 chaosLevitating;
-extern b8 chaosSlowGo;
-extern b8 chaosTopDownCam;
-extern b8 chaosHealingTouch;
-extern b8 chaosAllSfxAttackFx;
-extern b8 chaosHideModels;
-extern b8 chaosSpinAngle;
-extern f32 chaosPlayerPitch;
-extern f32 chaosPlayerSpriteAngle;
-extern s16 chaosPlayerPitchOffset;
-extern b8 chaosHpSoundPlayed;
-extern b8 chaosFpSoundPlayed;
-extern b8 chaosRotateCamera;
-extern b8 chaosZoomedOut;
-extern Matrix4f chaosZoomedOutMtx;
-extern b8 chaosBackgroundChanged;
-extern Matrix4f chaosRotateMtx;
-extern s8 chaosBadMusic;
-extern b8 chaosReverseAnalog;
-extern b8 chaosShuffleButtons;
-extern enum Buttons chaosButtonMap[9];
-extern b8 chaosRandomButton;
-extern b8 chaosRememberThis;
 
 void handleTimers(void);
 void handleBattleQueue(void);
 
+void initChaosStatus(void);
 void chaosUpdate(void);
 
 #endif

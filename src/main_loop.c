@@ -279,7 +279,7 @@ void gfx_draw_frame(void) {
     gDPFullSync(gMainGfxPos++);
     gSPEndDisplayList(gMainGfxPos++);
 
-    if (chaosRememberThis) {
+    if (chaosStatus.rememberThis) {
         return;
     }
 
@@ -346,6 +346,7 @@ void load_engine_data(void) {
     clear_windows();
     initialize_curtains();
     poll_rumble();
+    initChaosStatus();
 
     for (i = 0; i < ARRAY_COUNT(gGameStatusPtr->unk_50); i++) {
         gGameStatusPtr->unk_50[i] = 3;

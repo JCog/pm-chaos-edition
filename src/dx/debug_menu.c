@@ -459,7 +459,7 @@ void dx_debug_menu_main() {
     dx_debug_update_banner();
 
     // check input for menu open/close
-    if (chaosMenuOpen) {
+    if (chaosStatus.menuOpen) {
         return;
     }
     if (DebugMenuState == DBM_NONE) {

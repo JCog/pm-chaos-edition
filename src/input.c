@@ -90,7 +90,7 @@ void update_input(void) {
             stickY = 0;
         }
     }
-    if (chaosReverseAnalog) {
+    if (chaosStatus.reverseAnalog) {
         stickX *= -1;
         stickY *= -1;
     }
@@ -99,7 +99,7 @@ void update_input(void) {
     gGameStatusPtr->stickY[0] = stickY;
 
     buttons = contData->button;
-    if (chaosRandomButton) {
+    if (chaosStatus.randomButton) {
         s32 idx = rand_int(ARRAY_COUNT(primaryButtons) - 1);
         for (s32 i = 0; i < ARRAY_COUNT(primaryButtons); i++) {
             if (!(buttons & primaryButtons[idx])) {
@@ -110,16 +110,16 @@ void update_input(void) {
             idx++;
             idx %= ARRAY_COUNT(primaryButtons);
         }
-        chaosRandomButton = FALSE;
+        chaosStatus.randomButton = FALSE;
     }
-    if (chaosShuffleButtons) {
+    if (chaosStatus.shuffleButtons) {
         // keep d-pad, L, and stick values, but shuffle everything else
         s32 shuffled = buttons
             & ~(BUTTON_C_RIGHT | BUTTON_C_LEFT | BUTTON_C_DOWN | BUTTON_C_UP | BUTTON_R | BUTTON_START | BUTTON_Z
                 | BUTTON_B | BUTTON_A);
         for (s32 i = 0; i < ARRAY_COUNT(primaryButtons); i++) {
             if (buttons & primaryButtons[i]) {
-                shuffled |= chaosButtonMap[i];
+                shuffled |= chaosStatus.buttonMap[i];
             }
         }
         buttons = shuffled;

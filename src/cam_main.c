@@ -75,12 +75,12 @@ void update_cameras(void) {
                 guMtxCatF(cam->viewMtxLeading, cam->perspectiveMatrix, cam->perspectiveMatrix);
             }
 
-            if (chaosRotateCamera) {
-                guMtxCatF(chaosRotateMtx, cam->perspectiveMatrix, cam->perspectiveMatrix);
+            if (chaosStatus.rotateCamera) {
+                guMtxCatF(chaosStatus.rotateMtx, cam->perspectiveMatrix, cam->perspectiveMatrix);
             }
 
-            if (chaosZoomedOut) {
-                guMtxCatF(chaosZoomedOutMtx, cam->perspectiveMatrix, cam->perspectiveMatrix);
+            if (chaosStatus.zoomedOut) {
+                guMtxCatF(chaosStatus.zoomedOutMtx, cam->perspectiveMatrix, cam->perspectiveMatrix);
             }
 
             guMtxCatF(cam->viewMtxPlayer, cam->perspectiveMatrix, cam->perspectiveMatrix);
@@ -216,11 +216,11 @@ void render_frame(s32 isSecondPass) {
                 if (!(camera->flags & CAMERA_FLAG_RENDER_MODELS)) {
                     GFX_PROFILER_START(PROFILER_TIME_SUB_GFX_MODELS);
                     #if DX_DEBUG_MENU
-                    if (!dx_debug_should_hide_models() && !chaosHideModels) {
+                    if (!dx_debug_should_hide_models() && !chaosStatus.hideModels) {
                         render_models();
                     }
                     #else
-                    if (!chaosHideModels) {
+                    if (!chaosStatus.hideModels) {
                         render_models();
                     }
                     #endif

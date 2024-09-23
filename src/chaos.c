@@ -27,8 +27,6 @@ const enum GameMode badModes[] = {
     GAME_MODE_GAME_OVER, GAME_MODE_FILE_SELECT, GAME_MODE_END_FILE_SELECT, GAME_MODE_INTRO, GAME_MODE_DEMO
 };
 
-
-b8 chaosMenuOpen = FALSE;
 static u8 menuEffect = 0;
 static u8 menuTimer = 10;
 static s32 effectCountdown = 2;
@@ -183,11 +181,11 @@ static void handleMenu() {
     s32 pressed = gGameStatus.pressedButtons[0];
     s32 held = gGameStatus.heldButtons[0];
     if (pressed & BUTTON_L) {
-        chaosMenuOpen = !chaosMenuOpen;
+        chaosStatus.menuOpen = !chaosStatus.menuOpen;
         return;
     }
     if (CHAOS_DEBUG) {
-        if (!chaosMenuOpen) {
+        if (!chaosStatus.menuOpen) {
             return;
         }
         if (held & BUTTON_D_LEFT) {
@@ -272,7 +270,7 @@ void chaosUpdate() {
         }
     }
 
-    if (chaosMenuOpen) {
+    if (chaosStatus.menuOpen) {
         drawEffectList();
     }
 }

@@ -458,7 +458,7 @@ HitResult calc_partner_damage_enemy(void) {
 
             battleStatus->lastAttackDamage = 0;
         } else {
-            if (chaosHealingTouch) {
+            if (chaosStatus.healingTouch) {
                 damageDealt *= -1;
             }
             target->damageCounter += damageDealt;

@@ -264,7 +264,7 @@ void phys_update_jump(void) {
     if (playerStatus->gravityIntegrator[0] > playerStatus->maxJumpSpeed) {
         playerStatus->gravityIntegrator[0] = playerStatus->maxJumpSpeed;
     }
-    if (!chaosLevitating) {
+    if (!chaosStatus.levitating) {
         playerStatus->pos.y += playerStatus->gravityIntegrator[0];
     }
 }
@@ -439,7 +439,7 @@ void phys_player_land(void) {
 f32 integrate_gravity(void) {
     PlayerStatus* playerStatus = &gPlayerStatus;
 
-    if (chaosLevitating) {
+    if (chaosStatus.levitating) {
         playerStatus->gravityIntegrator[0] = 0;
         return 0.0f;
     }

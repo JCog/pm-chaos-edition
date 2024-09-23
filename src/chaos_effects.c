@@ -142,30 +142,7 @@ ChaosEffectData effectData[] = {
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
 b8 randomEffects = !CHAOS_DEBUG;
 
-s16 chaosTimers[TIMER_MAX] = {0};
-b8 chaosLevitating = FALSE;
-b8 chaosSlowGo = FALSE;
-b8 chaosTopDownCam = FALSE;
-b8 chaosHealingTouch = FALSE;
-b8 chaosAllSfxAttackFx = FALSE;
-b8 chaosHideModels = FALSE;
-b8 chaosSpinAngle = FALSE;
-f32 chaosPlayerPitch = 0.0f;
-f32 chaosPlayerSpriteAngle = 0.0f;
-s16 chaosPlayerPitchOffset = 0;
-b8 chaosHpSoundPlayed = FALSE;
-b8 chaosFpSoundPlayed = FALSE;
-b8 chaosBadMusic = FALSE;
-b8 chaosRotateCamera = FALSE;
-Matrix4f chaosRotateMtx = {0};
-b8 chaosBackgroundChanged = TRUE;
-b8 chaosReverseAnalog = FALSE;
-b8 chaosShuffleButtons = FALSE;
-enum Buttons chaosButtonMap[9] = {0};
-b8 chaosRandomButton = FALSE;
-b8 chaosRememberThis = FALSE;
-b8 chaosZoomedOut = FALSE;
-Matrix4f chaosZoomedOutMtx = {0};
+ChaosStatus chaosStatus = {.backgroundChanged = TRUE};
 
 static b8 rewindSaved = FALSE;
 static s16 rewindTime = TIMER_DISABLED;
@@ -178,14 +155,18 @@ static s16 perilTime = TIMER_DISABLED;
 static ActorScaleData actorScaleBuffer[] = {[0 ... ACTOR_DATA_COUNT] = {-1, 0, {0, 0, 0}} };
 static u16 savedPalette[256];
 static BackgroundHeader bgSaved = {.palette = &savedPalette[0]};
-static f32 yawSpeed = 0.0f;
 static f32 pitchSpeed = 0.0f;
+static f32 yawSpeed = 0.0f;
 static u16 *chaosSavedFrame = NULL;
 
 const enum ItemIDs mushroomIds[] = {
     ITEM_MUSHROOM, ITEM_VOLT_SHROOM, ITEM_SUPER_SHROOM, ITEM_ULTRA_SHROOM, ITEM_LIFE_SHROOM, ITEM_HONEY_SHROOM,
     ITEM_MAPLE_SHROOM, ITEM_JELLY_SHROOM
 };
+
+void initChaosStatus() {
+    guScaleF(chaosStatus.zoomedOutMtx, 0.1f, 0.1f, 1.0f);
+}
 
 static void updateEnemyHpDeltas() {
     b8 hpUpdated = FALSE;
@@ -202,32 +183,32 @@ static void updateEnemyHpDeltas() {
     }
     if (hpUpdated) {
         sfx_play_sound(SOUND_HEART_PICKUP);
-        chaosTimers[TIMER_ENEMY_HP_UPDATE] += 4;
+        chaosStatus.timers[TIMER_ENEMY_HP_UPDATE] += 4;
     }
 }
 
 void handleTimers() {
     for (s32 i = 0; i < TIMER_MAX; i++) {
-        if (chaosTimers[i] >= 0) {
-            chaosTimers[i]--;
+        if (chaosStatus.timers[i] >= 0) {
+            chaosStatus.timers[i]--;
         }
     }
 
-    if (chaosTimers[TIMER_ENEMY_HP_UPDATE] == 30) {
+    if (chaosStatus.timers[TIMER_ENEMY_HP_UPDATE] == 30) {
         updateEnemyHpDeltas();
     }
-    if (chaosTimers[TIMER_HP_SOUND] == 0 && !chaosHpSoundPlayed) {
+    if (chaosStatus.timers[TIMER_HP_SOUND] == 0 && !chaosStatus.hpSoundPlayed) {
         sfx_play_sound(SOUND_HEART_PICKUP);
     }
-    if (chaosTimers[TIMER_FP_SOUND] == 0 && !chaosFpSoundPlayed) {
+    if (chaosStatus.timers[TIMER_FP_SOUND] == 0 && !chaosStatus.fpSoundPlayed) {
         sfx_play_sound(SOUND_FLOWER_PICKUP);
     }
-    if (chaosTimers[TIMER_REMEMBER_THIS] == 130) {
-        chaosRememberThis = TRUE;
+    if (chaosStatus.timers[TIMER_REMEMBER_THIS] == 130) {
+        chaosStatus.rememberThis = TRUE;
         osViSwapBuffer(chaosSavedFrame);
         bgm_push_song(SONG_ITEM_UPGRADE, 1);
-    } else if (chaosTimers[TIMER_REMEMBER_THIS] == 0) {
-        chaosRememberThis = FALSE;
+    } else if (chaosStatus.timers[TIMER_REMEMBER_THIS] == 0) {
+        chaosStatus.rememberThis = FALSE;
         bgm_pop_song();
     }
 }
@@ -537,7 +518,7 @@ static b8 canActorChase() {
 }
 
 static b8 canKnockback() {
-    return !gGameStatus.isBattle && !chaosLevitating;
+    return !gGameStatus.isBattle && !chaosStatus.levitating;
 }
 
 static b8 canTouchLava() {
@@ -614,7 +595,7 @@ static b8 hasMushroom() {
 }
 
 static b8 canRememberThis() {
-    return chaosTimers[TIMER_REMEMBER_THIS] < 0;
+    return chaosStatus.timers[TIMER_REMEMBER_THIS] < 0;
 }
 
 static b8 canShuffleUpgrades() {
@@ -688,10 +669,7 @@ static void posRewindOff(ChaosEffectData *effect) {
 }
 
 static void levitate(ChaosEffectData *effect) {
-    if (!chaosLevitating) {
-        chaosLevitating = TRUE;
-    }
-
+    chaosStatus.levitating = TRUE;
     gPlayerStatus.curSpeed = 0.0f;
     gPlayerStatus.flags |= PS_FLAG_JUMPING;
     gPlayerStatus.flags &= ~(PS_FLAG_FALLING);
@@ -705,7 +683,7 @@ static void levitate(ChaosEffectData *effect) {
 }
 
 static void levitateOff(ChaosEffectData *effect) {
-    chaosLevitating = FALSE;
+    chaosStatus.levitating = FALSE;
 }
 
 static void magnetPosStep(Vec3f *pos) {
@@ -760,11 +738,11 @@ static void knockbackOff(ChaosEffectData *effect) {
 }
 
 static void slowGo(ChaosEffectData *effect) {
-    chaosSlowGo = !chaosSlowGo;
+    chaosStatus.slowGo = !chaosStatus.slowGo;
 }
 
 static void topDownCam(ChaosEffectData *effect) {
-    chaosTopDownCam = !chaosTopDownCam;
+    chaosStatus.topDownCam = !chaosStatus.topDownCam;
 }
 
 static void intangibleEnemies(ChaosEffectData *effect) {
@@ -772,7 +750,7 @@ static void intangibleEnemies(ChaosEffectData *effect) {
 }
 
 static void spinAngle(ChaosEffectData *effect) {
-    chaosSpinAngle = !chaosSpinAngle;
+    chaosStatus.spinAngle = !chaosStatus.spinAngle;
 }
 
 static void lava(ChaosEffectData *effect) {
@@ -782,9 +760,9 @@ static void lava(ChaosEffectData *effect) {
 static void rotatePlayer(ChaosEffectData *effect) {
     if (!playerRotating) {
         playerRotating = TRUE;
-        chaosPlayerPitch = 0;
-        chaosPlayerSpriteAngle = 0;
-        chaosPlayerPitchOffset = 14;
+        chaosStatus.playerPitch = 0;
+        chaosStatus.playerSpriteAngle = 0;
+        chaosStatus.playerPitchOffset = 14;
         pitchSpeed = rand_float() * 8 + 2;
         yawSpeed = rand_float() * 8 + 2;
         if (rand_int(100) < 50) {
@@ -795,19 +773,19 @@ static void rotatePlayer(ChaosEffectData *effect) {
         }
     }
 
-    chaosPlayerPitch += pitchSpeed;
-    chaosPlayerSpriteAngle += yawSpeed;
+    chaosStatus.playerPitch += pitchSpeed;
+    chaosStatus.playerSpriteAngle += yawSpeed;
 }
 
 static void rotatePlayerOff(ChaosEffectData *effect) {
     playerRotating = FALSE;
-    chaosPlayerPitch = 0.0f;
-    chaosPlayerSpriteAngle = 0.0f;
-    chaosPlayerPitchOffset = 0;
+    chaosStatus.playerPitch = 0.0f;
+    chaosStatus.playerSpriteAngle = 0.0f;
+    chaosStatus.playerPitchOffset = 0;
 }
 
 static void negativeAttack(ChaosEffectData *effect) {
-    chaosHealingTouch = !chaosHealingTouch;
+    chaosStatus.healingTouch = !chaosStatus.healingTouch;
 }
 
 static void randomEnemyHp(ChaosEffectData *effect) {
@@ -821,7 +799,7 @@ static void randomEnemyHp(ChaosEffectData *effect) {
             newHp = rand_int(enemy->maxHP - 1) + 1;
         }
         enemyHpDeltas[i] = newHp - enemy->curHP;
-        chaosTimers[TIMER_ENEMY_HP_UPDATE] = 34;
+        chaosStatus.timers[TIMER_ENEMY_HP_UPDATE] = 34;
     }
 }
 
@@ -977,10 +955,10 @@ static void pointSwap(ChaosEffectData *effect) {
     gPlayerData.curHP = gPlayerData.curFP;
     gPlayerData.curFP = curHpTemp;
     sfx_play_sound(SOUND_JUMP_COMBO_8);
-    chaosHpSoundPlayed = FALSE;
-    chaosFpSoundPlayed = FALSE;
-    chaosTimers[TIMER_HP_SOUND] = 20;
-    chaosTimers[TIMER_FP_SOUND] = 20;
+    chaosStatus.hpSoundPlayed = FALSE;
+    chaosStatus.fpSoundPlayed = FALSE;
+    chaosStatus.timers[TIMER_HP_SOUND] = 20;
+    chaosStatus.timers[TIMER_FP_SOUND] = 20;
 }
 
 static void perilSound(ChaosEffectData *effect) {
@@ -1084,11 +1062,11 @@ static void squishOff(ChaosEffectData *effect) {
 }
 
 static void allSfxAttackFx(ChaosEffectData *effect) {
-    chaosAllSfxAttackFx = !chaosAllSfxAttackFx;
+    chaosStatus.allSfxAttackFx = !chaosStatus.allSfxAttackFx;
 }
 
 static void hideModels(ChaosEffectData *effect) {
-    chaosHideModels = !chaosHideModels;
+    chaosStatus.hideModels = !chaosStatus.hideModels;
 }
 
 static void randomHp(ChaosEffectData *effect) {
@@ -1096,8 +1074,8 @@ static void randomHp(ChaosEffectData *effect) {
     while (gPlayerData.curHP == oldHp || gPlayerData.curHP > gPlayerData.curMaxHP || gPlayerData.curHP < 1) {
         gPlayerData.curHP = oldHp + rand_int(20) - 10;
     }
-    chaosHpSoundPlayed = FALSE;
-    chaosTimers[TIMER_HP_SOUND] = 20;
+    chaosStatus.hpSoundPlayed = FALSE;
+    chaosStatus.timers[TIMER_HP_SOUND] = 20;
 }
 
 static void randomFp(ChaosEffectData *effect) {
@@ -1105,8 +1083,8 @@ static void randomFp(ChaosEffectData *effect) {
     while (gPlayerData.curFP == oldFp || gPlayerData.curFP > gPlayerData.curMaxFP || gPlayerData.curFP < 0) {
         gPlayerData.curFP = oldFp + rand_int(20) - 10;
     }
-    chaosFpSoundPlayed = FALSE;
-    chaosTimers[TIMER_FP_SOUND] = 20;
+    chaosStatus.fpSoundPlayed = FALSE;
+    chaosStatus.timers[TIMER_FP_SOUND] = 20;
 }
 
 static void addRemoveCoins(ChaosEffectData *effect) {
@@ -1171,17 +1149,17 @@ static void randomTattle(ChaosEffectData *effect) {
 }
 
 static void badMusic(ChaosEffectData *effect) {
-    if (chaosBadMusic == 0) {
-        chaosTimers[TIMER_BAD_MUSIC] = 5 * 30;
-        chaosBadMusic = 1;
-    } else if (chaosTimers[TIMER_BAD_MUSIC] == 0) {
-        chaosTimers[TIMER_BAD_MUSIC] = chaosBadMusic * 5 * 30;
-        chaosBadMusic++;
+    if (chaosStatus.badMusic == 0) {
+        chaosStatus.timers[TIMER_BAD_MUSIC] = 5 * 30;
+        chaosStatus.badMusic = 1;
+    } else if (chaosStatus.timers[TIMER_BAD_MUSIC] == 0) {
+        chaosStatus.timers[TIMER_BAD_MUSIC] = chaosStatus.badMusic * 5 * 30;
+        chaosStatus.badMusic++;
     }
 }
 
 static void badMusicOff(ChaosEffectData *effect) {
-    chaosBadMusic = 0;
+    chaosStatus.badMusic = 0;
 }
 
 static void expireMushroom(ChaosEffectData *effect) {
@@ -1204,25 +1182,24 @@ static void expireMushroom(ChaosEffectData *effect) {
 }
 
 static void rotateCamera(ChaosEffectData *effect) {
-    chaosRotateCamera = TRUE;
-    guRotateF(chaosRotateMtx, (rand_float() * 270.0f) + 45.0f, 0.0f, 0.0f, -1.0f);
+    chaosStatus.rotateCamera = TRUE;
+    guRotateF(chaosStatus.rotateMtx, (rand_float() * 270.0f) + 45.0f, 0.0f, 0.0f, -1.0f);
 }
 
 static void rotateCameraOff(ChaosEffectData *effect) {
-    chaosRotateCamera = FALSE;
+    chaosStatus.rotateCamera = FALSE;
 }
 
 static void zoomOut(ChaosEffectData *effect) {
-    chaosZoomedOut = TRUE;
-    guScaleF(chaosZoomedOutMtx, 0.1f, 0.1f, 1.0f);
+    chaosStatus.zoomedOut = TRUE;
 }
 
 static void zoomOutOff(ChaosEffectData *effect) {
-    chaosZoomedOut = FALSE;
+    chaosStatus.zoomedOut = FALSE;
 }
 
 static void corruptBg(ChaosEffectData *effect) {
-    if (chaosBackgroundChanged) {
+    if (chaosStatus.backgroundChanged) {
         // save the uncorrupted background anytime the game changes it
         for (s32 i = 0; i < 256; i++) {
             bgSaved.palette[i] = gBackgroundImage.palette[i];
@@ -1231,7 +1208,7 @@ static void corruptBg(ChaosEffectData *effect) {
         bgSaved.startY = gBackgroundImage.startY;
         bgSaved.width = gBackgroundImage.width;
         bgSaved.height = gBackgroundImage.height;
-        chaosBackgroundChanged = FALSE;
+        chaosStatus.backgroundChanged = FALSE;
     }
 
     // corrupt one random byte of the background palette
@@ -1253,41 +1230,41 @@ static void corruptBgOff(ChaosEffectData *effect) {
 }
 
 static void reverseAnalog(ChaosEffectData *effect) {
-    chaosReverseAnalog = !chaosReverseAnalog;
+    chaosStatus.reverseAnalog = !chaosStatus.reverseAnalog;
 }
 
 static void shuffleButtons(ChaosEffectData *effect) {
-    chaosButtonMap[0] = BUTTON_C_RIGHT;
-    chaosButtonMap[1] = BUTTON_C_LEFT;
-    chaosButtonMap[2] = BUTTON_C_DOWN;
-    chaosButtonMap[3] = BUTTON_C_UP;
-    chaosButtonMap[4] = BUTTON_R;
-    chaosButtonMap[5] = BUTTON_START;
-    chaosButtonMap[6] = BUTTON_Z;
-    chaosButtonMap[7] = BUTTON_B;
-    chaosButtonMap[8] = BUTTON_A;
-    for (s32 i = 0; i < ARRAY_COUNT(chaosButtonMap) - 1; i++) {
-        s32 idx = rand_int(ARRAY_COUNT(chaosButtonMap) - i - 1) + i;
-        enum Buttons temp = chaosButtonMap[i];
-        chaosButtonMap[i] = chaosButtonMap[idx];
-        chaosButtonMap[idx] = temp;
+    chaosStatus.buttonMap[0] = BUTTON_C_RIGHT;
+    chaosStatus.buttonMap[1] = BUTTON_C_LEFT;
+    chaosStatus.buttonMap[2] = BUTTON_C_DOWN;
+    chaosStatus.buttonMap[3] = BUTTON_C_UP;
+    chaosStatus.buttonMap[4] = BUTTON_R;
+    chaosStatus.buttonMap[5] = BUTTON_START;
+    chaosStatus.buttonMap[6] = BUTTON_Z;
+    chaosStatus.buttonMap[7] = BUTTON_B;
+    chaosStatus.buttonMap[8] = BUTTON_A;
+    for (s32 i = 0; i < ARRAY_COUNT(chaosStatus.buttonMap) - 1; i++) {
+        s32 idx = rand_int(ARRAY_COUNT(chaosStatus.buttonMap) - i - 1) + i;
+        enum Buttons temp = chaosStatus.buttonMap[i];
+        chaosStatus.buttonMap[i] = chaosStatus.buttonMap[idx];
+        chaosStatus.buttonMap[idx] = temp;
     }
-    chaosShuffleButtons = TRUE;
+    chaosStatus.shuffleButtons = TRUE;
 }
 
 static void shuffleButtonsOff(ChaosEffectData *effect) {
-    chaosShuffleButtons = FALSE;
+    chaosStatus.shuffleButtons = FALSE;
 }
 
 static void randomButton(ChaosEffectData *effect) {
-    chaosRandomButton = TRUE;
+    chaosStatus.randomButton = TRUE;
 }
 
 static void rememberThis(ChaosEffectData *effect) {
     // very hacky location but I'm running into issues creating a proper framebuffer - possibly shifting related?
     chaosSavedFrame = (u16*)((osMemSize | 0xA0000000) - FB_SIZE);
     memcpy(chaosSavedFrame, osViGetCurrentFramebuffer(), FB_SIZE);
-    chaosTimers[TIMER_REMEMBER_THIS] = rand_int(30 * 60 * 5); // 5 minutes
+    chaosStatus.timers[TIMER_REMEMBER_THIS] = rand_int(30 * 60 * 5); // 5 minutes
     // TODO: edit text onto frame
 }
 
