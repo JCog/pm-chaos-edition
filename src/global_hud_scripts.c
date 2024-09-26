@@ -2388,6 +2388,14 @@ HudScript HES_SlowlyMashAButton = {
     hs_End
 };
 
+HudScript HES_BriefAButton = {
+    hs_SetVisible
+    hs_SetCustomSize(48, 40)
+    hs_SetCI(2, ui_input_a_button_unpressed)
+    hs_Restart
+    hs_End
+};
+
 HudScript HES_StartButton = HES_TEMPLATE_CI_CUSTOM_SIZE(ui_input_start_button, 48, 40);
 
 HudScript HES_StartButtonDown = HES_TEMPLATE_CI_CUSTOM_SIZE(ui_input_start_button2, 48, 40);
@@ -2408,6 +2416,14 @@ HudScript HES_PressStartButton = {
     hs_Loop
         hs_SetCI(10, ui_input_start_button)
         hs_SetCI(10, ui_input_start_button2)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_BriefStartButton = {
+    hs_SetVisible
+    hs_SetCustomSize(48, 40)
+    hs_SetCI(2, ui_input_start_button)
     hs_Restart
     hs_End
 };

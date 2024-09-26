@@ -1,6 +1,7 @@
 #include "common.h"
 #include "hud_element.h"
 #include "include_asset.h"
+#include "battle/action_cmd.h"
 
 INCLUDE_IMG("ui/battle/menu/unused.png", ui_battle_menu_unused_png);
 INCLUDE_PAL("ui/battle/menu/unused.pal", ui_battle_menu_unused_pal);
@@ -446,6 +447,62 @@ HudScript HES_MashCDownButton2 = {
         hs_SetCI(1, ui_battle_cont_c_down_up)
         hs_SetCI(2, ui_battle_cont_c_down_down)
         hs_SetCI(1, ui_battle_cont_c_down_up)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_BriefBButton = {
+    hs_SetVisible
+    hs_SetCustomSize(48, 40)
+    hs_SetCI(2, ui_battle_cont_b_up)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_BriefCUpButton = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_SetCI(2, ui_battle_cont_c_up_up)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_BriefCDownButton = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_SetCI(2, ui_battle_cont_c_down_up)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_BriefCLeftButton = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_SetCI(2, ui_battle_cont_c_left_up)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_BriefCRightButton = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_SetCI(2, ui_battle_cont_c_right_up)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_CycleButtons = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_Loop
+        hs_RandomBranch(
+            HS_PTR(HES_BriefAButton),
+            HS_PTR(HES_BriefBButton),
+            HS_PTR(HES_BriefStartButton),
+            HS_PTR(HES_BriefCUpButton),
+            HS_PTR(HES_BriefCDownButton),
+            HS_PTR(HES_BriefCLeftButton),
+            HS_PTR(HES_BriefCRightButton))
     hs_Restart
     hs_End
 };

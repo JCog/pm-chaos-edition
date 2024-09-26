@@ -262,6 +262,7 @@ extern HudScript HES_StickBackAndForth;
 extern HudScript HES_StickTapLeft;
 extern HudScript HES_StickTapRight;
 extern HudScript HES_TimingBlink;
+extern HudScript HES_CycleButtons;
 
 void btl_bonk_update(void* data);
 void btl_bonk_render(void* data);
@@ -897,6 +898,11 @@ void btl_update_message_popup(void* data) {
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
                             // fallthrough
                         case BTL_MSG_ACTION_TIP_PRESS_BEFORE_LANDING:
+                            HID_BattleMessage1 =
+                                hud_element_create(chaosStatus.randomACs ? &HES_CycleButtons : &HES_AButton);
+                            hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
+                            hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
+                            break;
                         case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:
                         case BTL_MSG_ACTION_TIP_MASH_BUTTON:
                         case BTL_MSG_ACTION_TIP_UNUSED_3:
