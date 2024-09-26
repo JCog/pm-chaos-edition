@@ -165,6 +165,10 @@ const enum ItemIDs mushroomIds[] = {
 
 void initChaosStatus() {
     guScaleF(chaosStatus.zoomedOutMtx, 0.1f, 0.1f, 1.0f);
+    gActionCommandStatus.randButton = BUTTON_A;
+    gActionCommandStatus.randHud1 = &HES_AButton;
+    gActionCommandStatus.randHud2 = &HES_AButtonDown;
+    gActionCommandStatus.randHudMessageButton = &HES_PressAButton;
 }
 
 static void updateEnemyHpDeltas() {

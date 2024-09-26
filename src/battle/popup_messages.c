@@ -994,7 +994,10 @@ void btl_update_message_popup(void* data) {
                                     hud_element_set_script(
                                         HID_BattleMessage1, gActionCommandStatus.randHudMessageButton
                                     );
-                                } else if (chaosStatus.randomACs && moveId >= MOVE_HEADBONK1 && moveId <= MOVE_HEADBONK3) {
+                                } else if (chaosStatus.randomACs
+                                           && ((moveId >= MOVE_HEADBONK1 && moveId <= MOVE_HEADBONK3)
+                                               || (moveId >= MOVE_SKY_DIVE1 && moveId <= MOVE_SKY_DIVE3)))
+                                {
                                     hud_element_set_script(
                                         HID_BattleMessage1, gActionCommandStatus.randHudMessageButton
                                     );

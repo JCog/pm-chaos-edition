@@ -35,7 +35,10 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosY = 80;
 
     if (chaosStatus.randomACs) {
-        if (gBattleStatus.selectedMoveID >= MOVE_HEADBONK1 && gBattleStatus.selectedMoveID <= MOVE_HEADBONK3) {
+        s16 moveId = gBattleStatus.selectedMoveID;
+        if ((moveId >= MOVE_HEADBONK1 && moveId <= MOVE_HEADBONK3)
+            || (moveId >= MOVE_SKY_DIVE1 && moveId <= MOVE_SKY_DIVE3))
+        {
             pickRandomButton();
         }
         hudElement = hud_element_create(actionCommandStatus->randHud1);
@@ -182,9 +185,16 @@ void N(update)(void) {
                     battleStatus->actionSuccess = 1;
                     battleStatus->actionResult = ACTION_RESULT_SUCCESS;
                     gBattleStatus.flags1 |= BS_FLAGS1_2000;
+                    if (chaosStatus.randomACs && gBattleStatus.selectedMoveID == MOVE_POWER_BOUNCE) {
+                        pickRandomButton();
+                    } else {
+                        gActionCommandStatus.randButton = BUTTON_A;
+                        gActionCommandStatus.randHud1 = &HES_AButton;
+                        gActionCommandStatus.randHud2 = &HES_AButtonDown;
+                        gActionCommandStatus.randHudMessageButton = &HES_PressAButton;
+                    }
                 }
             }
-
             if (actionCommandStatus->frameCounter == 0) {
                 if (battleStatus->actionSuccess == 1) {
                     func_80269160();
