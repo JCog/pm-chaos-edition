@@ -892,17 +892,16 @@ void btl_update_message_popup(void* data) {
                             hud_element_set_render_pos(HID_BattleMessage3, -100, -100);
                             hud_element_create_transform_B(HID_BattleMessage3);
                             break;
-                        case BTL_MSG_ACTION_TIP_BREAK_FREE:
                         case BTL_MSG_ACTION_TIP_REDUCE_DAMAGE:
-                            HID_BattleMessage1 = hud_element_create(&HES_AButton);
-                            hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
-                            hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
-                            // fallthrough
+                        case BTL_MSG_ACTION_TIP_BREAK_FREE:
                         case BTL_MSG_ACTION_TIP_MASH_BUTTON:
-                            HID_BattleMessage1 = hud_element_create(
-                                gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMessageButton
-                                                                  : &HES_AButton
-                            );
+                            HudScript *hudScript = &HES_AButton;
+                            if (battleStatus->selectedMoveID == MOVE_RUN_AWAY && gActionCommandStatus.randSelected) {
+                                hudScript = gActionCommandStatus.randHudMessageButton;
+                            } else if (chaosStatus.randomACs) {
+                                hudScript = &HES_CycleButtons;
+                            }
+                            HID_BattleMessage1 = hud_element_create(hudScript);
                             hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
                             break;
@@ -997,7 +996,11 @@ void btl_update_message_popup(void* data) {
                                 break;
                             case BTL_MSG_ACTION_TIP_BREAK_FREE:
                             case BTL_MSG_ACTION_TIP_REDUCE_DAMAGE:
-                                hud_element_set_script(HID_BattleMessage1, &HES_PressAButton);
+                                hud_element_set_script(
+                                    HID_BattleMessage1,
+                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMash
+                                                                      : &HES_MashAButton
+                                );
                                 // fallthrough
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_LANDING:
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:

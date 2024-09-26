@@ -1,5 +1,6 @@
 #include "common.h"
 #include "battle/action_cmd.h"
+#include "chaos.h"
 
 #define NAMESPACE action_command_power_shock
 
@@ -36,8 +37,11 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->thresholdMoveDir = 0;
     D_802A9B00 = FALSE;
     actionCommandStatus->hudPosY = 80;
+    if (chaosStatus.randomACs) {
+        pickRandomButton();
+    }
 
-    id = hud_element_create(&HES_AButton);
+    id = hud_element_create(actionCommandStatus->randSelected ? actionCommandStatus->randHudUp : &HES_AButton);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -155,7 +159,10 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 break;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], &HES_MashAButton);
+            hud_element_set_script(
+                actionCommandStatus->hudElements[0],
+                actionCommandStatus->randSelected ? actionCommandStatus->randHudMash : &HES_MashAButton
+            );
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->unk_5C = 0;
             D_802A9B00 = TRUE;
@@ -181,7 +188,9 @@ void N(update)(void) {
                 }
             }
 
-            if (battleStatus->curButtonsPressed & BUTTON_A) {
+            if (battleStatus->curButtonsPressed
+                & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
+            {
                 phi_a1 = actionCommandStatus->targetWeakness;
                 if (phi_a1 != 0) {
                     s32 a = battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];
@@ -255,6 +264,7 @@ void N(update)(void) {
                 actionCommandStatus->frameCounter--;
                 break;
             }
+            actionCommandStatus->randSelected = FALSE;
             action_command_free();
             break;
     }

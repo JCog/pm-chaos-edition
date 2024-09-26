@@ -270,6 +270,9 @@ void btl_update(void) {
             battleStatus->stickY = gGameStatusPtr->stickY[1];
         } else {
             s32 inputBitmask2 = battleStatus->inputBitmask;
+            if (gActionCommandStatus.randSelected) {
+                inputBitmask2 |= BUTTON_START;
+            }
 
             battleStatus->curButtonsDown = gGameStatusPtr->curButtons[0] & inputBitmask2;
             battleStatus->curButtonsPressed = gGameStatusPtr->pressedButtons[0] & inputBitmask2;

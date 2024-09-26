@@ -1,5 +1,6 @@
 #include "common.h"
 #include "battle/action_cmd.h"
+#include "chaos.h"
 
 #define NAMESPACE action_command_bomb
 
@@ -33,8 +34,11 @@ API_CALLABLE(N(init)) {
 
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
+    if (chaosStatus.randomACs) {
+        pickRandomButton();
+    }
 
-    hudElement = hud_element_create(&HES_AButton);
+    hudElement = hud_element_create(actionCommandStatus->randSelected ? actionCommandStatus->randHudUp : &HES_AButton);
     actionCommandStatus->hudElements[0] = hudElement;
     hud_element_set_render_pos(hudElement, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(hudElement, 0);
@@ -101,7 +105,10 @@ void N(update)(void) {
                 break;
             }
 
-            hud_element_set_script(actionCommandStatus->hudElements[0], &HES_MashAButton);
+            hud_element_set_script(
+                actionCommandStatus->hudElements[0],
+                actionCommandStatus->randSelected ? actionCommandStatus->randHudMash : &HES_MashAButton
+            );
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
             sfx_play_sound_with_params(SOUND_LOOP_CHARGE_BAR, 0, 0, 0);
@@ -120,7 +127,9 @@ void N(update)(void) {
                 }
             }
 
-            if (battleStatus->curButtonsPressed & BUTTON_A) {
+            if (battleStatus->curButtonsPressed
+                & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
+            {
                 switch (actionCommandStatus->targetWeakness) {
                     case 0: {
                         s32 fillOffset = battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty] * 235 * 4;
@@ -180,6 +189,7 @@ void N(update)(void) {
             if (actionCommandStatus->frameCounter != 0) {
                 actionCommandStatus->frameCounter--;
             } else {
+                actionCommandStatus->randSelected = FALSE;
                 action_command_free();
             }
             break;

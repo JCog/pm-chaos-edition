@@ -176,7 +176,7 @@ void N(update)(void) {
             }
 
             if (battleStatus->actionSuccess < 0) {
-                if (((gGameStatusPtr->pressedButtons[0]
+                if (((battleStatus->curButtonsPressed
                       & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
                      && !actionCommandStatus->wrongButtonPressed)
                     || actionCommandStatus->autoSucceed) {
