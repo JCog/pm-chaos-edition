@@ -35,13 +35,10 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosY = 80;
 
     if (chaosStatus.randomACs) {
-        s16 moveId = gBattleStatus.selectedMoveID;
-        if ((moveId >= MOVE_HEADBONK1 && moveId <= MOVE_HEADBONK3)
-            || (moveId >= MOVE_SKY_DIVE1 && moveId <= MOVE_SKY_DIVE3))
-        {
-            pickRandomButton();
-        }
-        hudElement = hud_element_create(actionCommandStatus->randHud1);
+        pickRandomButton();
+    }
+    if (actionCommandStatus->randSelected) {
+        hudElement = hud_element_create(actionCommandStatus->randHudUp);
     } else {
         hudElement = hud_element_create(&HES_AButton);
     }
@@ -142,10 +139,11 @@ void N(update)(void) {
             if (((actionCommandStatus->prepareTime - successWindow) - 2) <= 0) {
                 hud_element_set_script(
                     actionCommandStatus->hudElements[0],
-                    chaosStatus.randomACs ? actionCommandStatus->randHud2 : &HES_AButtonDown
+                    actionCommandStatus->randSelected ? actionCommandStatus->randHudDown : &HES_AButtonDown
                 );
             }
-            if ((battleStatus->curButtonsPressed & (gActionCommandStatus.randButton != BUTTON_A ? actionCommandStatus->randButton : BUTTON_A))
+            if ((battleStatus->curButtonsPressed
+                 & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
                 && !actionCommandStatus->autoSucceed)
             {
                 actionCommandStatus->wrongButtonPressed = TRUE;
@@ -179,23 +177,16 @@ void N(update)(void) {
 
             if (battleStatus->actionSuccess < 0) {
                 if (((gGameStatusPtr->pressedButtons[0]
-                      & (gActionCommandStatus.randButton != BUTTON_A ? actionCommandStatus->randButton : BUTTON_A))
+                      & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
                      && !actionCommandStatus->wrongButtonPressed)
                     || actionCommandStatus->autoSucceed) {
                     battleStatus->actionSuccess = 1;
                     battleStatus->actionResult = ACTION_RESULT_SUCCESS;
                     gBattleStatus.flags1 |= BS_FLAGS1_2000;
-                    if (chaosStatus.randomACs && gBattleStatus.selectedMoveID == MOVE_POWER_BOUNCE) {
-                        pickRandomButton();
-                    } else {
-                        gActionCommandStatus.randButton = BUTTON_A;
-                        gActionCommandStatus.randHud1 = &HES_AButton;
-                        gActionCommandStatus.randHud2 = &HES_AButtonDown;
-                        gActionCommandStatus.randHudMessageButton = &HES_PressAButton;
-                    }
                 }
             }
             if (actionCommandStatus->frameCounter == 0) {
+                actionCommandStatus->randSelected = FALSE;
                 if (battleStatus->actionSuccess == 1) {
                     func_80269160();
                 }
@@ -213,7 +204,6 @@ void N(update)(void) {
                 actionCommandStatus->frameCounter--;
                 break;
             }
-            gActionCommandStatus.randButton = BUTTON_A;
             action_command_free();
             break;
     }

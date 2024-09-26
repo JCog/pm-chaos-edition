@@ -74,9 +74,10 @@ typedef struct ActionCommandStatus {
     /* 0x72 */ s16 wrongInputFrameCounter;
     /* 0x74 */ s16 mashMeterCutoffs[6]; // upper bounds for each interval
     /* 0x80 */ s8 mashMeterIntervals;
+    b8 randSelected;
     enum Buttons randButton;
-    HudScript *randHud1;
-    HudScript *randHud2;
+    HudScript *randHudUp;
+    HudScript *randHudDown;
     HudScript *randHudMessageButton;
 } ActionCommandStatus;
 

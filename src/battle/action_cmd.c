@@ -805,6 +805,11 @@ API_CALLABLE(func_8026962C) {
 }
 
 void pickRandomButton() {
+    if (gActionCommandStatus.randSelected) {
+        return;
+    }
+    gActionCommandStatus.randSelected = TRUE;
+
     const enum Buttons buttons[] = {
         BUTTON_A,
         BUTTON_B,
@@ -844,7 +849,7 @@ void pickRandomButton() {
 
     u8 buttonIdx = rand_int(ARRAY_COUNT(buttons) - 1);
     gActionCommandStatus.randButton = buttons[buttonIdx];
-    gActionCommandStatus.randHud1 = buttonHuds1[buttonIdx];
-    gActionCommandStatus.randHud2 = buttonHuds2[buttonIdx];
+    gActionCommandStatus.randHudUp = buttonHuds1[buttonIdx];
+    gActionCommandStatus.randHudDown = buttonHuds2[buttonIdx];
     gActionCommandStatus.randHudMessageButton = buttonHudsMessage[buttonIdx];
 }

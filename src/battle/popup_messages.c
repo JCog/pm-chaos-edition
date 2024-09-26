@@ -988,22 +988,16 @@ void btl_update_message_popup(void* data) {
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:
                             case BTL_MSG_ACTION_TIP_HOLD_THEN_TAP:
                             case BTL_MSG_ACTION_TIP_NOT_USED_3:
-                                s16 moveId = battleStatus->selectedMoveID;
-                                if (chaosStatus.randomACs && gMoveTable[moveId].category == MOVE_TYPE_JUMP) {
-                                    pickRandomButton();
-                                    hud_element_set_script(
-                                        HID_BattleMessage1, gActionCommandStatus.randHudMessageButton
-                                    );
-                                } else if (chaosStatus.randomACs
-                                           && ((moveId >= MOVE_HEADBONK1 && moveId <= MOVE_HEADBONK3)
-                                               || (moveId >= MOVE_SKY_DIVE1 && moveId <= MOVE_SKY_DIVE3)))
+                                if (chaosStatus.randomACs
+                                    && gMoveTable[battleStatus->selectedMoveID].category == MOVE_TYPE_JUMP)
                                 {
-                                    hud_element_set_script(
-                                        HID_BattleMessage1, gActionCommandStatus.randHudMessageButton
-                                    );
-                                } else {
-                                    hud_element_set_script(HID_BattleMessage1, &HES_PressAButton);
+                                    pickRandomButton();
                                 }
+                                hud_element_set_script(
+                                    HID_BattleMessage1,
+                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMessageButton
+                                                                      : &HES_PressAButton
+                                );
                                 break;
                         }
                         if (popup->duration != -1) {
