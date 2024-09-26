@@ -35,7 +35,9 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosY = 80;
 
     if (chaosStatus.randomACs) {
-        pickRandomButton();
+        if (gBattleStatus.selectedMoveID >= MOVE_HEADBONK1 && gBattleStatus.selectedMoveID <= MOVE_HEADBONK3) {
+            pickRandomButton();
+        }
         hudElement = hud_element_create(actionCommandStatus->randHud1);
     } else {
         hudElement = hud_element_create(&HES_AButton);
@@ -140,7 +142,7 @@ void N(update)(void) {
                     chaosStatus.randomACs ? actionCommandStatus->randHud2 : &HES_AButtonDown
                 );
             }
-            if ((battleStatus->curButtonsPressed & (chaosStatus.randomACs ? actionCommandStatus->randButton : BUTTON_A))
+            if ((battleStatus->curButtonsPressed & (gActionCommandStatus.randButton != BUTTON_A ? actionCommandStatus->randButton : BUTTON_A))
                 && !actionCommandStatus->autoSucceed)
             {
                 actionCommandStatus->wrongButtonPressed = TRUE;
@@ -174,7 +176,7 @@ void N(update)(void) {
 
             if (battleStatus->actionSuccess < 0) {
                 if (((gGameStatusPtr->pressedButtons[0]
-                      & (chaosStatus.randomACs ? actionCommandStatus->randButton : BUTTON_A))
+                      & (gActionCommandStatus.randButton != BUTTON_A ? actionCommandStatus->randButton : BUTTON_A))
                      && !actionCommandStatus->wrongButtonPressed)
                     || actionCommandStatus->autoSucceed) {
                     battleStatus->actionSuccess = 1;
@@ -201,6 +203,7 @@ void N(update)(void) {
                 actionCommandStatus->frameCounter--;
                 break;
             }
+            gActionCommandStatus.randButton = BUTTON_A;
             action_command_free();
             break;
     }

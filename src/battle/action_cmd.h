@@ -77,6 +77,7 @@ typedef struct ActionCommandStatus {
     enum Buttons randButton;
     HudScript *randHud1;
     HudScript *randHud2;
+    HudScript *randHudMessageButton;
 } ActionCommandStatus;
 
 extern ActionCommandStatus gActionCommandStatus;
@@ -101,7 +102,10 @@ extern HudScript HES_MashAButton;
 extern HudScript HES_MashBButton1;
 extern HudScript HES_PressAButton;
 extern HudScript HES_PressBButton;
+extern HudScript HES_PressCUpButton;
 extern HudScript HES_PressCDownButton;
+extern HudScript HES_PressCLeftButton;
+extern HudScript HES_PressCRightButton;
 extern HudScript HES_RightOn;
 extern HudScript HES_RunningAway;
 extern HudScript HES_RunAwayOK;

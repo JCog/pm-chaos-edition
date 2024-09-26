@@ -832,9 +832,19 @@ void pickRandomButton() {
         &HES_CLeftButtonHeld,
         &HES_CRightButtonHeld,
     };
+    HudScript *buttonHudsMessage[] = {
+        &HES_PressAButton,
+        &HES_PressBButton,
+        &HES_StartButton,
+        &HES_PressCUpButton,
+        &HES_PressCDownButton,
+        &HES_PressCLeftButton,
+        &HES_PressCRightButton,
+    };
 
     u8 buttonIdx = rand_int(ARRAY_COUNT(buttons) - 1);
     gActionCommandStatus.randButton = buttons[buttonIdx];
     gActionCommandStatus.randHud1 = buttonHuds1[buttonIdx];
     gActionCommandStatus.randHud2 = buttonHuds2[buttonIdx];
+    gActionCommandStatus.randHudMessageButton = buttonHudsMessage[buttonIdx];
 }

@@ -395,6 +395,17 @@ HudScript HES_MashCDownButton1 = {
     hs_End
 };
 
+HudScript HES_PressCUpButton = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_Loop
+        hs_SetCI(6, ui_battle_cont_c_up_down)
+        hs_SetCI(10, ui_battle_cont_c_up_up)
+        hs_SetCI(4, ui_battle_cont_c_up_down)
+    hs_Restart
+    hs_End
+};
+
 HudScript HES_PressCDownButton = {
     hs_SetVisible
     hs_SetCustomSize(40, 34)
@@ -402,6 +413,28 @@ HudScript HES_PressCDownButton = {
         hs_SetCI(6, ui_battle_cont_c_down_down)
         hs_SetCI(10, ui_battle_cont_c_down_up)
         hs_SetCI(4, ui_battle_cont_c_down_down)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_PressCLeftButton = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_Loop
+        hs_SetCI(6, ui_battle_cont_c_left_down)
+        hs_SetCI(10, ui_battle_cont_c_left_up)
+        hs_SetCI(4, ui_battle_cont_c_left_down)
+    hs_Restart
+    hs_End
+};
+
+HudScript HES_PressCRightButton = {
+    hs_SetVisible
+    hs_SetCustomSize(40, 34)
+    hs_Loop
+        hs_SetCI(6, ui_battle_cont_c_right_down)
+        hs_SetCI(10, ui_battle_cont_c_right_up)
+        hs_SetCI(4, ui_battle_cont_c_right_down)
     hs_Restart
     hs_End
 };

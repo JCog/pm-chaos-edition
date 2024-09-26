@@ -3,6 +3,7 @@
 #include "entity.h"
 #include "battle/battle.h"
 #include "battle/action_cmd.h"
+#include "chaos.h"
 
 typedef struct BonkData {
     /* 0x00 */ b32 alive;
@@ -987,7 +988,19 @@ void btl_update_message_popup(void* data) {
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:
                             case BTL_MSG_ACTION_TIP_HOLD_THEN_TAP:
                             case BTL_MSG_ACTION_TIP_NOT_USED_3:
-                                hud_element_set_script(HID_BattleMessage1, &HES_PressAButton);
+                                s16 moveId = battleStatus->selectedMoveID;
+                                if (chaosStatus.randomACs && gMoveTable[moveId].category == MOVE_TYPE_JUMP) {
+                                    pickRandomButton();
+                                    hud_element_set_script(
+                                        HID_BattleMessage1, gActionCommandStatus.randHudMessageButton
+                                    );
+                                } else if (chaosStatus.randomACs && moveId >= MOVE_HEADBONK1 && moveId <= MOVE_HEADBONK3) {
+                                    hud_element_set_script(
+                                        HID_BattleMessage1, gActionCommandStatus.randHudMessageButton
+                                    );
+                                } else {
+                                    hud_element_set_script(HID_BattleMessage1, &HES_PressAButton);
+                                }
                                 break;
                         }
                         if (popup->duration != -1) {
