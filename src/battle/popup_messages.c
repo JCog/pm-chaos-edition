@@ -873,7 +873,8 @@ void btl_update_message_popup(void* data) {
                             hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_80);
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
 
-                            HID_BattleMessage2 = hud_element_create(&HES_AButtonDown);
+                            HID_BattleMessage2 =
+                                hud_element_create(chaosStatus.randomACs ? &HES_CycleButtons : &HES_AButton);
                             hud_element_set_flags(HID_BattleMessage2, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
                             hud_element_set_render_pos(HID_BattleMessage2, -100, -100);
                             break;
@@ -897,7 +898,7 @@ void btl_update_message_popup(void* data) {
                         case BTL_MSG_ACTION_TIP_MASH_BUTTON:
                             HudScript *hudScript = &HES_AButton;
                             if (battleStatus->selectedMoveID == MOVE_RUN_AWAY && gActionCommandStatus.randSelected) {
-                                hudScript = gActionCommandStatus.randHudMessageButton;
+                                hudScript = gActionCommandStatus.randHudPress;
                             } else if (chaosStatus.randomACs) {
                                 hudScript = &HES_CycleButtons;
                             }
@@ -906,10 +907,10 @@ void btl_update_message_popup(void* data) {
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
                             break;
                         case BTL_MSG_ACTION_TIP_PRESS_BEFORE_LANDING:
-                            showCyclingButtons = chaosStatus.randomACs;
                         case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:
-                        case BTL_MSG_ACTION_TIP_UNUSED_3:
                         case BTL_MSG_ACTION_TIP_HOLD_THEN_TAP:
+                            showCyclingButtons = chaosStatus.randomACs;
+                        case BTL_MSG_ACTION_TIP_UNUSED_3:
                         case BTL_MSG_ACTION_TIP_UNUSED_4:
                         case BTL_MSG_ACTION_TIP_NOT_USED_3:
                             HID_BattleMessage1 =
@@ -986,7 +987,11 @@ void btl_update_message_popup(void* data) {
                                 break;
                             case BTL_MSG_ACTION_TIP_HOLD_THEN_RELEASE:
                                 hud_element_set_script(HID_BattleMessage1, &HES_TimingBlink);
-                                hud_element_set_script(HID_BattleMessage2, &HES_PressAButton);
+                                hud_element_set_script(
+                                    HID_BattleMessage2,
+                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudPress
+                                                                      : &HES_PressAButton
+                                );
                                 break;
                             case BTL_MSG_ACTION_TIP_MOVE_TO_AIM:
                                 hud_element_set_script(HID_BattleMessage1, &HES_StickTapRight);
@@ -1001,7 +1006,7 @@ void btl_update_message_popup(void* data) {
                                     gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMash
                                                                       : &HES_MashAButton
                                 );
-                                // fallthrough
+                                break;
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_LANDING:
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:
                             case BTL_MSG_ACTION_TIP_HOLD_THEN_TAP:
@@ -1013,7 +1018,7 @@ void btl_update_message_popup(void* data) {
                                 }
                                 hud_element_set_script(
                                     HID_BattleMessage1,
-                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMessageButton
+                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudPress
                                                                       : &HES_PressAButton
                                 );
                                 break;

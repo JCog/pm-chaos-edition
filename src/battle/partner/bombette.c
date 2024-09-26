@@ -815,7 +815,7 @@ EvtScript N(EVS_Attack_BodySlam) = {
     Call(AddGoalPos, ACTOR_PARTNER, -40, 0, 0)
     Set(LF_MashStarted, 0)
     Loop(60)
-        Call(CheckButtonDown, BUTTON_A, LVar0)
+        Call(CheckActionCommandButtonDown, LVar0)
         IfNe(LVar0, FALSE)
             Set(LF_MashStarted, 1)
             BreakLoop
@@ -828,7 +828,7 @@ EvtScript N(EVS_Attack_BodySlam) = {
         Set(LF_MashEnded, 0)
         ExecGetTID(N(runToTarget), LVarA)
         Loop(35)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfEq(LVar0, FALSE)
                 Set(LF_MashEnded, 1)
                 BreakLoop
@@ -842,7 +842,7 @@ EvtScript N(EVS_Attack_BodySlam) = {
         Set(LF_MashEnded, 0)
         ExecGetTID(N(animBrace), LVarA)
         Loop(30)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfEq(LVar0, FALSE)
                 Set(LF_MashEnded, 1)
                 BreakLoop
@@ -856,7 +856,7 @@ EvtScript N(EVS_Attack_BodySlam) = {
         IfEq(LF_MashEnded, 0)
             ExecGetTID(N(animHold), LVarA)
             Loop(30)
-                Call(CheckButtonDown, BUTTON_A, LVar0)
+                Call(CheckActionCommandButtonDown, LVar0)
                 IfEq(LVar0, FALSE)
                     Set(LF_MashEnded, 1)
                     BreakLoop
@@ -872,7 +872,7 @@ EvtScript N(EVS_Attack_BodySlam) = {
         Set(LF_MashEnded, 0)
         ExecGetTID(N(runToTarget), LVarA)
         Loop(35)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfNe(LVar0, FALSE)
                 IfEq(LF_MashStarted, 0)
                     Call(action_command_body_slam_start, 0, 92, 3, 0)
@@ -894,7 +894,7 @@ EvtScript N(EVS_Attack_BodySlam) = {
         Set(LF_MashEnded, 0)
         ExecGetTID(N(animBrace), LVarA)
         Loop(30)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfNe(LVar0, FALSE)
                 IfEq(LF_MashStarted, 0)
                     Call(action_command_body_slam_start, 0, 92, 3, 0)
@@ -916,7 +916,7 @@ EvtScript N(EVS_Attack_BodySlam) = {
         IfEq(LF_MashEnded, 0)
             ExecGetTID(N(animHold), LVarA)
             Loop(30)
-                Call(CheckButtonDown, BUTTON_A, LVar0)
+                Call(CheckActionCommandButtonDown, LVar0)
                 IfEq(LVar0, FALSE)
                     Set(LF_MashEnded, 1)
                     BreakLoop

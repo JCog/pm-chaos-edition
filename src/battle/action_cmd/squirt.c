@@ -1,5 +1,6 @@
 #include "common.h"
 #include "battle/action_cmd.h"
+#include "chaos.h"
 
 #define NAMESPACE action_command_squirt
 
@@ -30,8 +31,11 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->unk_5C = 0;
     actionCommandStatus->hudPosY = 80;
+    if (chaosStatus.randomACs) {
+        pickRandomButton();
+    }
 
-    id = hud_element_create(&HES_AButton);
+    id = hud_element_create(actionCommandStatus->randSelected ? actionCommandStatus->randHudUp : &HES_AButton);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -119,7 +123,10 @@ void N(update)(void) {
                 break;
             }
 
-            hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButtonDown);
+            hud_element_set_script(
+                actionCommandStatus->hudElements[0],
+                actionCommandStatus->randSelected ? actionCommandStatus->randHudDown : &HES_AButtonDown
+            );
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->unk_5C = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
@@ -131,7 +138,9 @@ void N(update)(void) {
             cutoff = actionCommandStatus->mashMeterCutoffs[actionCommandStatus->mashMeterIntervals];
             temp = actionCommandStatus->barFillLevel / cutoff;
             if (actionCommandStatus->unk_5C == 0) {
-                if (!(battleStatus->curButtonsDown & BUTTON_A)) {
+                if (!(battleStatus->curButtonsDown
+                      & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A)))
+                {
                     actionCommandStatus->barFillLevel -= D_802A9760_42A480[temp / 20];
                     if (actionCommandStatus->barFillLevel < 0) {
                         actionCommandStatus->barFillLevel = 0;
@@ -155,12 +164,14 @@ void N(update)(void) {
             sfx_adjust_env_sound_params(SOUND_LOOP_CHARGE_BAR, 0, 0, battleStatus->actionQuality * 12);
             id = actionCommandStatus->hudElements[0];
             if (temp < 80) {
-                if (hud_element_get_script(id) != &HES_AButtonDown) {
-                    hud_element_set_script(id, &HES_AButtonDown);
+                HudScript *button = actionCommandStatus->randSelected ? actionCommandStatus->randHudDown : &HES_AButtonDown;
+                if (hud_element_get_script(id) != button) {
+                    hud_element_set_script(id, button);
                 }
             } else {
-                if (hud_element_get_script(id) != &HES_PressAButton) {
-                    hud_element_set_script(id, &HES_PressAButton);
+                HudScript *button = actionCommandStatus->randSelected ? actionCommandStatus->randHudUp : &HES_AButton;
+                if (hud_element_get_script(id) != button) {
+                    hud_element_set_script(id, button);
                 }
             }
 
@@ -194,6 +205,7 @@ void N(update)(void) {
             if (actionCommandStatus->frameCounter != 0) {
                 actionCommandStatus->frameCounter--;
             } else {
+                actionCommandStatus->randSelected = FALSE;
                 action_command_free();
             }
             break;

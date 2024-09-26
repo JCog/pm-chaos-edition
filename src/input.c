@@ -103,7 +103,6 @@ void update_input(void) {
         s32 idx = rand_int(ARRAY_COUNT(primaryButtons) - 1);
         for (s32 i = 0; i < ARRAY_COUNT(primaryButtons); i++) {
             if (!(buttons & primaryButtons[idx])) {
-                osSyncPrintf("%x\n", primaryButtons[idx]);
                 buttons |= primaryButtons[idx];
                 break;
             }

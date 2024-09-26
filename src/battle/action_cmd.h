@@ -79,7 +79,7 @@ typedef struct ActionCommandStatus {
     HudScript *randHudUp;
     HudScript *randHudDown;
     HudScript *randHudMash;
-    HudScript *randHudMessageButton;
+    HudScript *randHudPress;
 } ActionCommandStatus;
 
 extern ActionCommandStatus gActionCommandStatus;
@@ -173,5 +173,6 @@ API_CALLABLE(GetActionQuality);
 API_CALLABLE(SetActionQuality);
 API_CALLABLE(func_80269600);
 API_CALLABLE(func_8026962C);
+API_CALLABLE(CheckActionCommandButtonDown);
 
 #endif

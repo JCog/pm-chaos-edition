@@ -804,6 +804,19 @@ API_CALLABLE(func_8026962C) {
     return ApiStatus_DONE2;
 }
 
+API_CALLABLE(CheckActionCommandButtonDown) {
+    Bytecode* args = script->ptrReadPos;
+    Bytecode outVar = *args++;
+    s32 buttonsDown = gBattleStatus.curButtonsDown;
+    osSyncPrintf("CheckActionCommandButtonDown\n");
+
+    evt_set_variable(
+        script, outVar,
+        (buttonsDown & (gActionCommandStatus.randSelected ? gActionCommandStatus.randButton : BUTTON_A)) != 0
+    );
+    return ApiStatus_DONE2;
+}
+
 void pickRandomButton() {
     if (gActionCommandStatus.randSelected) {
         return;
@@ -846,7 +859,7 @@ void pickRandomButton() {
         &HES_MashCLeftButton,
         &HES_MashCRightButton1,
     };
-    HudScript *buttonHudsMessage[] = {
+    HudScript *buttonHudsPress[] = {
         &HES_PressAButton,
         &HES_PressBButton,
         &HES_StartButton,
@@ -861,5 +874,5 @@ void pickRandomButton() {
     gActionCommandStatus.randHudUp = buttonHudsUp[buttonIdx];
     gActionCommandStatus.randHudDown = buttonHudsDown[buttonIdx];
     gActionCommandStatus.randHudMash = buttonHudsMash[buttonIdx];
-    gActionCommandStatus.randHudMessageButton = buttonHudsMessage[buttonIdx];
+    gActionCommandStatus.randHudPress = buttonHudsPress[buttonIdx];
 }
