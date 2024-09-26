@@ -1,5 +1,6 @@
 #include "common.h"
 #include "battle/action_cmd.h"
+#include "chaos.h"
 
 #define NAMESPACE action_command_jump
 
@@ -33,7 +34,12 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->wrongButtonPressed = FALSE;
     actionCommandStatus->hudPosY = 80;
 
-    hudElement = hud_element_create(&HES_AButton);
+    if (chaosStatus.randomACs) {
+        pickRandomButton();
+        hudElement = hud_element_create(actionCommandStatus->randHud1);
+    } else {
+        hudElement = hud_element_create(&HES_AButton);
+    }
     actionCommandStatus->hudElements[0] = hudElement;
     hud_element_set_flags(hudElement, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(hudElement, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -129,9 +135,14 @@ void N(update)(void) {
 
             successWindow = battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];
             if (((actionCommandStatus->prepareTime - successWindow) - 2) <= 0) {
-                hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButtonDown);
+                hud_element_set_script(
+                    actionCommandStatus->hudElements[0],
+                    chaosStatus.randomACs ? actionCommandStatus->randHud2 : &HES_AButtonDown
+                );
             }
-            if ((battleStatus->curButtonsPressed & BUTTON_A) && !actionCommandStatus->autoSucceed) {
+            if ((battleStatus->curButtonsPressed & (chaosStatus.randomACs ? actionCommandStatus->randButton : BUTTON_A))
+                && !actionCommandStatus->autoSucceed)
+            {
                 actionCommandStatus->wrongButtonPressed = TRUE;
                 battleStatus->actionResult = ACTION_RESULT_EARLY;
             }
@@ -162,9 +173,10 @@ void N(update)(void) {
             }
 
             if (battleStatus->actionSuccess < 0) {
-                if (((battleStatus->curButtonsPressed & BUTTON_A) &&
-                    !actionCommandStatus->wrongButtonPressed) ||
-                    actionCommandStatus->autoSucceed) {
+                if (((gGameStatusPtr->pressedButtons[0]
+                      & (chaosStatus.randomACs ? actionCommandStatus->randButton : BUTTON_A))
+                     && !actionCommandStatus->wrongButtonPressed)
+                    || actionCommandStatus->autoSucceed) {
                     battleStatus->actionSuccess = 1;
                     battleStatus->actionResult = ACTION_RESULT_SUCCESS;
                     gBattleStatus.flags1 |= BS_FLAGS1_2000;

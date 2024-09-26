@@ -74,6 +74,9 @@ typedef struct ActionCommandStatus {
     /* 0x72 */ s16 wrongInputFrameCounter;
     /* 0x74 */ s16 mashMeterCutoffs[6]; // upper bounds for each interval
     /* 0x80 */ s8 mashMeterIntervals;
+    enum Buttons randButton;
+    HudScript *randHud1;
+    HudScript *randHud2;
 } ActionCommandStatus;
 
 extern ActionCommandStatus gActionCommandStatus;
@@ -83,6 +86,14 @@ extern HudScript HES_AButton;
 extern HudScript HES_AButtonDown;
 extern HudScript HES_BButton;
 extern HudScript HES_BButtonHeld;
+extern HudScript HES_CUpButton;
+extern HudScript HES_CUpButtonHeld;
+extern HudScript HES_CDownButton;
+extern HudScript HES_CDownButtonHeld;
+extern HudScript HES_CLeftButton;
+extern HudScript HES_CLeftButtonHeld;
+extern HudScript HES_CRightButton;
+extern HudScript HES_CRightButtonHeld;
 extern HudScript HES_BlueMeter;
 extern HudScript HES_CDownButtonHeld;
 extern HudScript HES_FillGaugeResult;
@@ -94,6 +105,7 @@ extern HudScript HES_PressCDownButton;
 extern HudScript HES_RightOn;
 extern HudScript HES_RunningAway;
 extern HudScript HES_RunAwayOK;
+extern HudScript HES_StartButton;
 extern HudScript HES_StickHoldLeft;
 extern HudScript HES_StickMashLeft;
 extern HudScript HES_StickNeutral;
@@ -124,6 +136,7 @@ void draw_mash_meter_mode_with_divisor(s32 posX, s32 posY, s32 fillValue, s32 di
 void draw_mash_meter_blink_with_divisor(s32 posX, s32 posY, s32 fillValue, s32 divisor);
 s32 adjust_action_command_difficulty(s32 arg0);
 s32 check_block_input(s32 buttonMask);
+void pickRandomButton(void);
 
 API_CALLABLE(LoadActionCommand);
 API_CALLABLE(SetActionDifficultyTable);

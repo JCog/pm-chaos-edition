@@ -85,6 +85,7 @@ static void shuffleUpgrades(ChaosEffectData*);
 static void spawnJunk(ChaosEffectData* effect);
 static void preventJump(ChaosEffectData* effect);
 static void preventHammer(ChaosEffectData* effect);
+static void actionCommands(ChaosEffectData* effect);
 
 ChaosEffectData effectData[] = {
     #if CHAOS_DEBUG
@@ -134,6 +135,7 @@ ChaosEffectData effectData[] = {
     {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               canSpawnItem},
     {"Can't Jump",              FALSE,  0,  60, preventJump,            preventJump,        NULL},
     {"Can't Hammer",            FALSE,  0,  60, preventHammer,          preventHammer,      NULL},
+    {"Action Commands",         FALSE,  0,  60, actionCommands,         actionCommands,     isValidBattle},
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -1268,4 +1270,8 @@ static void preventHammer(ChaosEffectData *effect) {
         clear_windows();
         gBattleSubState = BTL_SUBSTATE_PLAYER_MENU_CREATE_MAIN_MENU;
     }
+}
+
+static void actionCommands(ChaosEffectData *effect) {
+    chaosStatus.randomACs = !chaosStatus.randomACs;
 }

@@ -803,3 +803,38 @@ API_CALLABLE(func_8026962C) {
     gBattleStatus.unk_85 = evt_get_variable(script, *script->ptrReadPos);
     return ApiStatus_DONE2;
 }
+
+void pickRandomButton() {
+    const enum Buttons buttons[] = {
+        BUTTON_A,
+        BUTTON_B,
+        BUTTON_START,
+        BUTTON_C_UP,
+        BUTTON_C_DOWN,
+        BUTTON_C_LEFT,
+        BUTTON_C_RIGHT,
+    };
+    HudScript *buttonHuds1[] = {
+        &HES_AButton,
+        &HES_BButton,
+        &HES_StartButton,
+        &HES_CUpButton,
+        &HES_CDownButton,
+        &HES_CLeftButton,
+        &HES_CRightButton,
+    };
+    HudScript *buttonHuds2[] = {
+        &HES_AButtonDown,
+        &HES_BButtonHeld,
+        &HES_StartButton,
+        &HES_CUpButtonHeld,
+        &HES_CDownButtonHeld,
+        &HES_CLeftButtonHeld,
+        &HES_CRightButtonHeld,
+    };
+
+    u8 buttonIdx = rand_int(ARRAY_COUNT(buttons) - 1);
+    gActionCommandStatus.randButton = buttons[buttonIdx];
+    gActionCommandStatus.randHud1 = buttonHuds1[buttonIdx];
+    gActionCommandStatus.randHud2 = buttonHuds2[buttonIdx];
+}

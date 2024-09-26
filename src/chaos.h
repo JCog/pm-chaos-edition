@@ -54,6 +54,7 @@ typedef struct ChaosStatus {
     b8 rememberThis;
     b8 cantJump;
     b8 cantHammer;
+    b8 randomACs;
 } ChaosStatus;
 
 extern ChaosStatus chaosStatus;
