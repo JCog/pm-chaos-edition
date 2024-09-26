@@ -659,6 +659,7 @@ void btl_update_message_popup(void* data) {
     PopupMessage* popup = data;
     BattleStatus* battleStatus = &gBattleStatus;
     s32 shouldDisposeWindow = FALSE;
+    b8 showCyclingButtons = FALSE;
 
     s32 actionCommandMode;
 
@@ -897,19 +898,23 @@ void btl_update_message_popup(void* data) {
                             hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
                             // fallthrough
-                        case BTL_MSG_ACTION_TIP_PRESS_BEFORE_LANDING:
-                            HID_BattleMessage1 =
-                                hud_element_create(chaosStatus.randomACs ? &HES_CycleButtons : &HES_AButton);
+                        case BTL_MSG_ACTION_TIP_MASH_BUTTON:
+                            HID_BattleMessage1 = hud_element_create(
+                                gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMessageButton
+                                                                  : &HES_AButton
+                            );
                             hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
                             break;
+                        case BTL_MSG_ACTION_TIP_PRESS_BEFORE_LANDING:
+                            showCyclingButtons = chaosStatus.randomACs;
                         case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:
-                        case BTL_MSG_ACTION_TIP_MASH_BUTTON:
                         case BTL_MSG_ACTION_TIP_UNUSED_3:
                         case BTL_MSG_ACTION_TIP_HOLD_THEN_TAP:
                         case BTL_MSG_ACTION_TIP_UNUSED_4:
                         case BTL_MSG_ACTION_TIP_NOT_USED_3:
-                            HID_BattleMessage1 = hud_element_create(&HES_AButton);
+                            HID_BattleMessage1 =
+                                hud_element_create(showCyclingButtons ? &HES_CycleButtons : &HES_AButton);
                             hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
                             break;
@@ -931,7 +936,11 @@ void btl_update_message_popup(void* data) {
                         set_window_update(WIN_BTL_POPUP, WINDOW_UPDATE_SHOW_TRANSPARENT);
                         switch (popup->messageIndex) {
                             case BTL_MSG_ACTION_TIP_MASH_BUTTON:
-                                hud_element_set_script(HID_BattleMessage1, &HES_MashAButton);
+                                hud_element_set_script(
+                                    HID_BattleMessage1,
+                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMash
+                                                                      : &HES_MashAButton
+                                );
                                 break;
                             case BTL_MSG_ACTION_TIP_MASH_LEFT:
                                 hud_element_set_script(HID_BattleMessage1, &HES_StickMashLeft);

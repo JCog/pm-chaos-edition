@@ -819,7 +819,7 @@ void pickRandomButton() {
         BUTTON_C_LEFT,
         BUTTON_C_RIGHT,
     };
-    HudScript *buttonHuds1[] = {
+    HudScript *buttonHudsUp[] = {
         &HES_AButton,
         &HES_BButton,
         &HES_StartButton,
@@ -828,7 +828,7 @@ void pickRandomButton() {
         &HES_CLeftButton,
         &HES_CRightButton,
     };
-    HudScript *buttonHuds2[] = {
+    HudScript *buttonHudsDown[] = {
         &HES_AButtonDown,
         &HES_BButtonHeld,
         &HES_StartButton,
@@ -836,6 +836,15 @@ void pickRandomButton() {
         &HES_CDownButtonHeld,
         &HES_CLeftButtonHeld,
         &HES_CRightButtonHeld,
+    };
+    HudScript *buttonHudsMash[] = {
+        &HES_MashAButton,
+        &HES_MashBButton1,
+        &HES_MashStartButton,
+        &HES_MashCUpButton,
+        &HES_MashCDownButton1,
+        &HES_MashCLeftButton,
+        &HES_MashCRightButton1,
     };
     HudScript *buttonHudsMessage[] = {
         &HES_PressAButton,
@@ -849,7 +858,8 @@ void pickRandomButton() {
 
     u8 buttonIdx = rand_int(ARRAY_COUNT(buttons) - 1);
     gActionCommandStatus.randButton = buttons[buttonIdx];
-    gActionCommandStatus.randHudUp = buttonHuds1[buttonIdx];
-    gActionCommandStatus.randHudDown = buttonHuds2[buttonIdx];
+    gActionCommandStatus.randHudUp = buttonHudsUp[buttonIdx];
+    gActionCommandStatus.randHudDown = buttonHudsDown[buttonIdx];
+    gActionCommandStatus.randHudMash = buttonHudsMash[buttonIdx];
     gActionCommandStatus.randHudMessageButton = buttonHudsMessage[buttonIdx];
 }
