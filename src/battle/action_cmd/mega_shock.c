@@ -31,13 +31,13 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    elementID = hud_element_create(&HES_AButton);
+    elementID = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
     actionCommandStatus->hudElements[0] = elementID;
     hud_element_set_flags(elementID, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(elementID, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(elementID, 0);
 
-    elementID = hud_element_create(&HES_BButton);
+    elementID = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx2]);
     actionCommandStatus->hudElements[2] = elementID;
     hud_element_set_flags(elementID, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(elementID, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -157,13 +157,14 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 break;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], &HES_MashAButton);
-            hud_element_set_script(actionCommandStatus->hudElements[2], &HES_MashBButton1);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]);
+            hud_element_set_script(actionCommandStatus->hudElements[2], buttonHudsMash[actionCommandStatus->buttonIdx2]);
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->unk_5C = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
             sfx_play_sound_with_params(SOUND_LOOP_CHARGE_BAR, 0, 0, 0);
             actionCommandStatus->state = 11;
+            // fallthrough
         case 11:
             btl_set_popup_duration(99);
             if (!actionCommandStatus->isBarFilled) {
@@ -205,7 +206,7 @@ void N(update)(void) {
                 frameCount--;
             }
 
-            buttonsAB = BUTTON_A | BUTTON_B;
+            buttonsAB = buttonChoices[actionCommandStatus->buttonIdx1] | buttonChoices[actionCommandStatus->buttonIdx2];
             if ((buttonsPushed & buttonsAB) == buttonsAB) {
                 if (actionCommandStatus->targetWeakness != 0) {
                     s32 fillLevel;

@@ -867,15 +867,19 @@ API_CALLABLE(CheckActionCommandButtonDown) {
 }
 
 void pickActionCommandButtons() {
-    if (!chaosStatus.randomACs || gActionCommandStatus.randSelected) {
+    ActionCommandStatus *acStatus = &gActionCommandStatus;
+    if (!chaosStatus.randomACs || acStatus->randSelected) {
         return;
     }
-    gActionCommandStatus.randSelected = TRUE;
 
-    gActionCommandStatus.buttonIdx1 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    acStatus->randSelected = TRUE;
+    acStatus->buttonIdx1 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
     do {
-        gActionCommandStatus.buttonIdx2 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
-    } while (gActionCommandStatus.buttonIdx1 == gActionCommandStatus.buttonIdx2);
+        acStatus->buttonIdx2 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    } while (acStatus->buttonIdx1 == acStatus->buttonIdx2);
+    do {
+        acStatus->buttonIdx3 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    } while (acStatus->buttonIdx1 == acStatus->buttonIdx3 && acStatus->buttonIdx2 == acStatus->buttonIdx3);
 }
 
 void restoreActionCommandButtons() {

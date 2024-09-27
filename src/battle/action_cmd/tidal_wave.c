@@ -3,8 +3,8 @@
 
 #define NAMESPACE action_command_tidal_wave
 
-HudScript* D_802A97C0_42CEB0[3] = { &HES_PressAButton, &HES_PressBButton, &HES_PressCDownButton };
-HudScript* D_802A97CC_42CEBC[3] = { &HES_AButtonDown, &HES_BButtonHeld, &HES_CDownButtonHeld };
+HudScript* buttonsPress[3] = { &HES_PressAButton, &HES_PressBButton, &HES_PressCDownButton };
+HudScript* buttonsDown[3] = { &HES_AButtonDown, &HES_BButtonHeld, &HES_CDownButtonHeld };
 
 extern s32 actionCmdTableTidalWave[];
 
@@ -44,6 +44,13 @@ API_CALLABLE(N(init)) {
             hud_element_set_render_depth(id, 0);
             hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
         }
+
+        buttonsPress[0] = buttonHudsPress[actionCommandStatus->buttonIdx1];
+        buttonsPress[1] = buttonHudsPress[actionCommandStatus->buttonIdx2];
+        buttonsPress[2] = buttonHudsPress[actionCommandStatus->buttonIdx3];
+        buttonsDown[0] = buttonHudsDown[actionCommandStatus->buttonIdx1];
+        buttonsDown[1] = buttonHudsDown[actionCommandStatus->buttonIdx2];
+        buttonsDown[2] = buttonHudsDown[actionCommandStatus->buttonIdx3];
 
         return ApiStatus_DONE2;
     }
@@ -132,8 +139,7 @@ void N(update)(void) {
             } while (oldButton == newButton);
 
             id = actionCommandStatus->hudElements[actionCommandStatus->unk_5D];
-            hud_element_set_script(
-                id, D_802A97C0_42CEB0[newButton]);
+            hud_element_set_script(id, buttonsPress[newButton]);
             hud_element_set_render_pos(
                 id,
                 actionCommandStatus->hudPosX + ((actionCommandStatus->unk_5D - 1) * 20) + 16,
@@ -201,7 +207,7 @@ void N(update)(void) {
                             } else {
                                 buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
                                 if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~BUTTON_A) {
+                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdx1]) {
                                         actionCommandStatus->wrongButtonPressed = TRUE;
                                     } else {
                                         success = TRUE;
@@ -215,7 +221,7 @@ void N(update)(void) {
                             } else {
                                 buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
                                 if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~BUTTON_B) {
+                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdx2]) {
                                         actionCommandStatus->wrongButtonPressed = TRUE;
                                     } else {
                                         success = TRUE;
@@ -229,7 +235,7 @@ void N(update)(void) {
                             } else {
                                 buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
                                 if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~BUTTON_C_DOWN) {
+                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdx3]) {
                                         actionCommandStatus->wrongButtonPressed = TRUE;
                                     } else {
                                         success = TRUE;
@@ -249,7 +255,7 @@ void N(update)(void) {
                     if (success) {
                         // Correct; shrink button, set up next button press, etc.
                         id = actionCommandStatus->hudElements[actionCommandStatus->unk_5D];
-                        hud_element_set_script(id, D_802A97CC_42CEBC[actionCommandStatus->unk_5C]);
+                        hud_element_set_script(id, buttonsDown[actionCommandStatus->unk_5C]);
                         hud_element_set_scale(id, 0.5f);
                         hud_element_set_render_pos(
                             id,

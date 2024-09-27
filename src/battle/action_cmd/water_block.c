@@ -136,7 +136,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    id = hud_element_create(&HES_AButton);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -358,7 +358,7 @@ void N(update)(void) {
             }
             if (actionCommandStatus->frameCounter == 2) {
                 hud_element_set_script(actionCommandStatus->hudElements[2], &HES_TimingReady);
-                hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButtonDown);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
                 sfx_play_sound(SOUND_TIMING_BAR_GO);
             }
             actionCommandStatus->frameCounter--;
@@ -390,12 +390,14 @@ void N(update)(void) {
                         pos -= ARRAY_COUNT(battleStatus->pushInputBuffer);
                     }
 
-                    if (i < 5 && (battleStatus->pushInputBuffer[pos] & BUTTON_A)) {
+                    if (i < 5 && (battleStatus->pushInputBuffer[pos] & buttonChoices[actionCommandStatus->buttonIdx1])) {
                         actionCommandStatus->wrongButtonPressed = TRUE;
                     }
 
-                    if (((battleStatus->pushInputBuffer[pos] & BUTTON_A) && !actionCommandStatus->wrongButtonPressed) ||
-                        actionCommandStatus->autoSucceed) {
+                    if (((battleStatus->pushInputBuffer[pos] & buttonChoices[actionCommandStatus->buttonIdx1])
+                         && !actionCommandStatus->wrongButtonPressed)
+                        || actionCommandStatus->autoSucceed)
+                    {
                         actionCommandStatus->unk_5C = 1;
                         battleStatus->actionQuality++;
                         break;
@@ -423,12 +425,12 @@ void N(update)(void) {
                 }
                 hud_element_set_render_pos(id, actionCommandStatus->hudPosX + 28, actionCommandStatus->hudPosY + 38);
                 hud_element_clear_flags(id, 2);
-                hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButton);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsUp[actionCommandStatus->buttonIdx1]);
             }
             actionCommandStatus->unk_5D--;
             if (actionCommandStatus->frameCounter == 2) {
                 hud_element_set_script(actionCommandStatus->hudElements[3], &HES_TimingReady);
-                hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButtonDown);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
                 sfx_play_sound(SOUND_TIMING_BAR_GO);
             }
             actionCommandStatus->frameCounter--;
@@ -464,13 +466,15 @@ void N(update)(void) {
                     }
 
                     if (i < 5) {
-                        if (battleStatus->pushInputBuffer[pos] & BUTTON_A) {
+                        if (battleStatus->pushInputBuffer[pos] & buttonChoices[actionCommandStatus->buttonIdx1]) {
                             actionCommandStatus->wrongButtonPressed = TRUE;
                         }
                     }
 
-                    if (((battleStatus->pushInputBuffer[pos] & BUTTON_A) && !actionCommandStatus->wrongButtonPressed) ||
-                        actionCommandStatus->autoSucceed) {
+                    if (((battleStatus->pushInputBuffer[pos] & buttonChoices[actionCommandStatus->buttonIdx1])
+                         && !actionCommandStatus->wrongButtonPressed)
+                        || actionCommandStatus->autoSucceed)
+                    {
                         actionCommandStatus->unk_5C = 1;
                         battleStatus->actionQuality++;
                         break;
@@ -497,12 +501,12 @@ void N(update)(void) {
                 }
                 hud_element_set_render_pos(id, actionCommandStatus->hudPosX + 48, actionCommandStatus->hudPosY + 38);
                 hud_element_clear_flags(id, 2);
-                hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButton);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsUp[actionCommandStatus->buttonIdx1]);
             }
             actionCommandStatus->unk_5D--;
             if (actionCommandStatus->frameCounter == 2) {
                 hud_element_set_script(actionCommandStatus->hudElements[4], &HES_TimingReady);
-                hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButtonDown);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
                 sfx_play_sound(SOUND_TIMING_BAR_GO);
             }
             actionCommandStatus->frameCounter--;
@@ -538,13 +542,15 @@ void N(update)(void) {
                     }
 
                     if (i < 5) {
-                        if (battleStatus->pushInputBuffer[pos] & BUTTON_A) {
+                        if (battleStatus->pushInputBuffer[pos] & buttonChoices[actionCommandStatus->buttonIdx1]) {
                             actionCommandStatus->wrongButtonPressed = TRUE;
                         }
                     }
 
-                    if (((battleStatus->pushInputBuffer[pos] & BUTTON_A) && !actionCommandStatus->wrongButtonPressed) ||
-                        actionCommandStatus->autoSucceed) {
+                    if (((battleStatus->pushInputBuffer[pos] & buttonChoices[actionCommandStatus->buttonIdx1])
+                         && !actionCommandStatus->wrongButtonPressed)
+                        || actionCommandStatus->autoSucceed)
+                    {
                         actionCommandStatus->unk_5C = 1;
                         battleStatus->actionQuality++;
                         break;
@@ -572,7 +578,7 @@ void N(update)(void) {
                 }
                 hud_element_set_render_pos(id, actionCommandStatus->hudPosX + 68, actionCommandStatus->hudPosY + 38);
                 hud_element_clear_flags(id, 2);
-                hud_element_set_script(actionCommandStatus->hudElements[0], &HES_AButton);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsUp[actionCommandStatus->buttonIdx1]);
                 actionCommandStatus->state = 16;
                 return;
             }
