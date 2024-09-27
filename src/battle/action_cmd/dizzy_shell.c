@@ -34,7 +34,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(id, 0);
@@ -97,7 +97,7 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 return;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdxA]);
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
             sfx_play_sound_with_params(SOUND_LOOP_CHARGE_BAR, 0, 0, 0);
@@ -121,7 +121,7 @@ void N(update)(void) {
                 }
             }
 
-            if (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1])) {
+            if (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdxA])) {
                 s32 a = battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];
                 s32 b = actionCommandStatus->targetWeakness * 850;
                 s32 temp_v1_2 = (a * b) / 10000;

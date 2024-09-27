@@ -36,7 +36,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    id = hud_element_create(&HES_StickNeutral);
+    id = hud_element_create(buttonHudsUp[gActionCommandStatus.buttonIdxS]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(id, 0);
@@ -136,7 +136,7 @@ void N(update)(void) {
                 break;
             }
 
-            hud_element_set_script(actionCommandStatus->hudElements[0], &HES_StickMashLeft);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[gActionCommandStatus.buttonIdxS]);
             actionCommandStatus->unk_5C = 0;
             D_802A98C0 = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
@@ -156,7 +156,7 @@ void N(update)(void) {
                 }
 
                 if (!actionCommandStatus->isBarFilled) {
-                    if (battleStatus->curButtonsPressed & BUTTON_STICK_LEFT) {
+                    if (battleStatus->curButtonsPressed & buttonChoices[actionCommandStatus->buttonIdxS]) {
                         actionCommandStatus->barFillLevel += (battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty] * 1250) / 100;
                     }
                     if (battleStatus->curButtonsPressed & BUTTON_STICK_RIGHT) {
@@ -177,14 +177,14 @@ void N(update)(void) {
                 hud_element_clear_flags(id, 2);
             }
 
-            if (D_802A98C0 & BUTTON_STICK_LEFT) {
+            if (D_802A98C0 & buttonChoices[actionCommandStatus->buttonIdxS]) {
                 actionCommandStatus->unk_5C = 1;
             }
             if (D_802A98C0 & BUTTON_STICK_RIGHT) {
                 actionCommandStatus->unk_5C = -1;
             }
 
-            if (!(D_802A98C0 & BUTTON_STICK_LEFT) &&
+            if (!(D_802A98C0 & buttonChoices[actionCommandStatus->buttonIdxS]) &&
                 !(battleStatus->curButtonsDown & BUTTON_STICK_RIGHT) &&
                 actionCommandStatus->unk_5C == 1)
             {

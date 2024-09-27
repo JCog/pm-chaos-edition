@@ -33,7 +33,7 @@ API_CALLABLE(N(init)) {
     D_802A9920 = 0;
     actionCommandStatus->hudPosY = 80;
 
-    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = hudElement;
     hud_element_set_render_pos(hudElement, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(hudElement, 0);
@@ -136,14 +136,14 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 break;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdxA]);
             D_802A9920 = 1;
             actionCommandStatus->state = 11;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
             // fallthrough
         case 11:
             if (battleStatus->actionCommandMode != ACTION_COMMAND_MODE_NOT_LEARNED
-                && (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1])))
+                && (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdxA])))
             {
                 actionCommandStatus->barFillLevel += (battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty] * 180 / 100);
             }

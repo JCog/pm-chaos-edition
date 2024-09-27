@@ -91,7 +91,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -203,7 +203,7 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 return;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdxA]);
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->state = 11;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
@@ -224,7 +224,7 @@ void N(update)(void) {
             }
 
             if (!actionCommandStatus->berserkerEnabled) {
-                if (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1])) {
+                if (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdxA])) {
                     s32 amt;
 
                     if (actionCommandStatus->targetWeakness == 0) {

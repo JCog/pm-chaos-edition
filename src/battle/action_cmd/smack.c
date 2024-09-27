@@ -60,7 +60,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    hudElement = hud_element_create(&HES_StickNeutral);
+    hudElement = hud_element_create(buttonHudsUp[gActionCommandStatus.buttonIdxS]);
     actionCommandStatus->hudElements[0] = hudElement;
     hud_element_set_render_pos(hudElement, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(hudElement, 0);
@@ -129,7 +129,7 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 break;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], &HES_StickMashLeft);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[gActionCommandStatus.buttonIdxS]);
             actionCommandStatus->barFillLevel = 0;
             battleStatus->unk_85 = 0;
             actionCommandStatus->unk_5C = 0;
@@ -151,11 +151,11 @@ void N(update)(void) {
                 }
 
                 if (!actionCommandStatus->isBarFilled) {
-                    if (battleStatus->curButtonsDown & BUTTON_STICK_LEFT) {
+                    if (battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) {
                         actionCommandStatus->unk_5C = TRUE;
                     }
 
-                    if (!(battleStatus->curButtonsDown & BUTTON_STICK_LEFT) && actionCommandStatus->unk_5C) {
+                    if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) && actionCommandStatus->unk_5C) {
                         if (actionCommandStatus->targetWeakness == 0) {
                             actionCommandStatus->barFillLevel += battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty] * 13;
                         } else {

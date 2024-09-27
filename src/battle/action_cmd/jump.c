@@ -33,7 +33,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->wrongButtonPressed = FALSE;
     actionCommandStatus->hudPosY = 80;
 
-    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = hudElement;
     hud_element_set_flags(hudElement, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(hudElement, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -129,9 +129,9 @@ void N(update)(void) {
 
             successWindow = battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];
             if (((actionCommandStatus->prepareTime - successWindow) - 2) <= 0) {
-                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdxA]);
             }
-            if ((battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1]))
+            if ((battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdxA]))
                 && !actionCommandStatus->autoSucceed)
             {
                 actionCommandStatus->wrongButtonPressed = TRUE;
@@ -165,7 +165,7 @@ void N(update)(void) {
 
             if (battleStatus->actionSuccess < 0) {
                 if (((battleStatus->curButtonsPressed
-                      & (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1])))
+                      & (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdxA])))
                      && !actionCommandStatus->wrongButtonPressed)
                     || actionCommandStatus->autoSucceed) {
                     battleStatus->actionSuccess = 1;

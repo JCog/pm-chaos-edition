@@ -31,7 +31,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->unk_5C = 0;
     actionCommandStatus->hudPosY = 80;
 
-    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -119,7 +119,7 @@ void N(update)(void) {
                 break;
             }
 
-            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdxA]);
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->unk_5C = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
@@ -131,7 +131,7 @@ void N(update)(void) {
             cutoff = actionCommandStatus->mashMeterCutoffs[actionCommandStatus->mashMeterIntervals];
             temp = actionCommandStatus->barFillLevel / cutoff;
             if (actionCommandStatus->unk_5C == 0) {
-                if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdx1])) {
+                if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxA])) {
                     actionCommandStatus->barFillLevel -= D_802A9760_42A480[temp / 20];
                     if (actionCommandStatus->barFillLevel < 0) {
                         actionCommandStatus->barFillLevel = 0;
@@ -155,12 +155,12 @@ void N(update)(void) {
             sfx_adjust_env_sound_params(SOUND_LOOP_CHARGE_BAR, 0, 0, battleStatus->actionQuality * 12);
             id = actionCommandStatus->hudElements[0];
             if (temp < 80) {
-                HudScript *button = buttonHudsDown[actionCommandStatus->buttonIdx1];
+                HudScript *button = buttonHudsDown[actionCommandStatus->buttonIdxA];
                 if (hud_element_get_script(id) != button) {
                     hud_element_set_script(id, button);
                 }
             } else {
-                HudScript *button = buttonHudsUp[actionCommandStatus->buttonIdx1];
+                HudScript *button = buttonHudsUp[actionCommandStatus->buttonIdxA];
                 if (hud_element_get_script(id) != button) {
                     hud_element_set_script(id, button);
                 }

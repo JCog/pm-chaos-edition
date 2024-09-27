@@ -35,7 +35,7 @@ API_CALLABLE(N(init)) {
     air_lift_bss_0 = 0;
     actionCommandStatus->hudPosY = 80;
 
-    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = hudElement;
     hud_element_set_render_pos(hudElement, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(hudElement, 0);
@@ -132,7 +132,7 @@ void N(update)(void) {
                 return;
             }
             hud_element_set_script(
-                actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]
+                actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdxA]
             );
             air_lift_bss_0 = 1;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
@@ -158,7 +158,7 @@ void N(update)(void) {
             }
 
             if (battleStatus->actionCommandMode != ACTION_COMMAND_MODE_NOT_LEARNED
-                && battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1]))
+                && battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdxA]))
             {
                 if (actionCommandStatus->unk_5A != 0) {
                     s32 a = battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];

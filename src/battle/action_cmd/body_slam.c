@@ -30,7 +30,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(id, 0);
@@ -111,7 +111,7 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 return;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdxA]);
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->thresholdLevel = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
@@ -120,7 +120,7 @@ void N(update)(void) {
         case 11:
             btl_set_popup_duration(99);
 
-            if (battleStatus->curButtonsDown & (buttonChoices[actionCommandStatus->buttonIdx1])) {
+            if (battleStatus->curButtonsDown & (buttonChoices[actionCommandStatus->buttonIdxA])) {
                 actionCommandStatus->barFillLevel += 154;
                 actionCommandStatus->thresholdLevel += 154;
             } else {
@@ -130,7 +130,7 @@ void N(update)(void) {
             if (actionCommandStatus->barFillLevel >= 10000) {
                 actionCommandStatus->barFillLevel = 10000;
                 hud_element_set_script(actionCommandStatus->hudElements[2], &HES_TimingReady);
-                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdxA]);
                 if (!actionCommandStatus->isBarFilled) {
                     sfx_play_sound(SOUND_TIMING_BAR_GO);
                     actionCommandStatus->isBarFilled = TRUE;

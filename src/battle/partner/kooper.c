@@ -562,7 +562,7 @@ EvtScript N(shellToss) = {
     Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlowest)
     Loop(30)
         Wait(1)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfNe(LVar0, FALSE)
             BreakLoop
         EndIf
@@ -605,7 +605,7 @@ EvtScript N(shellToss) = {
                 Set(LVar1, 1)
             EndIf
         EndIf
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, FALSE)
             BreakLoop
         EndIf
@@ -731,7 +731,7 @@ EvtScript N(powerShell) = {
     Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlowest)
     Loop(30)
         Wait(1)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfNe(LVar0, FALSE)
             BreakLoop
         EndIf
@@ -775,7 +775,7 @@ EvtScript N(powerShell) = {
                 Set(LVar1, 1)
             EndIf
         EndIf
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, FALSE)
             BreakLoop
         EndIf
@@ -1080,7 +1080,8 @@ EvtScript N(fireShell) = {
     Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlowest)
     Call(PlaySoundAtActor, ACTOR_PARTNER, SOUND_KOOPER_SHELL_SPINUP)
     Call(PlaySoundAtActor, ACTOR_PARTNER, SOUND_ROARING_FIRE)
-    Call(AddActorDecoration, ACTOR_SELF, PRT_ZERO, 0, ACTOR_DECORATION_RED_FLAMES)
+    // TODO: replace once fx_aura is fixed
+    //Call(AddActorDecoration, ACTOR_SELF, PRT_ZERO, 0, ACTOR_DECORATION_RED_FLAMES)
     Wait(1)
     Call(ModifyActorDecoration, ACTOR_PARTNER, -1, 0, 10, 10, 255, 0)
     Call(SetActorVar, ACTOR_SELF, AVAR_Unk_1, 1)

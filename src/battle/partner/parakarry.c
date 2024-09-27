@@ -202,7 +202,7 @@ API_CALLABLE(N(ShellShotActionCommand)) {
             script->functionTemp[0] = 1;
             break;
         case 1:
-            if (gActionCommandStatus.autoSucceed || battleStatus->curButtonsDown & BUTTON_STICK_LEFT) {
+            if (gActionCommandStatus.autoSucceed || battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) {
                 shellShotTimer = 0;
             }
 
@@ -225,7 +225,7 @@ API_CALLABLE(N(ShellShotActionCommand)) {
             break;
         case 2:
             if (!(gActionCommandStatus.autoSucceed)) {
-                if (!(battleStatus->curButtonsDown & BUTTON_STICK_LEFT)) {
+                if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS])) {
                     script->functionTemp[0] = 3;
                     break;
                 }
@@ -303,9 +303,9 @@ API_CALLABLE(N(ShellShotActionCommand)) {
             aimAngle = fabsf(clampedAngleDiff) / state->unk_24 * targetActor->scalingFactor;
 
             if (aimAngle < 7.0f) {
-                hud_element_set_script(hudID, &HES_StickNeutral);
+                hud_element_set_script(hudID, buttonHudsUp[actionCommandStatus->buttonIdxS]);
             } else {
-                hud_element_set_script(hudID, &HES_StickHoldLeft);
+                hud_element_set_script(hudID, buttonHudsDown[actionCommandStatus->buttonIdxS]);
             }
 
             hudStickPosX += 20;

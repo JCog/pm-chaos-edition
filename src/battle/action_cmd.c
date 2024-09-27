@@ -10,7 +10,9 @@ enum Buttons buttonChoices[] = {
     BUTTON_C_DOWN,
     BUTTON_C_LEFT,
     BUTTON_C_RIGHT,
+    BUTTON_STICK_LEFT,
 };
+
 HudScript *buttonHudsUp[] = {
     &HES_AButton,
     &HES_BButton,
@@ -19,7 +21,9 @@ HudScript *buttonHudsUp[] = {
     &HES_CDownButton,
     &HES_CLeftButton,
     &HES_CRightButton,
+    &HES_StickNeutral,
 };
+
 HudScript *buttonHudsDown[] = {
     &HES_AButtonDown,
     &HES_BButtonHeld,
@@ -28,7 +32,9 @@ HudScript *buttonHudsDown[] = {
     &HES_CDownButtonHeld,
     &HES_CLeftButtonHeld,
     &HES_CRightButtonHeld,
+    &HES_StickHoldLeft,
 };
+
 HudScript *buttonHudsMash[] = {
     &HES_MashAButton,
     &HES_MashBButton1,
@@ -37,7 +43,9 @@ HudScript *buttonHudsMash[] = {
     &HES_MashCDownButton1,
     &HES_MashCLeftButton,
     &HES_MashCRightButton1,
+    &HES_StickMashLeft,
 };
+
 HudScript *buttonHudsPress[] = {
     &HES_PressAButton,
     &HES_PressBButton,
@@ -46,6 +54,18 @@ HudScript *buttonHudsPress[] = {
     &HES_PressCDownButton,
     &HES_PressCLeftButton,
     &HES_PressCRightButton,
+    &HES_StickTapLeft,
+};
+
+HudScript *buttonHudsRelease[] = {
+    &HES_AButton,
+    &HES_BButton,
+    &HES_StartButton,
+    &HES_CUpButton,
+    &HES_CDownButton,
+    &HES_CLeftButton,
+    &HES_CRightButton,
+    &HES_StickTapNeutral,
 };
 
 u8 mashMeter_bgColors[15] = {
@@ -857,11 +877,22 @@ API_CALLABLE(CheckActionCommandButtonDown) {
     Bytecode* args = script->ptrReadPos;
     Bytecode outVar = *args++;
     s32 buttonsDown = gBattleStatus.curButtonsDown;
-    osSyncPrintf("CheckActionCommandButtonDown\n");
 
     evt_set_variable(
         script, outVar,
-        (buttonsDown & (buttonChoices[gActionCommandStatus.buttonIdx1])) != 0
+        (buttonsDown & (buttonChoices[gActionCommandStatus.buttonIdxA])) != 0
+    );
+    return ApiStatus_DONE2;
+}
+
+API_CALLABLE(CheckStickButtonDown) {
+    Bytecode* args = script->ptrReadPos;
+    Bytecode outVar = *args++;
+    s32 buttonsDown = gBattleStatus.curButtonsDown;
+
+    evt_set_variable(
+        script, outVar,
+        (buttonsDown & (buttonChoices[gActionCommandStatus.buttonIdxS])) != 0
     );
     return ApiStatus_DONE2;
 }
@@ -873,18 +904,20 @@ void pickActionCommandButtons() {
     }
 
     acStatus->randSelected = TRUE;
-    acStatus->buttonIdx1 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    acStatus->buttonIdxA = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    acStatus->buttonIdxS = acStatus->buttonIdxA;
     do {
-        acStatus->buttonIdx2 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
-    } while (acStatus->buttonIdx1 == acStatus->buttonIdx2);
+        acStatus->buttonIdxB = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    } while (acStatus->buttonIdxA == acStatus->buttonIdxB);
     do {
-        acStatus->buttonIdx3 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
-    } while (acStatus->buttonIdx1 == acStatus->buttonIdx3 && acStatus->buttonIdx2 == acStatus->buttonIdx3);
+        acStatus->buttonIdxC = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    } while (acStatus->buttonIdxA == acStatus->buttonIdxC || acStatus->buttonIdxB == acStatus->buttonIdxC);
 }
 
 void restoreActionCommandButtons() {
     gActionCommandStatus.randSelected = FALSE;
-    gActionCommandStatus.buttonIdx1 = 0; // A
-    gActionCommandStatus.buttonIdx2 = 1; // B
-    gActionCommandStatus.buttonIdx3 = 4; // CDown
+    gActionCommandStatus.buttonIdxA = 0;
+    gActionCommandStatus.buttonIdxB = 1;
+    gActionCommandStatus.buttonIdxC = 4;
+    gActionCommandStatus.buttonIdxS = 7;
 }

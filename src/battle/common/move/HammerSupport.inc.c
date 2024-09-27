@@ -36,7 +36,7 @@ EvtScript N(EVS_HammerSupport_C) = {
     Call(AddGoalPos, ACTOR_PLAYER, 0, 0, 0)
     Set(LVar1, 0)
     Loop(10)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, TRUE)
             Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_Mario1_Idle)
             BreakLoop
@@ -67,7 +67,7 @@ EvtScript N(EVS_HammerSupport_D) = {
     Call(AddGoalPos, ACTOR_PLAYER, 0, 0, 0)
     Set(LVar1, 0)
     Loop(10)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, TRUE)
             Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_Mario1_Idle)
             BreakLoop
@@ -98,7 +98,7 @@ EvtScript N(EVS_HammerSupport_E) = {
     Call(AddGoalPos, ACTOR_PLAYER, 0, 0, 0)
     Set(LVar1, 0)
     Loop(10)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, TRUE)
             Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_Mario1_Idle)
             BreakLoop
@@ -144,14 +144,14 @@ EvtScript N(EVS_HammerSupport_F) = {
                 Set(LVar1, 1)
             EndIf
         EndIf
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, FALSE)
             BreakLoop
         EndIf
     EndLoop
     Label(0)
         Wait(1)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, TRUE)
             Goto(0)
         EndIf
@@ -237,7 +237,7 @@ EvtScript N(EVS_UseBasicHammer) = {
             IfEq(LVar0, 0)
                 Loop(45)
                     Wait(1)
-                    Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+                    Call(CheckStickButtonDown, LVar0)
                     IfNe(LVar0, FALSE)
                         BreakLoop
                     EndIf
@@ -257,7 +257,7 @@ EvtScript N(EVS_UseBasicHammer) = {
                     Set(LVar1, 1)
                 EndIf
             EndIf
-            Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+            Call(CheckStickButtonDown, LVar0)
             IfEq(LVar0, FALSE)
                 BreakLoop
             EndIf
@@ -321,7 +321,7 @@ EvtScript N(EVS_UseSuperHammer) = {
         IfEq(LVar0, HIT_RESULT_HIT)
             Loop(45)
                 Wait(1)
-                Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+                Call(CheckStickButtonDown, LVar0)
                 IfNe(LVar0, FALSE)
                     BreakLoop
                 EndIf
@@ -340,7 +340,7 @@ EvtScript N(EVS_UseSuperHammer) = {
                     Set(LVar1, 1)
                 EndIf
             EndIf
-            Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+            Call(CheckStickButtonDown, LVar0)
             IfEq(LVar0, FALSE)
                 BreakLoop
             EndIf
@@ -390,7 +390,7 @@ EvtScript N(EVS_UseUltraHammer) = {
         IfEq(LVar0, HIT_RESULT_HIT)
             Loop(45)
                 Wait(1)
-                Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+                Call(CheckStickButtonDown, LVar0)
                 IfNe(LVar0, FALSE)
                     BreakLoop
                 EndIf
@@ -409,7 +409,7 @@ EvtScript N(EVS_UseUltraHammer) = {
                     Set(LVar1, 1)
                 EndIf
             EndIf
-            Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+            Call(CheckStickButtonDown, LVar0)
             IfEq(LVar0, FALSE)
                 BreakLoop
             EndIf
@@ -457,7 +457,7 @@ EvtScript N(EVS_Hammer_UseBasicQuake) = {
     IfEq(LVar0, 0)
         Loop(45)
             Wait(1)
-            Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+            Call(CheckStickButtonDown, LVar0)
             IfNe(LVar0, FALSE)
                 BreakLoop
             EndIf
@@ -476,7 +476,7 @@ EvtScript N(EVS_Hammer_UseBasicQuake) = {
                 Set(LVar1, 1)
             EndIf
         EndIf
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, FALSE)
             BreakLoop
         EndIf
@@ -515,7 +515,7 @@ EvtScript N(EVS_Hammer_UseSuperQuake) = {
     IfEq(LVar0, 0)
         Loop(45)
             Wait(1)
-            Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+            Call(CheckStickButtonDown, LVar0)
             IfNe(LVar0, FALSE)
                 BreakLoop
             EndIf
@@ -525,7 +525,7 @@ EvtScript N(EVS_Hammer_UseSuperQuake) = {
     Call(action_command_hammer_start, 0, LVarD, 3)
     Loop(60)
         Wait(1)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, FALSE)
             BreakLoop
         EndIf
@@ -564,7 +564,7 @@ EvtScript N(EVS_Hammer_UseUltraQuake) = {
     IfEq(LVar0, 0)
         Loop(45)
             Wait(1)
-            Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+            Call(CheckStickButtonDown, LVar0)
             IfNe(LVar0, FALSE)
                 BreakLoop
             EndIf
@@ -574,7 +574,7 @@ EvtScript N(EVS_Hammer_UseUltraQuake) = {
     Call(action_command_hammer_start, 0, LVarD, 3)
     Loop(60)
         Wait(1)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, FALSE)
             BreakLoop
         EndIf

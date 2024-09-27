@@ -45,12 +45,12 @@ API_CALLABLE(N(init)) {
             hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
         }
 
-        buttonsPress[0] = buttonHudsPress[actionCommandStatus->buttonIdx1];
-        buttonsPress[1] = buttonHudsPress[actionCommandStatus->buttonIdx2];
-        buttonsPress[2] = buttonHudsPress[actionCommandStatus->buttonIdx3];
-        buttonsDown[0] = buttonHudsDown[actionCommandStatus->buttonIdx1];
-        buttonsDown[1] = buttonHudsDown[actionCommandStatus->buttonIdx2];
-        buttonsDown[2] = buttonHudsDown[actionCommandStatus->buttonIdx3];
+        buttonsPress[0] = buttonHudsPress[actionCommandStatus->buttonIdxA];
+        buttonsPress[1] = buttonHudsPress[actionCommandStatus->buttonIdxB];
+        buttonsPress[2] = buttonHudsPress[actionCommandStatus->buttonIdxC];
+        buttonsDown[0] = buttonHudsDown[actionCommandStatus->buttonIdxA];
+        buttonsDown[1] = buttonHudsDown[actionCommandStatus->buttonIdxB];
+        buttonsDown[2] = buttonHudsDown[actionCommandStatus->buttonIdxC];
 
         return ApiStatus_DONE2;
     }
@@ -207,7 +207,7 @@ void N(update)(void) {
                             } else {
                                 buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
                                 if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdx1]) {
+                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdxA]) {
                                         actionCommandStatus->wrongButtonPressed = TRUE;
                                     } else {
                                         success = TRUE;
@@ -221,7 +221,7 @@ void N(update)(void) {
                             } else {
                                 buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
                                 if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdx2]) {
+                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdxB]) {
                                         actionCommandStatus->wrongButtonPressed = TRUE;
                                     } else {
                                         success = TRUE;
@@ -235,7 +235,7 @@ void N(update)(void) {
                             } else {
                                 buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
                                 if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdx3]) {
+                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdxC]) {
                                         actionCommandStatus->wrongButtonPressed = TRUE;
                                     } else {
                                         success = TRUE;

@@ -2585,6 +2585,15 @@ HudScript HES_StickTapRight = {
     hs_End
 };
 
+HudScript HES_BriefStickHoldLeft = {
+    hs_SetVisible
+    hs_SetCustomSize(32, 32)
+    hs_SetTexelOffset(0, 0)
+    hs_SetCI(2, ui_input_analog_stick)
+    hs_Restart
+    hs_End
+};
+
 HudScript HES_RunAwayOK = {
     hs_SetVisible
     hs_Loop

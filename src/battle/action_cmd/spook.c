@@ -34,7 +34,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
 
-    id = hud_element_create(&HES_StickNeutral);
+    id = hud_element_create(buttonHudsUp[gActionCommandStatus.buttonIdxS]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(id, 0);
@@ -97,7 +97,7 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 return;
             }
-            hud_element_set_script(actionCommandStatus->hudElements[0], &HES_StickMashLeft);
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[gActionCommandStatus.buttonIdxS]);
             actionCommandStatus->barFillLevel = 0;
             battleStatus->actionQuality = 0;
             actionCommandStatus->unk_5C = 0;
@@ -124,11 +124,11 @@ void N(update)(void) {
                  if (!actionCommandStatus->isBarFilled) {
                     if (actionCommandStatus->targetWeakness != 0) {
 
-                        if (battleStatus->curButtonsDown & BUTTON_STICK_LEFT) {
+                        if (battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) {
                             actionCommandStatus->unk_5C = TRUE;
                         }
 
-                        if (!(battleStatus->curButtonsDown & BUTTON_STICK_LEFT) && actionCommandStatus->unk_5C) {
+                        if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) && actionCommandStatus->unk_5C) {
                             s32 a = battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];
                             s32 b = actionCommandStatus->targetWeakness * 850;
 
@@ -143,11 +143,11 @@ void N(update)(void) {
                             actionCommandStatus->barFillLevel -= (a * b) / 10000;
                         }
                     } else {
-                        if (battleStatus->curButtonsDown & BUTTON_STICK_LEFT) {
+                        if (battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) {
                             actionCommandStatus->unk_5C = TRUE;
                         }
 
-                        if (!(battleStatus->curButtonsDown & BUTTON_STICK_LEFT) && actionCommandStatus->unk_5C) {
+                        if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) && actionCommandStatus->unk_5C) {
                             actionCommandStatus->barFillLevel += 100;
                             if (actionCommandStatus->barFillLevel >= 500) {
                                 actionCommandStatus->barFillLevel = 500;

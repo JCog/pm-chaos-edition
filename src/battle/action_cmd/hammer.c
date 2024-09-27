@@ -57,7 +57,7 @@ API_CALLABLE(N(init)) {
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(id, 0);
 
-    id = hud_element_create(&HES_StickHoldLeft);
+    id = hud_element_create(buttonHudsDown[actionCommandStatus->buttonIdxS]);
     actionCommandStatus->hudElements[5] = id;
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -196,7 +196,9 @@ void N(update)(void) {
             }
 
             actionCommandStatus->frameCounter = 0;
-            if (!(battleStatus->curButtonsDown & BUTTON_STICK_LEFT) && battleStatus->actionCommandMode < ACTION_COMMAND_MODE_TUTORIAL) {
+            if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS])
+                && battleStatus->actionCommandMode < ACTION_COMMAND_MODE_TUTORIAL)
+            {
                 actionCommandStatus->hammerMissedStart = TRUE;
             }
             actionCommandStatus->state = 11;
@@ -238,7 +240,7 @@ void N(update)(void) {
             if (actionCommandStatus->frameCounter == (~phi_s0 + actionCommandStatus->duration)) {
                 battleStatus->actionQuality = 3;
                 hud_element_set_script(actionCommandStatus->hudElements[1], &HES_TimingReady);
-                hud_element_set_script(actionCommandStatus->hudElements[5], &HES_StickTapNeutral);
+                hud_element_set_script(actionCommandStatus->hudElements[5], buttonHudsRelease[actionCommandStatus->buttonIdxS]);
                 if (actionCommandStatus->playHammerSounds) {
                     sfx_play_sound(SOUND_TIMING_BAR_GO);
                 }
@@ -254,7 +256,7 @@ void N(update)(void) {
                 phi_s0 = 0;
             }
 
-            if (!(battleStatus->curButtonsDown & BUTTON_STICK_LEFT) &&
+            if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) &&
                 phi_s0 == 0 &&
                 actionCommandStatus->autoSucceed == 0 &&
                 battleStatus->actionCommandMode < ACTION_COMMAND_MODE_TUTORIAL)
@@ -278,8 +280,8 @@ void N(update)(void) {
                             bufferPos -= ARRAY_COUNT(battleStatus->holdInputBuffer);
                         }
 
-                        if (!(battleStatus->holdInputBuffer[bufferPos] & BUTTON_STICK_LEFT) ||
-                            actionCommandStatus->autoSucceed != 0)
+                        if (!(battleStatus->holdInputBuffer[bufferPos] & buttonChoices[actionCommandStatus->buttonIdxS])
+                            || actionCommandStatus->autoSucceed != 0)
                         {
                             battleStatus->actionSuccess = 1;
                             battleStatus->actionResult = ACTION_RESULT_SUCCESS;

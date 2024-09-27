@@ -26,7 +26,7 @@ API_CALLABLE(N(init)) {
     actionCommandStatus->barFillWidth = 0;
     actionCommandStatus->hudPosY = 80;
 
-    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
+    hudElement = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdxA]);
     actionCommandStatus->hudElements[0] = hudElement;
     hud_element_set_flags(hudElement, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(hudElement, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -104,7 +104,7 @@ void N(update)(void) {
                 break;
             }
             hud_element_set_script(
-                actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]
+                actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdxA]
             );
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->state = 11;
@@ -112,7 +112,7 @@ void N(update)(void) {
         case 11:
             btl_set_popup_duration(99);
             if (!actionCommandStatus->berserkerEnabled) {
-                if (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1])) {
+                if (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdxA])) {
                     actionCommandStatus->barFillLevel += battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];
                 }
             } else {

@@ -739,7 +739,7 @@ EvtScript N(bellyFlop) = {
     ExecWait(N(getJumpTime))
     Loop(30)
         Wait(1)
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfNe(LVar0, 0)
             BreakLoop
         EndIf
@@ -755,7 +755,7 @@ EvtScript N(bellyFlop) = {
         IfEq(LVar0, 0)
             Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleSushie_Tense2)
         EndIf
-        Call(CheckButtonDown, BUTTON_STICK_LEFT, LVar0)
+        Call(CheckStickButtonDown, LVar0)
         IfEq(LVar0, 0)
             BreakLoop
         EndIf

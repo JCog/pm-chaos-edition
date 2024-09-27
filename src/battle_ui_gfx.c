@@ -502,7 +502,8 @@ HudScript HES_CycleButtons = {
             HS_PTR(HES_BriefCUpButton),
             HS_PTR(HES_BriefCDownButton),
             HS_PTR(HES_BriefCLeftButton),
-            HS_PTR(HES_BriefCRightButton))
+            HS_PTR(HES_BriefCRightButton),
+            HS_PTR(HES_BriefStickHoldLeft))
     hs_Restart
     hs_End
 };

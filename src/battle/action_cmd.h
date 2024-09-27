@@ -75,9 +75,10 @@ typedef struct ActionCommandStatus {
     /* 0x74 */ s16 mashMeterCutoffs[6]; // upper bounds for each interval
     /* 0x80 */ s8 mashMeterIntervals;
     b8 randSelected;
-    u8 buttonIdx1;
-    u8 buttonIdx2;
-    u8 buttonIdx3;
+    u8 buttonIdxA;
+    u8 buttonIdxB;
+    u8 buttonIdxC;
+    u8 buttonIdxS;
 } ActionCommandStatus;
 
 extern ActionCommandStatus gActionCommandStatus;
@@ -121,7 +122,9 @@ extern HudScript HES_BriefStartButton;
 extern HudScript HES_StickHoldLeft;
 extern HudScript HES_StickMashLeft;
 extern HudScript HES_StickNeutral;
+extern HudScript HES_StickTapLeft;
 extern HudScript HES_StickTapNeutral;
+extern HudScript HES_BriefStickHoldLeft;
 extern HudScript HES_TimingBar1Chance;
 extern HudScript HES_TimingBar3Chances;
 extern HudScript HES_TimingCharge1;
@@ -140,6 +143,7 @@ extern HudScript *buttonHudsUp[];
 extern HudScript *buttonHudsDown[];
 extern HudScript *buttonHudsMash[];
 extern HudScript *buttonHudsPress[];
+extern HudScript *buttonHudsRelease[];
 
 void action_command_init_status(void);
 void action_command_free(void);
@@ -180,5 +184,6 @@ API_CALLABLE(SetActionQuality);
 API_CALLABLE(func_80269600);
 API_CALLABLE(func_8026962C);
 API_CALLABLE(CheckActionCommandButtonDown);
+API_CALLABLE(CheckStickButtonDown);
 
 #endif

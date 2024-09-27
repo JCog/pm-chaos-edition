@@ -781,7 +781,7 @@ EvtScript N(EVS_Attack_ElectroDash) = {
     Call(AddGoalPos, ACTOR_PARTNER, -20, 0, 0)
     Set(LFlag2, FALSE)
     Loop(60)
-        Call(CheckButtonDown, BUTTON_A, LVar0)
+        Call(CheckActionCommandButtonDown, LVar0)
         IfNe(LVar0, 0)
             Set(LFlag2, TRUE)
             BreakLoop
@@ -794,7 +794,7 @@ EvtScript N(EVS_Attack_ElectroDash) = {
         Set(LFlag0, FALSE)
         ExecGetTID(N(dashToTarget), LVarA)
         Loop(20)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfEq(LVar0, 0)
                 Set(LFlag0, TRUE)
                 BreakLoop
@@ -809,7 +809,7 @@ EvtScript N(EVS_Attack_ElectroDash) = {
         Set(LFlag0, FALSE)
         ExecGetTID(N(charge), LVarA)
         Loop(55)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfEq(LVar0, 0)
                 Set(LFlag0, TRUE)
                 BreakLoop
@@ -823,7 +823,7 @@ EvtScript N(EVS_Attack_ElectroDash) = {
         IfEq(LFlag0, FALSE)
             ExecGetTID(N(EVS_ElectroDashDelay), LVarA)
             Loop(30)
-                Call(CheckButtonDown, BUTTON_A, LVar0)
+                Call(CheckActionCommandButtonDown, LVar0)
                 IfEq(LVar0, 0)
                     Set(LFlag0, TRUE)
                     BreakLoop
@@ -839,7 +839,7 @@ EvtScript N(EVS_Attack_ElectroDash) = {
         Set(LFlag0, FALSE)
         ExecGetTID(N(dashToTarget), LVarA)
         Loop(20)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfNe(LVar0, 0)
                 IfEq(LFlag2, FALSE)
                     Call(action_command_body_slam_start, 0, 92, 3, 1)
@@ -862,7 +862,7 @@ EvtScript N(EVS_Attack_ElectroDash) = {
         Set(LFlag0, FALSE)
         ExecGetTID(N(charge), LVarA)
         Loop(55)
-            Call(CheckButtonDown, BUTTON_A, LVar0)
+            Call(CheckActionCommandButtonDown, LVar0)
             IfNe(LVar0, 0)
                 IfEq(LFlag2, FALSE)
                     Call(action_command_body_slam_start, 0, 92, 3, 1)
@@ -884,7 +884,7 @@ EvtScript N(EVS_Attack_ElectroDash) = {
         IfEq(LFlag0, FALSE)
             ExecGetTID(N(EVS_ElectroDashDelay), LVarA)
             Loop(30)
-                Call(CheckButtonDown, BUTTON_A, LVar0)
+                Call(CheckActionCommandButtonDown, LVar0)
                 IfEq(LVar0, 0)
                     Set(LFlag0, TRUE)
                     BreakLoop
