@@ -1,6 +1,5 @@
 #include "common.h"
 #include "battle/action_cmd.h"
-#include "chaos.h"
 
 #define NAMESPACE action_command_break_free
 
@@ -31,11 +30,8 @@ API_CALLABLE(N(init)) {
     battleStatus->actionSuccess = 0;
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
-    if (chaosStatus.randomACs) {
-        pickRandomButton();
-    }
 
-    id = hud_element_create(actionCommandStatus->randSelected ? actionCommandStatus->randHudUp : &HES_AButton);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(id, 0);
@@ -149,12 +145,10 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 return;
             }
-            hud_element_set_script(
-                actionCommandStatus->hudElements[0],
-                actionCommandStatus->randSelected ? actionCommandStatus->randHudMash : &HES_MashAButton
-            );
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]);
             actionCommandStatus->state = 11;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
+            // fallthrough
         case 11:
             btl_set_popup_duration(99);
             if (actionCommandStatus->unk_5C == 0) {
@@ -187,9 +181,7 @@ void N(update)(void) {
                     if (inputBufPos >= ARRAY_COUNT(battleStatus->pushInputBuffer)) {
                         inputBufPos -= ARRAY_COUNT(battleStatus->pushInputBuffer);
                     }
-                    if (battleStatus->pushInputBuffer[inputBufPos]
-                        & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
-                    {
+                    if (battleStatus->pushInputBuffer[inputBufPos] & (buttonChoices[actionCommandStatus->buttonIdx1])) {
                         actionCommandStatus->barFillLevel += battleStatus->actionCmdDifficultyTable[actionCommandStatus->difficulty];
                     }
                 }
@@ -221,7 +213,6 @@ void N(update)(void) {
                 actionCommandStatus->frameCounter--;
                 return;
             }
-            actionCommandStatus->randSelected = FALSE;
             action_command_free();
             break;
     }

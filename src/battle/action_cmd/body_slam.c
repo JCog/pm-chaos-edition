@@ -1,6 +1,5 @@
 #include "common.h"
 #include "battle/action_cmd.h"
-#include "chaos.h"
 
 #define NAMESPACE action_command_body_slam
 
@@ -30,11 +29,8 @@ API_CALLABLE(N(init)) {
     battleStatus->actionSuccess = 0;
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
-    if (chaosStatus.randomACs) {
-        pickRandomButton();
-    }
 
-    id = hud_element_create(actionCommandStatus->randSelected ? actionCommandStatus->randHudUp : &HES_AButton);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
     hud_element_set_render_depth(id, 0);
@@ -57,7 +53,6 @@ API_CALLABLE(N(init)) {
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX + 41, actionCommandStatus->hudPosY + 22);
     hud_element_set_render_depth(id, 0);
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80);
-    osSyncPrintf("body slam init\n");
     return ApiStatus_DONE2;
 }
 
@@ -116,10 +111,7 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 return;
             }
-            hud_element_set_script(
-                actionCommandStatus->hudElements[0],
-                actionCommandStatus->randSelected ? actionCommandStatus->randHudDown : &HES_AButtonDown
-            );
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->thresholdLevel = 0;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
@@ -128,9 +120,7 @@ void N(update)(void) {
         case 11:
             btl_set_popup_duration(99);
 
-            if (battleStatus->curButtonsDown
-                & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
-            {
+            if (battleStatus->curButtonsDown & (buttonChoices[actionCommandStatus->buttonIdx1])) {
                 actionCommandStatus->barFillLevel += 154;
                 actionCommandStatus->thresholdLevel += 154;
             } else {
@@ -140,10 +130,7 @@ void N(update)(void) {
             if (actionCommandStatus->barFillLevel >= 10000) {
                 actionCommandStatus->barFillLevel = 10000;
                 hud_element_set_script(actionCommandStatus->hudElements[2], &HES_TimingReady);
-                hud_element_set_script(
-                    actionCommandStatus->hudElements[0],
-                    actionCommandStatus->randSelected ? actionCommandStatus->randHudDown : &HES_AButtonDown
-                );
+                hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsDown[actionCommandStatus->buttonIdx1]);
                 if (!actionCommandStatus->isBarFilled) {
                     sfx_play_sound(SOUND_TIMING_BAR_GO);
                     actionCommandStatus->isBarFilled = TRUE;
@@ -179,7 +166,6 @@ void N(update)(void) {
                 actionCommandStatus->frameCounter--;
                 return;
             }
-            actionCommandStatus->randSelected = FALSE;
             action_command_free();
             break;
     }

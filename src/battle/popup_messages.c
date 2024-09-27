@@ -896,13 +896,13 @@ void btl_update_message_popup(void* data) {
                         case BTL_MSG_ACTION_TIP_REDUCE_DAMAGE:
                         case BTL_MSG_ACTION_TIP_BREAK_FREE:
                         case BTL_MSG_ACTION_TIP_MASH_BUTTON:
-                            HudScript *hudScript = &HES_AButton;
                             if (battleStatus->selectedMoveID == MOVE_RUN_AWAY && gActionCommandStatus.randSelected) {
-                                hudScript = gActionCommandStatus.randHudPress;
+                                HID_BattleMessage1 = hud_element_create(buttonHudsPress[gActionCommandStatus.buttonIdx1]);
                             } else if (chaosStatus.randomACs) {
-                                hudScript = &HES_CycleButtons;
+                                HID_BattleMessage1 = hud_element_create(&HES_CycleButtons);
+                            } else {
+                                HID_BattleMessage1 = hud_element_create(&HES_AButton);
                             }
-                            HID_BattleMessage1 = hud_element_create(hudScript);
                             hud_element_set_flags(HID_BattleMessage1, HUD_ELEMENT_FLAG_FILTER_TEX | HUD_ELEMENT_FLAG_80);
                             hud_element_set_render_pos(HID_BattleMessage1, -100, -100);
                             break;
@@ -936,11 +936,7 @@ void btl_update_message_popup(void* data) {
                         set_window_update(WIN_BTL_POPUP, WINDOW_UPDATE_SHOW_TRANSPARENT);
                         switch (popup->messageIndex) {
                             case BTL_MSG_ACTION_TIP_MASH_BUTTON:
-                                hud_element_set_script(
-                                    HID_BattleMessage1,
-                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMash
-                                                                      : &HES_MashAButton
-                                );
+                                hud_element_set_script(HID_BattleMessage1, buttonHudsMash[gActionCommandStatus.buttonIdx1]);
                                 break;
                             case BTL_MSG_ACTION_TIP_MASH_LEFT:
                                 hud_element_set_script(HID_BattleMessage1, &HES_StickMashLeft);
@@ -987,11 +983,7 @@ void btl_update_message_popup(void* data) {
                                 break;
                             case BTL_MSG_ACTION_TIP_HOLD_THEN_RELEASE:
                                 hud_element_set_script(HID_BattleMessage1, &HES_TimingBlink);
-                                hud_element_set_script(
-                                    HID_BattleMessage2,
-                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudPress
-                                                                      : &HES_PressAButton
-                                );
+                                hud_element_set_script(HID_BattleMessage2, buttonHudsPress[gActionCommandStatus.buttonIdx1]);
                                 break;
                             case BTL_MSG_ACTION_TIP_MOVE_TO_AIM:
                                 hud_element_set_script(HID_BattleMessage1, &HES_StickTapRight);
@@ -1001,26 +993,17 @@ void btl_update_message_popup(void* data) {
                                 break;
                             case BTL_MSG_ACTION_TIP_BREAK_FREE:
                             case BTL_MSG_ACTION_TIP_REDUCE_DAMAGE:
-                                hud_element_set_script(
-                                    HID_BattleMessage1,
-                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudMash
-                                                                      : &HES_MashAButton
-                                );
+                                hud_element_set_script(HID_BattleMessage1, buttonHudsMash[gActionCommandStatus.buttonIdx1]);
                                 break;
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_LANDING:
                             case BTL_MSG_ACTION_TIP_PRESS_BEFORE_STRIKE:
                             case BTL_MSG_ACTION_TIP_HOLD_THEN_TAP:
                             case BTL_MSG_ACTION_TIP_NOT_USED_3:
-                                if (chaosStatus.randomACs
-                                    && gMoveTable[battleStatus->selectedMoveID].category == MOVE_TYPE_JUMP)
-                                {
-                                    pickRandomButton();
+                                if (chaosStatus.randomACs && gMoveTable[battleStatus->selectedMoveID].category == MOVE_TYPE_JUMP) {
+                                    // only instance where this is needed early
+                                    pickActionCommandButtons();
                                 }
-                                hud_element_set_script(
-                                    HID_BattleMessage1,
-                                    gActionCommandStatus.randSelected ? gActionCommandStatus.randHudPress
-                                                                      : &HES_PressAButton
-                                );
+                                hud_element_set_script(HID_BattleMessage1, buttonHudsPress[gActionCommandStatus.buttonIdx1]);
                                 break;
                         }
                         if (popup->duration != -1) {

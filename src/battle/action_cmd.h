@@ -75,11 +75,9 @@ typedef struct ActionCommandStatus {
     /* 0x74 */ s16 mashMeterCutoffs[6]; // upper bounds for each interval
     /* 0x80 */ s8 mashMeterIntervals;
     b8 randSelected;
-    enum Buttons randButton;
-    HudScript *randHudUp;
-    HudScript *randHudDown;
-    HudScript *randHudMash;
-    HudScript *randHudPress;
+    u8 buttonIdx1;
+    u8 buttonIdx2;
+    u8 buttonIdx3;
 } ActionCommandStatus;
 
 extern ActionCommandStatus gActionCommandStatus;
@@ -118,6 +116,7 @@ extern HudScript HES_RightOn;
 extern HudScript HES_RunningAway;
 extern HudScript HES_RunAwayOK;
 extern HudScript HES_StartButton;
+extern HudScript HES_StartButtonDown;
 extern HudScript HES_BriefStartButton;
 extern HudScript HES_StickHoldLeft;
 extern HudScript HES_StickMashLeft;
@@ -136,6 +135,12 @@ extern HudScript HES_TimingMiss;
 extern HudScript HES_TimingReady;
 extern HudScript HES_TimingWait;
 
+extern enum Buttons buttonChoices[];
+extern HudScript *buttonHudsUp[];
+extern HudScript *buttonHudsDown[];
+extern HudScript *buttonHudsMash[];
+extern HudScript *buttonHudsPress[];
+
 void action_command_init_status(void);
 void action_command_free(void);
 void func_80268E88(void);
@@ -149,7 +154,8 @@ void draw_mash_meter_mode_with_divisor(s32 posX, s32 posY, s32 fillValue, s32 di
 void draw_mash_meter_blink_with_divisor(s32 posX, s32 posY, s32 fillValue, s32 divisor);
 s32 adjust_action_command_difficulty(s32 arg0);
 s32 check_block_input(s32 buttonMask);
-void pickRandomButton(void);
+void pickActionCommandButtons(void);
+void restoreActionCommandButtons(void);
 
 API_CALLABLE(LoadActionCommand);
 API_CALLABLE(SetActionDifficultyTable);

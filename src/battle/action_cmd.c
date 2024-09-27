@@ -1,5 +1,52 @@
 #include "common.h"
+#include "action_cmd.h"
 #include "ld_addrs.h"
+
+enum Buttons buttonChoices[] = {
+    BUTTON_A,
+    BUTTON_B,
+    BUTTON_START,
+    BUTTON_C_UP,
+    BUTTON_C_DOWN,
+    BUTTON_C_LEFT,
+    BUTTON_C_RIGHT,
+};
+HudScript *buttonHudsUp[] = {
+    &HES_AButton,
+    &HES_BButton,
+    &HES_StartButton,
+    &HES_CUpButton,
+    &HES_CDownButton,
+    &HES_CLeftButton,
+    &HES_CRightButton,
+};
+HudScript *buttonHudsDown[] = {
+    &HES_AButtonDown,
+    &HES_BButtonHeld,
+    &HES_StartButtonDown,
+    &HES_CUpButtonHeld,
+    &HES_CDownButtonHeld,
+    &HES_CLeftButtonHeld,
+    &HES_CRightButtonHeld,
+};
+HudScript *buttonHudsMash[] = {
+    &HES_MashAButton,
+    &HES_MashBButton1,
+    &HES_MashStartButton,
+    &HES_MashCUpButton,
+    &HES_MashCDownButton1,
+    &HES_MashCLeftButton,
+    &HES_MashCRightButton1,
+};
+HudScript *buttonHudsPress[] = {
+    &HES_PressAButton,
+    &HES_PressBButton,
+    &HES_StartButton,
+    &HES_PressCUpButton,
+    &HES_PressCDownButton,
+    &HES_PressCLeftButton,
+    &HES_PressCRightButton,
+};
 
 u8 mashMeter_bgColors[15] = {
      33,  33, 117,
@@ -86,7 +133,7 @@ BSS s32 IsGroupHeal;
 BSS s8 ApplyingBuff;
 BSS s32 D_8029FBD8_pad[2];
 
-#include "action_cmd.h"
+#include "chaos.h"
 
 BSS ActionCommandStatus gActionCommandStatus;
 
@@ -258,6 +305,7 @@ void action_command_init_status(void) {
 
     actionCommandStatus->autoSucceed = FALSE;
     actionCommandStatus->berserkerEnabled = FALSE;
+    pickActionCommandButtons();
 
     if (!(gBattleStatus.flags1 & BS_FLAGS1_PARTNER_ACTING)) {
         if (is_ability_active(ABILITY_RIGHT_ON)) {
@@ -526,6 +574,7 @@ void action_command_free(void) {
     gBattleStatus.flags1 &= ~BS_FLAGS1_4000;
     close_action_command_instruction_popup();
     btl_set_popup_duration(0);
+    restoreActionCommandButtons();
 }
 
 void func_80268E88(void) {
@@ -812,67 +861,26 @@ API_CALLABLE(CheckActionCommandButtonDown) {
 
     evt_set_variable(
         script, outVar,
-        (buttonsDown & (gActionCommandStatus.randSelected ? gActionCommandStatus.randButton : BUTTON_A)) != 0
+        (buttonsDown & (buttonChoices[gActionCommandStatus.buttonIdx1])) != 0
     );
     return ApiStatus_DONE2;
 }
 
-void pickRandomButton() {
-    if (gActionCommandStatus.randSelected) {
+void pickActionCommandButtons() {
+    if (!chaosStatus.randomACs || gActionCommandStatus.randSelected) {
         return;
     }
     gActionCommandStatus.randSelected = TRUE;
 
-    const enum Buttons buttons[] = {
-        BUTTON_A,
-        BUTTON_B,
-        BUTTON_START,
-        BUTTON_C_UP,
-        BUTTON_C_DOWN,
-        BUTTON_C_LEFT,
-        BUTTON_C_RIGHT,
-    };
-    HudScript *buttonHudsUp[] = {
-        &HES_AButton,
-        &HES_BButton,
-        &HES_StartButton,
-        &HES_CUpButton,
-        &HES_CDownButton,
-        &HES_CLeftButton,
-        &HES_CRightButton,
-    };
-    HudScript *buttonHudsDown[] = {
-        &HES_AButtonDown,
-        &HES_BButtonHeld,
-        &HES_StartButton,
-        &HES_CUpButtonHeld,
-        &HES_CDownButtonHeld,
-        &HES_CLeftButtonHeld,
-        &HES_CRightButtonHeld,
-    };
-    HudScript *buttonHudsMash[] = {
-        &HES_MashAButton,
-        &HES_MashBButton1,
-        &HES_MashStartButton,
-        &HES_MashCUpButton,
-        &HES_MashCDownButton1,
-        &HES_MashCLeftButton,
-        &HES_MashCRightButton1,
-    };
-    HudScript *buttonHudsPress[] = {
-        &HES_PressAButton,
-        &HES_PressBButton,
-        &HES_StartButton,
-        &HES_PressCUpButton,
-        &HES_PressCDownButton,
-        &HES_PressCLeftButton,
-        &HES_PressCRightButton,
-    };
+    gActionCommandStatus.buttonIdx1 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    do {
+        gActionCommandStatus.buttonIdx2 = rand_int(ARRAY_COUNT(buttonChoices) - 1);
+    } while (gActionCommandStatus.buttonIdx1 == gActionCommandStatus.buttonIdx2);
+}
 
-    u8 buttonIdx = rand_int(ARRAY_COUNT(buttons) - 1);
-    gActionCommandStatus.randButton = buttons[buttonIdx];
-    gActionCommandStatus.randHudUp = buttonHudsUp[buttonIdx];
-    gActionCommandStatus.randHudDown = buttonHudsDown[buttonIdx];
-    gActionCommandStatus.randHudMash = buttonHudsMash[buttonIdx];
-    gActionCommandStatus.randHudPress = buttonHudsPress[buttonIdx];
+void restoreActionCommandButtons() {
+    gActionCommandStatus.randSelected = FALSE;
+    gActionCommandStatus.buttonIdx1 = 0; // A
+    gActionCommandStatus.buttonIdx2 = 1; // B
+    gActionCommandStatus.buttonIdx3 = 4; // CDown
 }

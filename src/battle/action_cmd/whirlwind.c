@@ -2,7 +2,6 @@
 #include "battle/action_cmd.h"
 #include "battle/action_cmd/whirlwind_bubble.png.h"
 #include "include_asset.h"
-#include "chaos.h"
 
 #define NAMESPACE action_command_whirlwind
 
@@ -91,11 +90,8 @@ API_CALLABLE(N(init)) {
     }
     actionCommandStatus->hudPosX = -48;
     actionCommandStatus->hudPosY = 80;
-    if (chaosStatus.randomACs) {
-        pickRandomButton();
-    }
 
-    id = hud_element_create(actionCommandStatus->randSelected ? actionCommandStatus->randHudUp : &HES_AButton);
+    id = hud_element_create(buttonHudsUp[actionCommandStatus->buttonIdx1]);
     actionCommandStatus->hudElements[0] = id;
     hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
     hud_element_set_render_pos(id, actionCommandStatus->hudPosX, actionCommandStatus->hudPosY);
@@ -207,13 +203,11 @@ void N(update)(void) {
                 actionCommandStatus->prepareTime--;
                 return;
             }
-            hud_element_set_script(
-                actionCommandStatus->hudElements[0],
-                actionCommandStatus->randSelected ? actionCommandStatus->randHudMash : &HES_MashAButton
-            );
+            hud_element_set_script(actionCommandStatus->hudElements[0], buttonHudsMash[actionCommandStatus->buttonIdx1]);
             actionCommandStatus->barFillLevel = 0;
             actionCommandStatus->state = 11;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
+            // fallthrough
         case 11:
             btl_set_popup_duration(99);
             cutoff = actionCommandStatus->mashMeterCutoffs[actionCommandStatus->mashMeterIntervals];
@@ -230,9 +224,7 @@ void N(update)(void) {
             }
 
             if (!actionCommandStatus->berserkerEnabled) {
-                if (battleStatus->curButtonsPressed
-                    & (actionCommandStatus->randSelected ? actionCommandStatus->randButton : BUTTON_A))
-                {
+                if (battleStatus->curButtonsPressed & (buttonChoices[actionCommandStatus->buttonIdx1])) {
                     s32 amt;
 
                     if (actionCommandStatus->targetWeakness == 0) {
@@ -271,7 +263,6 @@ void N(update)(void) {
                 actionCommandStatus->frameCounter--;
                 return;
             }
-            actionCommandStatus->randSelected = FALSE;
             action_command_free();
             break;
     }
