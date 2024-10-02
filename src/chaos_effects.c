@@ -17,6 +17,7 @@ static b8 canActorChase(void);
 static b8 canKnockback(void);
 static b8 canTouchLava(void);
 static b8 isValidBattle(void);
+static b8 canRandomizeACs(void);
 static b8 canEquipBadge(void);
 static b8 canUnequipBadge(void);
 static b8 canPointSwap(void);
@@ -108,6 +109,7 @@ ChaosEffectData effectData[] = {
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               isValidBattle},
     {"Location Shuffle",        FALSE,  0,  0,  shuffleBattlePos,       NULL,               isValidBattle},
     {"Random Mario Move",       FALSE,  0,  0,  randomMarioMove,        NULL,               isValidBattle},
+    {"Action Commands",         FALSE,  0,  90, actionCommands,         actionCommands,     canRandomizeACs},
     // anywhere
     {"Rotate Player",           TRUE,   0,  90, rotatePlayer,           rotatePlayerOff,    NULL},
     {"Equip Badge",             FALSE,  0,  0,  equipBadge,             NULL,               canEquipBadge},
@@ -135,7 +137,6 @@ ChaosEffectData effectData[] = {
     {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               canSpawnItem},
     {"Can't Jump",              FALSE,  0,  60, preventJump,            preventJump,        NULL},
     {"Can't Hammer",            FALSE,  0,  60, preventHammer,          preventHammer,      NULL},
-    {"Action Commands",         FALSE,  0,  60, actionCommands,         actionCommands,     isValidBattle},
 };
 
 const u8 totalEffectCount = ARRAY_COUNT(effectData);
@@ -548,6 +549,10 @@ static b8 isValidBattle() {
         }
     }
     return FALSE;
+}
+
+static b8 canRandomizeACs() {
+    return isValidBattle() && gPlayerData.hasActionCommands;
 }
 
 static s32 getTotalEquippedBpCost() {
