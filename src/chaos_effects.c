@@ -16,6 +16,8 @@ static b8 canLevitate(void);
 static b8 canActorChase(void);
 static b8 canKnockback(void);
 static b8 canTouchLava(void);
+static b8 canSpawnItem(void);
+static b8 hasItem(void);
 static b8 isValidBattle(void);
 static b8 canRandomizeACs(void);
 static b8 canEquipBadge(void);
@@ -24,7 +26,6 @@ static b8 canPointSwap(void);
 static b8 hasMushroom(void);
 static b8 canRememberThis(void);
 static b8 canShuffleUpgrades(void);
-static b8 canSpawnItem(void);
 
 #if CHAOS_DEBUG
 static void toggleRandomEffects(ChaosEffectData*);
@@ -46,6 +47,8 @@ static void spinAngle(ChaosEffectData*);
 static void lava(ChaosEffectData*);
 static void turbo(ChaosEffectData*);
 static void turboOff(ChaosEffectData*);
+static void spawnJunk(ChaosEffectData* effect);
+static void tossItem(ChaosEffectData* effect);
 // battle
 static void negativeAttack(ChaosEffectData*);
 static void randomEnemyHp(ChaosEffectData*);
@@ -83,7 +86,6 @@ static void shuffleButtonsOff(ChaosEffectData*);
 static void randomButton(ChaosEffectData*);
 static void rememberThis(ChaosEffectData*);
 static void shuffleUpgrades(ChaosEffectData*);
-static void spawnJunk(ChaosEffectData* effect);
 static void preventJump(ChaosEffectData* effect);
 static void preventHammer(ChaosEffectData* effect);
 static void actionCommands(ChaosEffectData* effect);
@@ -104,6 +106,8 @@ ChaosEffectData effectData[] = {
     {"Random Spin Angle",       FALSE,  0,  60, spinAngle,              spinAngle,          isOverworld},
     {"The Floor is Lava",       FALSE,  0,  0,  lava,                   NULL,               canTouchLava},
     {"Turbo",                   FALSE,  0,  60, turbo,                  turboOff,           isOverworld},
+    {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               canSpawnItem},
+    {"Toss Item",               FALSE,  0,  0,  tossItem,               NULL,               hasItem},
     // battle
     {"Healing Touch",           FALSE,  0,  10, negativeAttack,         negativeAttack,     isValidBattle},
     {"Random Enemy HP",         FALSE,  0,  0,  randomEnemyHp,          NULL,               isValidBattle},
@@ -134,7 +138,6 @@ ChaosEffectData effectData[] = {
     {"Random Button",           FALSE,  0,  0,  randomButton,           NULL,               NULL},
     {"Remember This?",          FALSE,  0,  0,  rememberThis,           NULL,               canRememberThis},
     {"Shuffle Upgrades",        FALSE,  0,  0,  shuffleUpgrades,        NULL,               canShuffleUpgrades},
-    {"Spawn Junk",              FALSE,  0,  0,  spawnJunk,              NULL,               canSpawnItem},
     {"Can't Jump",              FALSE,  0,  60, preventJump,            preventJump,        NULL},
     {"Can't Hammer",            FALSE,  0,  60, preventHammer,          preventHammer,      NULL},
 };
@@ -537,6 +540,30 @@ static b8 canTouchLava() {
     return isOverworld() && gPlayerStatus.actionState <= ACTION_STATE_RUN;
 }
 
+static b8 canSpawnItem() {
+    if (gGameStatus.isBattle) {
+        return FALSE;
+    }
+    for (s32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
+        if (gCurrentItemEntities[i] == NULL) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+static b8 hasItem(void) {
+    if (gGameStatus.isBattle) {
+        return FALSE;
+    }
+    for (s32 i = 0; i < 10; i++) {
+        if (gPlayerData.invItems[i] != ITEM_NONE) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 static b8 isValidBattle() {
     if (!gGameStatus.isBattle || gPlayerData.curPartner == PARTNER_GOOMPA
         || gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE || evt_get_variable(NULL, GB_StoryProgress) == STORY_INTRO)
@@ -624,18 +651,6 @@ static b8 canShuffleUpgrades() {
         }
     }
     return upgradeCount != 0 && upgradeCount != partnerCount * 2;
-}
-
-static b8 canSpawnItem() {
-    if (gGameStatus.isBattle) {
-        return FALSE;
-    }
-    for (s32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
-        if (gCurrentItemEntities[i] == NULL) {
-            return TRUE;
-        }
-    }
-    return FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -807,6 +822,32 @@ static void turboOff(ChaosEffectData *effect) {
     chaosStatus.turbo = FALSE;
     gPlayerStatus.walkSpeed = 2.0f;
     gPlayerStatus.runSpeed = 4.0f;
+}
+
+static void spawnJunk(ChaosEffectData *effect) {
+    enum ItemIDs junkItems[] = {ITEM_MYSTERY, ITEM_PEBBLE, ITEM_DRIED_SHROOM, ITEM_DUSTY_HAMMER, ITEM_MISTAKE};
+    make_item_entity(junkItems[rand_int(ARRAY_COUNT(junkItems) - 1)], gPlayerStatus.pos.x, gPlayerStatus.pos.y + 19.0f,
+                     gPlayerStatus.pos.z, ITEM_SPAWN_MODE_FALL, 0, 0, 0);
+}
+
+static void tossItem(ChaosEffectData* effect) {
+    s16 items[10];
+    u8 itemCount = 0;
+    for (s32 i = 0; i < 10; i++) {
+        if (gPlayerData.invItems[i] != ITEM_NONE) {
+            items[itemCount++] = gPlayerData.invItems[i];
+        }
+    }
+    s32 itemId = items[rand_int(itemCount - 1)];
+    osSyncPrintf("%x\n", itemId);
+    make_item_entity(itemId, gPlayerStatus.pos.x, gPlayerStatus.pos.y + 37.0f,
+                     gPlayerStatus.pos.z, ITEM_SPAWN_MODE_TOSS_SPAWN_ALWAYS, 0, -1, 0);
+    for (s32 i = 0; i < 10; i++) {
+        if (gPlayerData.invItems[i] == itemId) {
+            gPlayerData.invItems[i] = ITEM_NONE;
+            return;
+        }
+    }
 }
 
 static void negativeAttack(ChaosEffectData *effect) {
@@ -1255,12 +1296,6 @@ static void shuffleUpgrades(ChaosEffectData *effect) {
         partners[idx] = partners[partnerCount];
     }
     sfx_play_sound(SOUND_GROW);
-}
-
-static void spawnJunk(ChaosEffectData *effect) {
-    enum ItemIDs junkItems[] = {ITEM_MYSTERY, ITEM_PEBBLE, ITEM_DRIED_SHROOM, ITEM_DUSTY_HAMMER, ITEM_MISTAKE};
-    make_item_entity(junkItems[rand_int(ARRAY_COUNT(junkItems) - 1)], gPlayerStatus.pos.x, gPlayerStatus.pos.y + 19.0f,
-                     gPlayerStatus.pos.z, ITEM_SPAWN_MODE_FALL, 0, 0, 0);
 }
 
 static void preventJump(ChaosEffectData *effect) {
