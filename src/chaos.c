@@ -80,7 +80,7 @@ static void updateReload() {
     s32 cur = gGameStatus.curButtons[0];
     s32 pressed = gGameStatus.pressedButtons[0];
     if ((cur & BUTTON_R) && (pressed & BUTTON_D_DOWN)) {
-        if (reloadCooldown > 0) {
+        if (reloadCooldown > 0 && !CHAOS_DEBUG) {
             reloadMessageTimer = 90;
             return;
         }
