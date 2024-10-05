@@ -1,10 +1,8 @@
 #include "common.h"
 #include "battle/action_cmd.h"
+#include "chaos.h"
 
 #define NAMESPACE action_command_tidal_wave
-
-HudScript* buttonsPress[3] = { &HES_PressAButton, &HES_PressBButton, &HES_PressCDownButton };
-HudScript* buttonsDown[3] = { &HES_AButtonDown, &HES_BButtonHeld, &HES_CDownButtonHeld };
 
 extern s32 actionCmdTableTidalWave[];
 
@@ -44,13 +42,6 @@ API_CALLABLE(N(init)) {
             hud_element_set_render_depth(id, 0);
             hud_element_set_flags(id, HUD_ELEMENT_FLAG_80 | HUD_ELEMENT_FLAG_DISABLED);
         }
-
-        buttonsPress[0] = buttonHudsPress[actionCommandStatus->buttonIdxA];
-        buttonsPress[1] = buttonHudsPress[actionCommandStatus->buttonIdxB];
-        buttonsPress[2] = buttonHudsPress[actionCommandStatus->buttonIdxC];
-        buttonsDown[0] = buttonHudsDown[actionCommandStatus->buttonIdxA];
-        buttonsDown[1] = buttonHudsDown[actionCommandStatus->buttonIdxB];
-        buttonsDown[2] = buttonHudsDown[actionCommandStatus->buttonIdxC];
 
         return ApiStatus_DONE2;
     }
@@ -124,7 +115,7 @@ void N(update)(void) {
             }
             actionCommandStatus->unk_5D = 1;
             actionCommandStatus->frameCounter = actionCommandStatus->duration;
-            actionCommandStatus->unk_5C = rand_int(2);
+            actionCommandStatus->unk_5C = rand_int(chaosStatus.randomACs ? 8 : 2);
             actionCommandStatus->state = 11;
             actionCommandStatus->wrongInputFrameCounter = 0;
             // fallthrough
@@ -134,12 +125,12 @@ void N(update)(void) {
             // Pick a new button that doesn't match the old one.
             oldButton = actionCommandStatus->unk_5C;
             do {
-                newButton = rand_int(2);
+                newButton = rand_int(chaosStatus.randomACs ? 8 : 2);
                 actionCommandStatus->unk_5C = newButton;
             } while (oldButton == newButton);
 
             id = actionCommandStatus->hudElements[actionCommandStatus->unk_5D];
-            hud_element_set_script(id, buttonsPress[newButton]);
+            hud_element_set_script(id, buttonHudsPress[newButton]);
             hud_element_set_render_pos(
                 id,
                 actionCommandStatus->hudPosX + ((actionCommandStatus->unk_5D - 1) * 20) + 16,
@@ -200,49 +191,17 @@ void N(update)(void) {
                     actionCommandStatus->wrongButtonPressed = FALSE;
 
                     // Check for presses of the current button.
-                    switch (actionCommandStatus->unk_5C) {
-                        case 0:
-                            if (actionCommandStatus->autoSucceed) {
-                                success = TRUE;
+                    if (actionCommandStatus->autoSucceed) {
+                        success = TRUE;
+                    } else {
+                        buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
+                        if (buttonsPressed != 0) {
+                            if (buttonsPressed & ~buttonChoices[actionCommandStatus->unk_5C]) {
+                                actionCommandStatus->wrongButtonPressed = TRUE;
                             } else {
-                                buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
-                                if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdxA]) {
-                                        actionCommandStatus->wrongButtonPressed = TRUE;
-                                    } else {
-                                        success = TRUE;
-                                    }
-                                }
-                            }
-                            break;
-                        case 1:
-                            if (actionCommandStatus->autoSucceed) {
                                 success = TRUE;
-                            } else {
-                                buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
-                                if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdxB]) {
-                                        actionCommandStatus->wrongButtonPressed = TRUE;
-                                    } else {
-                                        success = TRUE;
-                                    }
-                                }
                             }
-                            break;
-                        case 2:
-                            if (actionCommandStatus->autoSucceed) {
-                                success = TRUE;
-                            } else {
-                                buttonsPressed = battleStatus->pushInputBuffer[bufferPos];
-                                if (buttonsPressed != 0) {
-                                    if (buttonsPressed & ~buttonChoices[actionCommandStatus->buttonIdxC]) {
-                                        actionCommandStatus->wrongButtonPressed = TRUE;
-                                    } else {
-                                        success = TRUE;
-                                    }
-                                }
-                            }
-                            break;
+                        }
                     }
 
                     if (actionCommandStatus->wrongButtonPressed) {
@@ -255,7 +214,7 @@ void N(update)(void) {
                     if (success) {
                         // Correct; shrink button, set up next button press, etc.
                         id = actionCommandStatus->hudElements[actionCommandStatus->unk_5D];
-                        hud_element_set_script(id, buttonsDown[actionCommandStatus->unk_5C]);
+                        hud_element_set_script(id, buttonHudsDown[actionCommandStatus->unk_5C]);
                         hud_element_set_scale(id, 0.5f);
                         hud_element_set_render_pos(
                             id,

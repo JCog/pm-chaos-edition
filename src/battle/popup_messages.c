@@ -971,9 +971,11 @@ void btl_update_message_popup(void* data) {
                                 hud_element_set_script(HID_BattleMessage1, &HES_StickBackAndForth);
                                 break;
                             case BTL_MSG_ACTION_TIP_PRESS_BUTTONS_SHOWN:
-                                hud_element_set_script(HID_BattleMessage1, buttonHudsPress[gActionCommandStatus.buttonIdxA]);
-                                hud_element_set_script(HID_BattleMessage2, buttonHudsPress[gActionCommandStatus.buttonIdxB]);
-                                hud_element_set_script(HID_BattleMessage3, buttonHudsPress[gActionCommandStatus.buttonIdxC]);
+                                if (!chaosStatus.randomACs) {
+                                    hud_element_set_script(HID_BattleMessage1, buttonHudsPress[gActionCommandStatus.buttonIdxA]);
+                                    hud_element_set_script(HID_BattleMessage2, buttonHudsPress[gActionCommandStatus.buttonIdxB]);
+                                    hud_element_set_script(HID_BattleMessage3, buttonHudsPress[gActionCommandStatus.buttonIdxC]);
+                                }
                                 break;
                             case BTL_MSG_ACTION_TIP_NOT_USED_1:
                                 hud_element_set_script(HID_BattleMessage1, &HES_RotateStickCW);

@@ -5,67 +5,67 @@
 enum Buttons buttonChoices[] = {
     BUTTON_A,
     BUTTON_B,
-    BUTTON_START,
-    BUTTON_C_UP,
     BUTTON_C_DOWN,
+    BUTTON_C_UP,
     BUTTON_C_LEFT,
     BUTTON_C_RIGHT,
     BUTTON_STICK_LEFT,
+    BUTTON_START,
 };
 
 HudScript *buttonHudsUp[] = {
     &HES_AButton,
     &HES_BButton,
-    &HES_StartButton,
-    &HES_CUpButton,
     &HES_CDownButton,
+    &HES_CUpButton,
     &HES_CLeftButton,
     &HES_CRightButton,
     &HES_StickNeutral,
+    &HES_StartButton,
 };
 
 HudScript *buttonHudsDown[] = {
     &HES_AButtonDown,
     &HES_BButtonHeld,
-    &HES_StartButtonDown,
-    &HES_CUpButtonHeld,
     &HES_CDownButtonHeld,
+    &HES_CUpButtonHeld,
     &HES_CLeftButtonHeld,
     &HES_CRightButtonHeld,
     &HES_StickHoldLeft,
+    &HES_StartButtonDown,
 };
 
 HudScript *buttonHudsMash[] = {
     &HES_MashAButton,
     &HES_MashBButton1,
-    &HES_MashStartButton,
-    &HES_MashCUpButton,
     &HES_MashCDownButton1,
+    &HES_MashCUpButton,
     &HES_MashCLeftButton,
     &HES_MashCRightButton1,
     &HES_StickMashLeft,
+    &HES_MashStartButton,
 };
 
 HudScript *buttonHudsPress[] = {
     &HES_PressAButton,
     &HES_PressBButton,
-    &HES_StartButton,
-    &HES_PressCUpButton,
     &HES_PressCDownButton,
+    &HES_PressCUpButton,
     &HES_PressCLeftButton,
     &HES_PressCRightButton,
     &HES_StickTapLeft,
+    &HES_StartButton,
 };
 
 HudScript *buttonHudsRelease[] = {
     &HES_AButton,
     &HES_BButton,
-    &HES_StartButton,
-    &HES_CUpButton,
     &HES_CDownButton,
+    &HES_CUpButton,
     &HES_CLeftButton,
     &HES_CRightButton,
     &HES_StickTapNeutral,
+    &HES_StartButton,
 };
 
 u8 mashMeter_bgColors[15] = {
@@ -918,6 +918,6 @@ void restoreActionCommandButtons() {
     gActionCommandStatus.randSelected = FALSE;
     gActionCommandStatus.buttonIdxA = 0;
     gActionCommandStatus.buttonIdxB = 1;
-    gActionCommandStatus.buttonIdxC = 4;
-    gActionCommandStatus.buttonIdxS = 7;
+    gActionCommandStatus.buttonIdxC = 2;
+    gActionCommandStatus.buttonIdxS = 6;
 }

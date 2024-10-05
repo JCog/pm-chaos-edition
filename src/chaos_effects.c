@@ -168,8 +168,8 @@ void initChaosStatus() {
     guScaleF(chaosStatus.zoomedOutMtx, 0.1f, 0.1f, 1.0f);
     gActionCommandStatus.buttonIdxA = 0;
     gActionCommandStatus.buttonIdxB = 1;
-    gActionCommandStatus.buttonIdxC = 4;
-    gActionCommandStatus.buttonIdxS = 7;
+    gActionCommandStatus.buttonIdxC = 2;
+    gActionCommandStatus.buttonIdxS = 6;
 }
 
 static void updateEnemyHpDeltas() {
