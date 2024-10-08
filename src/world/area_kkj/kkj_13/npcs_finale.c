@@ -45,7 +45,7 @@ EvtScript N(EVS_MoveToBattlePositions) = {
         Call(UseSettingsFrom, CAM_DEFAULT, 600, 0, 0)
         Call(SetPanTarget, CAM_DEFAULT, 600, 0, 0)
         Call(SetCamSpeed, CAM_DEFAULT, Float(1.5))
-        Call(PanToTarget, CAM_DEFAULT, 0, 1)
+        Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     EndThread
     Thread
         Wait(20)
@@ -80,7 +80,7 @@ EvtScript N(EVS_Scene_MarioConfrontsBowser) = {
     Exec(N(EVS_UpdatePropellerSounds))
     Call(SpeakToPlayer, NPC_CaptivePeach, ANIM_Peach2_TiedHangStruggle, ANIM_Peach2_TiedHangIdle, 0, MSG_CH8_006F)
     Call(EnableNpcShadow, NPC_Bowser_Body, FALSE)
-    Call(SetCamType, CAM_DEFAULT, 1, FALSE)
+    Call(SetCamType, CAM_DEFAULT, CAM_CONTROL_LOOK_AT_POINT, FALSE)
     Set(LVar0, 725)
     Set(LVar1, 50)
     Set(LVar2, -25)
@@ -91,7 +91,7 @@ EvtScript N(EVS_Scene_MarioConfrontsBowser) = {
     Call(SetCamDistance, CAM_DEFAULT, 600)
     Call(SetCamPosA, CAM_DEFAULT, Float(85.0), Float(-3.5))
     Call(SetCamPosB, CAM_DEFAULT, Float(210.0), Float(240.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Wait(60)
     Call(EnableNpcShadow, NPC_Bowser_Body, TRUE)
     Thread
@@ -109,7 +109,7 @@ EvtScript N(EVS_Scene_MarioConfrontsBowser) = {
     Call(SetCamDistance, CAM_DEFAULT, 350)
     Call(SetCamPosA, CAM_DEFAULT, Float(72.5), Float(-25.0))
     Call(SetCamPosB, CAM_DEFAULT, Float(210.0), Float(240.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Call(WaitForCam, CAM_DEFAULT, Float(1.0))
     Wait(10)
     Call(SpeakToPlayer, NPC_Bowser_Body, ANIM_WorldBowser_ClownCarTalk, ANIM_WorldBowser_ClownCarIdle, 0, MSG_CH8_0070)
@@ -122,7 +122,7 @@ EvtScript N(EVS_Scene_MarioConfrontsBowser) = {
     Call(SetCamDistance, CAM_DEFAULT, 325)
     Call(SetCamPosA, CAM_DEFAULT, Float(72.0), Float(0.0))
     Call(SetCamPosB, CAM_DEFAULT, Float(170.0), Float(240.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Wait(20)
     Call(SpeakToPlayer, NPC_CaptivePeach, ANIM_Peach2_TiedHangStruggle, ANIM_Peach2_TiedHangIdle, 0, MSG_CH8_0071)
     Wait(20)
@@ -142,6 +142,9 @@ EvtScript N(EVS_Scene_MarioConfrontsBowser) = {
     Call(SetNpcVar, NPC_Bowser_Body, 0, 1)
     Wait(10)
     Thread
+#if VERSION_JP
+        Call(DisablePartnerAI, 0)
+#endif
         Call(PlayerMoveTo, 580, 0, 25)
     EndThread
     Thread
@@ -244,6 +247,7 @@ EvtScript N(EVS_Scene_BowserDefeated) = {
     Call(DisablePartnerAI, 1)
     Call(EnableGroup, MODEL_g153, FALSE)
     Call(SetPlayerPos, 525, 0, 0)
+#if !VERSION_JP
     Call(PartnerIsFlying, LVar0)
     IfEq(LVar0, FALSE)
         Set(LVar1, 10)
@@ -252,6 +256,7 @@ EvtScript N(EVS_Scene_BowserDefeated) = {
     EndIf
     Call(SetNpcPos, NPC_PARTNER, 490, LVar1, 0)
     Call(SetNpcYaw, NPC_PARTNER, 90)
+#endif
     Call(SetNpcPos, NPC_Bowser_Body, 675, 0, 0)
     Call(AdjustCam, CAM_DEFAULT, Float(90.0), 75, 450, Float(17.0), Float(-7.0))
     Call(SetNpcAnimation, NPC_Bowser_Body, ANIM_WorldBowser_Tantrum)

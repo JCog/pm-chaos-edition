@@ -20,6 +20,37 @@ API_CALLABLE(N(ScreenOverlayFadeIn)) {
     }
 }
 
+// TODO: this was moved from the end of intro.c. This is a possible indication that
+// file spitting in other versions might be off.
+#if VERSION_JP
+#include "world/common/npc/StarSpirit.inc.c"
+#include "world/common/npc/Twink.h"
+
+EvtScript N(EVS_NpcInit_Twink) = {
+    Return
+    End
+};
+
+NpcData N(NpcData_Twink) = {
+    .id = NPC_Twink,
+    .pos = { NPC_DISPOSE_LOCATION },
+    .yaw = 270,
+    .init = &N(EVS_NpcInit_Twink),
+    .settings = &N(NpcSettings_StarSpirit),
+    .flags = ENEMY_FLAG_PASSIVE | ENEMY_FLAG_FLYING,
+    .drops = NO_DROPS,
+    .animations = TWINK_ANIMS,
+};
+
+NpcGroupList N(DefaultNPCs) = {
+    NPC_GROUP(N(NpcData_Twink)),
+    {}
+};
+
+// TODO: required. File splitting?
+u8 N(D_802422CC)[4] = { 0 };
+#endif
+
 EvtScript N(EVS_Starship_FlyingAway) = {
     Call(DisablePlayerInput, TRUE)
     Call(DisablePlayerPhysics, TRUE)
@@ -29,13 +60,13 @@ EvtScript N(EVS_Starship_FlyingAway) = {
     Call(SetCamPerspective, CAM_DEFAULT, CAM_UPDATE_FROM_ZONE, 45, 16, 4096)
     Call(UseSettingsFrom, CAM_DEFAULT, -280, 0, 0)
     Call(SetPanTarget, CAM_DEFAULT, -280, 0, 0)
-    Call(SetCamType, CAM_DEFAULT, 0, FALSE)
+    Call(SetCamType, CAM_DEFAULT, CAM_CONTROL_FIXED_ORIENTATION, FALSE)
     Call(SetCamDistance, CAM_DEFAULT, Float(550.0))
     Call(SetCamPosA, CAM_DEFAULT, Float(-688.0), Float(50.0))
     Call(SetCamPosB, CAM_DEFAULT, Float(-544.0), Float(50.0))
     Call(SetCamPitch, CAM_DEFAULT, Float(2.0), Float(-20.0))
     Call(SetCamSpeed, CAM_DEFAULT, Float(90.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Call(WaitForCam, CAM_DEFAULT, Float(1.0))
     Wait(10)
     Thread
@@ -101,7 +132,7 @@ EvtScript N(EVS_BetaStarship_Flight1) = {
     Call(SetCamPosB, CAM_DEFAULT, 5000, 50)
     Call(SetCamPitch, CAM_DEFAULT, Float(17.0), Float(-7.0))
     Call(SetCamSpeed, CAM_DEFAULT, Float(90.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Set(MV_Starship_Yaw, 0)
     Set(MV_Starship_PosX, -5000)
     Set(MV_Starship_PosY, -525)
@@ -140,7 +171,7 @@ EvtScript N(EVS_BetaStarship_Flight1) = {
         Loop(0)
             Add(LVar0, 45)
             Call(SetPanTarget, CAM_DEFAULT, LVar0, 0, 0)
-            Call(PanToTarget, CAM_DEFAULT, 0, 1)
+            Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
             Wait(1)
         EndLoop
     EndThread
@@ -181,7 +212,7 @@ EvtScript N(EVS_BetaStarship_Flight2) = {
     Call(SetCamPosB, CAM_DEFAULT, 5000, 50)
     Call(SetCamPitch, CAM_DEFAULT, Float(17.0), Float(-7.0))
     Call(SetCamSpeed, CAM_DEFAULT, Float(90.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Set(MV_Starship_Yaw, 0)
     Set(MV_Starship_PosX, -4673)
     Set(MV_Starship_PosY, -525)
@@ -205,7 +236,7 @@ EvtScript N(EVS_BetaStarship_Flight2) = {
         Loop(0)
             Add(LVar0, 45)
             Call(SetPanTarget, CAM_DEFAULT, LVar0, 0, 0)
-            Call(PanToTarget, CAM_DEFAULT, 0, 1)
+            Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
             Wait(1)
             IfGt(LVar0, 0)
                 Set(MV_Starship_Yaw, 1)
@@ -246,7 +277,7 @@ EvtScript N(EVS_BetaStarship_Return) = {
     Call(SetCamPosB, CAM_DEFAULT, 5000, 50)
     Call(SetCamPitch, CAM_DEFAULT, Float(17.0), Float(-7.0))
     Call(SetCamSpeed, CAM_DEFAULT, Float(90.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Set(MV_Starship_Yaw, 0)
     Set(MV_Starship_PosX, 5000)
     Set(MV_Starship_PosY, -525)
@@ -278,7 +309,7 @@ EvtScript N(EVS_BetaStarship_Return) = {
         Loop(0)
             Add(LVar0, -45)
             Call(SetPanTarget, CAM_DEFAULT, LVar0, 0, 0)
-            Call(PanToTarget, CAM_DEFAULT, 0, 1)
+            Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
             Wait(1)
             IfLt(LVar0, -1000)
                 Set(MV_Starship_Yaw, 1)

@@ -319,7 +319,7 @@ void load_engine_data(void) {
     clear_render_tasks();
     clear_worker_list();
     clear_script_list();
-    create_cameras_a();
+    create_cameras();
     clear_player_status();
     spr_init_sprites(PLAYER_SPRITES_MARIO_WORLD);
     clear_entity_models();
@@ -337,6 +337,7 @@ void load_engine_data(void) {
     clear_player_data();
     init_encounter_status();
     clear_screen_overlays();
+    check_effect_sizes();
     clear_effect_data();
     clear_saved_variables();
     clear_item_entity_data();

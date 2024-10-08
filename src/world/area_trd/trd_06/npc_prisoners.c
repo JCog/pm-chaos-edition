@@ -175,13 +175,13 @@ EvtScript N(EVS_NpcIdle_KoopaTroopa) = {
     Call(SetPanTarget, CAM_DEFAULT, -260, 0, 0)
     Call(SetCamDistance, CAM_DEFAULT, 300)
     Call(SetCamSpeed, CAM_DEFAULT, Float(90.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Call(SetNpcAnimation, NPC_Jailer_Bobomb_01, ANIM_Bobomb_Idle)
     Call(SetNpcAnimation, NPC_Jailer_Bobomb_02, ANIM_Bobomb_Idle)
     Call(SpeakToPlayer, NPC_Jailer_KoopaTroopa, ANIM_KoopaTroopa_Run, ANIM_KoopaTroopa_Idle, 0, MSG_CH1_00F0)
     Call(SetNpcAnimation, NPC_Jailer_Bobomb_01, ANIM_Bobomb_Run)
     Call(SetNpcAnimation, NPC_Jailer_Bobomb_02, ANIM_Bobomb_Run)
-    Call(PanToTarget, CAM_DEFAULT, 0, 0)
+    Call(PanToTarget, CAM_DEFAULT, 0, FALSE)
     Thread
         Wait(60)
         Call(MakeLerp, 90, 0, 15, EASING_COS_IN_OUT)
@@ -228,6 +228,30 @@ EvtScript N(EVS_NpcDefeat_KoopaTroopa) = {
             Set(GB_StoryProgress, STORY_CH1_DEFEATED_DUNGEON_GUARDS)
             Call(DoNpcDefeat)
         CaseEq(OUTCOME_PLAYER_LOST)
+#if VERSION_JP
+        CaseEq(OUTCOME_PLAYER_FLED)
+            Call(DisablePlayerInput, TRUE)
+            Call(SetPlayerAnimation, ANIM_Mario1_Run)
+            Call(PlayerMoveTo, 82, 264, 20)
+            Call(SetPlayerAnimation, ANIM_Mario1_Idle)
+            Call(SpeakToPlayer, NPC_Jailer_KoopaTroopa, ANIM_KoopaTroopa_Run, ANIM_KoopaTroopa_Idle, 0, MSG_CH1_013A)
+            Thread
+                Label(10)
+                Call(GetPlayerPos, LVar0, LVar1, LVar2)
+                Wait(1)
+                IfLt(LVar2, 200)
+                    Goto(10)
+                EndIf
+                IfGt(LVar0, -120)
+                    Goto(10)
+                EndIf
+                Call(DisablePlayerInput, TRUE)
+                Call(SpeakToPlayer, NPC_Jailer_KoopaTroopa, ANIM_KoopaTroopa_Run, ANIM_KoopaTroopa_Idle, 0, MSG_CH1_013B)
+                Call(DisablePlayerInput, FALSE)
+                Call(StartBossBattle, SONG_SPECIAL_BATTLE)
+            EndThread
+            Call(DisablePlayerInput, FALSE)
+#endif
     EndSwitch
     Return
     End

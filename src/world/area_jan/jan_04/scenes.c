@@ -47,7 +47,7 @@ EvtScript N(EVS_Scene_Epilogue) = {
     Call(SetCamDistance, CAM_DEFAULT, 350)
     Call(SetCamPitch, CAM_DEFAULT, Float(16.0), Float(-7.5))
     Call(SetCamSpeed, CAM_DEFAULT, Float(90.0))
-    Call(PanToTarget, CAM_DEFAULT, 0, 1)
+    Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     Wait(90)
     Thread
         Call(SetNpcPos, NPC_YoshiKid_01, -350, 0, 15)
@@ -83,10 +83,15 @@ EvtScript N(EVS_Scene_Epilogue) = {
     Call(SetNpcAnimation, NPC_YoshiKid_01, ANIM_YoshiKid_Green_Talk)
     Call(SetNpcFlagBits, NPC_YoshiKid_03, NPC_FLAG_GRAVITY, TRUE)
     Call(SetNpcPos, NPC_YoshiKid_03, -350, 0, 15)
+#if VERSION_JP
+    Call(SetNpcSpeed, NPC_YoshiKid_03, Float(3.0))
+    Call(NpcMoveTo, NPC_YoshiKid_03, -100, 0, 15)
+#else
     Call(SetNpcAnimation, NPC_YoshiKid_03, ANIM_YoshiKid_Blue_Run)
     Call(SetNpcSpeed, NPC_YoshiKid_03, Float(5.0))
     Call(NpcMoveTo, NPC_YoshiKid_03, -100, 0, 0)
     Call(SetNpcAnimation, NPC_YoshiKid_03, ANIM_YoshiKid_Blue_Idle)
+#endif
     ChildThread
         Wait(20)
         Call(SetNpcJumpscale, NPC_YoshiKid_03, Float(2.0))

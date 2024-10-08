@@ -21,7 +21,7 @@ void state_step_startup(void) {
 
     gOverrideFlags = 0;
     gGameStatus.areaID = 0;
-    gGameStatus.isBattle = 0;
+    gGameStatus.context = CONTEXT_WORLD;
     gGameStatus.prevArea = -1;
     gGameStatus.mapID = 0;
     gGameStatus.entryID = 0;
@@ -37,7 +37,7 @@ void state_step_startup(void) {
     clear_render_tasks();
     clear_worker_list();
     clear_script_list();
-    create_cameras_a();
+    create_cameras();
     spr_init_sprites(PLAYER_SPRITES_MARIO_WORLD);
     clear_entity_models();
     clear_animator_list();

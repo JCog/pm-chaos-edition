@@ -191,7 +191,7 @@ void state_step_demo(void) {
                 gGameStatusPtr->demoState = DEMO_STATE_NONE;
                 gGameStatusPtr->peachFlags = 0;
                 enable_sounds();
-                gGameStatusPtr->isBattle = FALSE;
+                gGameStatusPtr->context = CONTEXT_WORLD;
                 gGameStatusPtr->debugUnused1 = FALSE;
                 gGameStatusPtr->debugScripts = DEBUG_SCRIPTS_NONE;
                 gGameStatusPtr->keepUsingPartnerOnMapChange = FALSE;
@@ -200,7 +200,7 @@ void state_step_demo(void) {
                 clear_render_tasks();
                 clear_worker_list();
                 clear_script_list();
-                create_cameras_a();
+                create_cameras();
                 spr_init_sprites(PLAYER_SPRITES_MARIO_WORLD);
                 clear_entity_models();
                 clear_animator_list();

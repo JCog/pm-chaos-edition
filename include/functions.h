@@ -17,7 +17,7 @@ void boot_idle(void* data);
 void boot_main(void* data);
 
 void is_debug_init(void);
-void is_debug_panic(const char* message, const char* file, u32 line, const char* func);
+void is_debug_panic(const char* message);
 
 f32 signF(f32 val);
 
@@ -871,12 +871,12 @@ void draw_entity_model_D(s32, Mtx*, s32, Vec3s*);
 void draw_entity_model_E(s32, Mtx*);
 void free_entity_model_by_index(s32 idx);
 void btl_cam_use_preset(s32);
-void btl_cam_set_params(s16, s16, s16, s16, s32, s32, s32, s32);
+void btl_cam_set_params(b16, s16, s16, s16, s32, s32, s32);
 void btl_cam_set_zoffset(s16);
 void btl_cam_target_actor(s32);
 void btl_cam_set_zoom(s16);
 void btl_cam_move(s16);
-void func_8024E60C(void);
+void btl_cam_disable_clamp_x(void);
 
 void initialize_battle(void);
 
@@ -1019,7 +1019,7 @@ void set_background_size(s16, s16, s16, s16);
 void set_background(BackgroundHeader*);
 void set_max_star_power(s8);
 void sync_status_bar(void);
-void create_cameras_a(void);
+void create_cameras(void);
 void func_80045AC0(void);
 void func_8005AF84(void);
 void npc_follow_init(Npc*, s32, FollowAnims*, f32, f32, s32, s32);
@@ -1072,6 +1072,7 @@ void clear_character_set(void);
 void clear_trigger_data(void);
 void clear_script_list(void);
 void clear_entity_data(b32);
+void check_effect_sizes(void);
 void clear_effect_data(void);
 
 void clear_saved_variables(void);

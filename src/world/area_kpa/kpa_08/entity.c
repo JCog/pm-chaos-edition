@@ -1,8 +1,6 @@
 #include "kpa_08.h"
 #include "entity.h"
 
-#include "world/common/EnableCameraFollowPlayerY.inc.c"
-
 API_CALLABLE(N(ElevatePlayer)) {
     Bytecode* args = script->ptrReadPos;
     s32 floor = evt_get_variable(script, *args++);
@@ -20,14 +18,14 @@ EvtScript N(EVS_ActivateSwitch) = {
         Return
     EndIf
     Set(AF_KPA08_PlatformRaised, TRUE)
-    Call(N(EnableCameraFollowPlayerY))
+    Call(EnableCameraFollowPlayerY)
     Thread
         SetGroup(EVT_GROUP_EF)
         Call(PlaySoundAtCollider, COLLIDER_o19, SOUND_KPA_RAISE_STONE_PLATFORM, SOUND_SPACE_DEFAULT)
         Call(MakeLerp, -50, 0, 15, EASING_COS_IN_OUT)
         Loop(0)
             Call(UpdateLerp)
-            Call(N(ElevatePlayer), 15, 100)
+            Call(N(ElevatePlayer), COLLIDER_o19, 100)
             Call(TranslateGroup, MODEL_move, 0, LVar0, 0)
             Call(UpdateColliderTransform, COLLIDER_o19)
             Wait(1)
@@ -40,7 +38,7 @@ EvtScript N(EVS_ActivateSwitch) = {
         Call(MakeLerp, 0, -50, 20, EASING_COS_IN_OUT)
         Loop(0)
             Call(UpdateLerp)
-            Call(N(ElevatePlayer), 15, 100)
+            Call(N(ElevatePlayer), COLLIDER_o19, 100)
             Call(TranslateGroup, MODEL_move, 0, LVar0, 0)
             Call(UpdateColliderTransform, COLLIDER_o19)
             Wait(1)
@@ -56,7 +54,7 @@ EvtScript N(EVS_ActivateSwitch) = {
         Call(MakeLerp, -99, 0, 15, EASING_COS_IN_OUT)
         Loop(0)
             Call(UpdateLerp)
-            Call(N(ElevatePlayer), 17, 100)
+            Call(N(ElevatePlayer), COLLIDER_o90, 100)
             Call(TranslateGroup, MODEL_move2, 0, LVar0, 0)
             Call(UpdateColliderTransform, COLLIDER_o90)
             Wait(1)
@@ -70,7 +68,7 @@ EvtScript N(EVS_ActivateSwitch) = {
         Call(MakeLerp, 0, -99, 15, EASING_COS_IN_OUT)
         Loop(0)
             Call(UpdateLerp)
-            Call(N(ElevatePlayer), 17, 100)
+            Call(N(ElevatePlayer), COLLIDER_o90, 100)
             Call(TranslateGroup, MODEL_move2, 0, LVar0, 0)
             Call(UpdateColliderTransform, COLLIDER_o90)
             Wait(1)

@@ -515,7 +515,7 @@ void handleBattleQueue() {
 ////////////////////////////////////////////////////////////////////////////////
 
 static b8 isOverworld() {
-    return !gGameStatus.isBattle;
+    return gGameStatus.context == 0;
 }
 
 static b8 canTeleport() {
@@ -523,16 +523,16 @@ static b8 canTeleport() {
 }
 
 static b8 canLevitate() {
-    return !gGameStatus.isBattle && gPlayerStatus.actionState != ACTION_STATE_KNOCKBACK
+    return gGameStatus.context == 0 && gPlayerStatus.actionState != ACTION_STATE_KNOCKBACK
         && gPlayerStatus.actionState != ACTION_STATE_RIDE;
 }
 
 static b8 canActorChase() {
-    return !gGameStatus.isBattle && !(gPlayerStatus.flags & PS_FLAG_INPUT_DISABLED);
+    return gGameStatus.context == 0 && !(gPlayerStatus.flags & PS_FLAG_INPUT_DISABLED);
 }
 
 static b8 canKnockback() {
-    return !gGameStatus.isBattle && !chaosStatus.levitating && gPlayerStatus.actionState != ACTION_STATE_RIDE;
+    return gGameStatus.context == 0 && !chaosStatus.levitating && gPlayerStatus.actionState != ACTION_STATE_RIDE;
 }
 
 static b8 canTouchLava() {
@@ -541,7 +541,7 @@ static b8 canTouchLava() {
 }
 
 static b8 canSpawnItem() {
-    if (gGameStatus.isBattle) {
+    if (gGameStatus.context != 0) {
         return FALSE;
     }
     for (s32 i = 0; i < MAX_ITEM_ENTITIES; i++) {
@@ -553,7 +553,7 @@ static b8 canSpawnItem() {
 }
 
 static b8 hasItem(void) {
-    if (gGameStatus.isBattle) {
+    if (gGameStatus.context != 0) {
         return FALSE;
     }
     for (s32 i = 0; i < 10; i++) {
@@ -565,7 +565,7 @@ static b8 hasItem(void) {
 }
 
 static b8 isValidBattle() {
-    if (!gGameStatus.isBattle || gPlayerData.curPartner == PARTNER_GOOMPA
+    if (gGameStatus.context != 1 || gPlayerData.curPartner == PARTNER_GOOMPA
         || gBattleStatus.flags1 & BS_FLAGS1_TUTORIAL_BATTLE || evt_get_variable(NULL, GB_StoryProgress) == STORY_INTRO)
     {
         return FALSE;
@@ -1118,7 +1118,7 @@ static void addRemoveStarPoints(ChaosEffectData *effect) {
     }
     sfx_play_sound(SOUND_STAR_POINT_PICKUP);
     open_status_bar_quickly();
-    if (!gGameStatus.isBattle) {
+    if (gGameStatus.context != 1) {
         status_bar_start_blinking_starpoints();
     }
 }
@@ -1300,7 +1300,7 @@ static void shuffleUpgrades(ChaosEffectData *effect) {
 
 static void preventJump(ChaosEffectData *effect) {
     chaosStatus.cantJump = !chaosStatus.cantJump;
-    if (gGameStatus.isBattle && gBattleState == BATTLE_STATE_PLAYER_MENU) {
+    if (gGameStatus.context == 1 && gBattleState == BATTLE_STATE_PLAYER_MENU) {
         // TODO: make this more robust
         clear_windows();
         gBattleSubState = BTL_SUBSTATE_PLAYER_MENU_CREATE_MAIN_MENU;
@@ -1309,7 +1309,7 @@ static void preventJump(ChaosEffectData *effect) {
 
 static void preventHammer(ChaosEffectData *effect) {
     chaosStatus.cantHammer = !chaosStatus.cantHammer;
-    if (gGameStatus.isBattle && gBattleState == BATTLE_STATE_PLAYER_MENU) {
+    if (gGameStatus.context == 1 && gBattleState == BATTLE_STATE_PLAYER_MENU) {
         // TODO: make this more robust
         clear_windows();
         gBattleSubState = BTL_SUBSTATE_PLAYER_MENU_CREATE_MAIN_MENU;

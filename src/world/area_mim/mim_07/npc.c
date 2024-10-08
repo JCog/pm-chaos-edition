@@ -66,11 +66,13 @@ EvtScript N(EVS_NpcIdle_JrTroopa) = {
         Goto(10)
     EndIf
     Call(DisablePlayerInput, TRUE)
+#if !VERSION_JP
     Call(GetPartnerInUse, LVar0)
     IfNe(LVar0, PARTNER_NONE)
         Call(InterruptUsePartner)
         Wait(20)
     EndIf
+#endif
     ExecWait(N(EVS_JrTroopaMusic))
     Call(GetPlayerPos, LVar1, LVar2, LVar3)
     Call(GetEntryID, LVar0)
@@ -110,7 +112,7 @@ EvtScript N(EVS_NpcIdle_JrTroopa) = {
         Call(SetCamSpeed, CAM_DEFAULT, Float(4.0 / DT))
         Call(SetCamDistance, CAM_DEFAULT, Float(300.0))
         Call(SetCamPitch, CAM_DEFAULT, Float(20.0), Float(-6.0))
-        Call(PanToTarget, CAM_DEFAULT, 0, 1)
+        Call(PanToTarget, CAM_DEFAULT, 0, TRUE)
     EndThread
     Call(SetNpcAnimation, NPC_SELF, ANIM_JrTroopa_Run)
     Call(NpcMoveTo, NPC_SELF, LVar4, LVar5, 30)

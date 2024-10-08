@@ -55,12 +55,12 @@ segments:
     - [auto, c, crash_screen]
     - [auto, c, os/nusys/nugfxtaskmgr, -fforce-addr]
     - [auto, c, cam_main]
-    - [auto, c, cam_mode_2]
-    - [auto, c, cam_mode_1]
-    - [auto, c, cam_mode_0]
-    - [auto, c, cam_mode_6]
-    - [auto, c, cam_mode_unused]
-    - [auto, c, cam_mode_5]
+    - [auto, c, cam_mode_interp]
+    - [auto, c, cam_mode_unused_radial]
+    - [auto, c, cam_mode_minimal]
+    - [auto, c, cam_mode_no_interp]
+    - [auto, c, cam_mode_unused_ahead]
+    - [auto, c, cam_mode_unused_leading]
     - [auto, c, cam_mode_zone_interp]
     - [auto, c, cam_math]
     - [auto, c, game_modes]
@@ -1555,12 +1555,12 @@ segments:
   ###############
   ### Effects ###
   ###############
-  - name: 325AD0
+  - name: effect_globals
     type: code
     start: 0x36E520
     vram: 0xE0200000
     subsegments:
-    - [auto, c, 325AD0]
+    - [auto, c, effect_utils]
     - [0x36E930, pm_effect_shims, effect_shims]
     - [0x36EBB0]
   - name: effect_gfx_big_smoke_puff

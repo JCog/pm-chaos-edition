@@ -747,7 +747,7 @@ void update_status_bar(void) {
         return;
     }
 
-    if (!gGameStatusPtr->isBattle && playerData->coins != statusBar->displayCoins) {
+    if (gGameStatusPtr->context == CONTEXT_WORLD && playerData->coins != statusBar->displayCoins) {
         status_bar_start_blinking_coins();
     }
 
@@ -795,7 +795,7 @@ void update_status_bar(void) {
 
     // sync displayed HP toward true HP
     if (statusBar->displayHP != playerData->curHP) {
-        if (!gGameStatusPtr->isBattle && playerData->curHP < statusBar->displayHP) {
+        if (gGameStatusPtr->context == CONTEXT_WORLD && playerData->curHP < statusBar->displayHP) {
             status_bar_start_blinking_hp();
         }
         if (statusBar->displayHP < playerData->curHP) {
@@ -815,7 +815,7 @@ void update_status_bar(void) {
 
     // sync displayed FP toward true FP
     if (statusBar->displayFP != playerData->curFP) {
-        if (!gGameStatusPtr->isBattle && playerData->curFP < statusBar->displayFP) {
+        if (gGameStatusPtr->context == CONTEXT_WORLD && playerData->curFP < statusBar->displayFP) {
             status_bar_start_blinking_fp();
         }
         if (statusBar->displayFP < playerData->curFP) {
@@ -871,7 +871,7 @@ void update_status_bar(void) {
                 } else {
                     if (!statusBar->ignoreChanges) {
                         if (!statusBar->unk_3B || playerStatus->actionState != ACTION_STATE_IDLE) {
-                            if (!gGameStatusPtr->isBattle) {
+                            if (gGameStatusPtr->context == CONTEXT_WORLD) {
                                 statusBar->hidden = TRUE;
                                 statusBar->showTimer = 0;
                                 statusBar->unk_3C = FALSE;
@@ -894,7 +894,7 @@ void update_status_bar(void) {
                         statusBar->showTimer++;
                     }
 
-                    if (statusBar->showTimer >= 240 && !gGameStatusPtr->isBattle) {
+                    if (statusBar->showTimer >= 240 && gGameStatusPtr->context == CONTEXT_WORLD) {
                         statusBar->showTimer = 210;
                         statusBar->hidden = FALSE;
                         statusBar->unk_3B = TRUE;
@@ -908,8 +908,8 @@ void update_status_bar(void) {
     gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, 12, 20, SCREEN_WIDTH - 12, SCREEN_HEIGHT - 20);
     x = statusBar->drawPosX;
     y = statusBar->drawPosY;
-    draw_box(0, WINDOW_STYLE_5, x,       y, 0, 174, 35, 255, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, NULL, NULL, NULL, SCREEN_WIDTH, SCREEN_HEIGHT, NULL);
-    draw_box(0, WINDOW_STYLE_6, x + 174, y, 0, 122, 25, 255, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, NULL, NULL, NULL, SCREEN_WIDTH, SCREEN_HEIGHT, NULL);
+    draw_box(0, (WindowStyle)WINDOW_STYLE_5, x, y, 0, 174, 35, 255, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, NULL, NULL, NULL, SCREEN_WIDTH, SCREEN_HEIGHT, NULL);
+    draw_box(0, (WindowStyle)WINDOW_STYLE_6, x + 174, y, 0, 122, 25, 255, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, NULL, NULL, NULL, SCREEN_WIDTH, SCREEN_HEIGHT, NULL);
 
     if (statusBar->hpBlinkTimer > 0) {
         statusBar->hpBlinkTimer--;
@@ -1552,7 +1552,7 @@ s32 is_status_bar_visible(void) {
 void status_bar_start_blinking_hp(void) {
     StatusBar* statusBar = &gStatusBar;
 
-    if (!gGameStatusPtr->isBattle) {
+    if (gGameStatusPtr->context == CONTEXT_WORLD) {
         statusBar->hpBlinkTimer = 120;
     }
 
@@ -1575,7 +1575,7 @@ void status_bar_stop_blinking_hp(void) {
 void status_bar_start_blinking_fp(void) {
     StatusBar* statusBar = &gStatusBar;
 
-    if (!gGameStatusPtr->isBattle) {
+    if (gGameStatusPtr->context == CONTEXT_WORLD) {
         statusBar->fpBlinkTimer = 120;
     }
 
@@ -1597,7 +1597,7 @@ void status_bar_stop_blinking_fp(void) {
 void status_bar_start_blinking_coins(void) {
     StatusBar* statusBar = &gStatusBar;
 
-    if (!gGameStatusPtr->isBattle) {
+    if (gGameStatusPtr->context == CONTEXT_WORLD) {
         statusBar->coinsBlinkTimer = 120;
     }
 
@@ -1650,7 +1650,7 @@ void status_bar_start_blinking_sp_bars(s32 numBarsToBlink) {
 void status_bar_start_blinking_starpoints(void) {
     StatusBar* statusBar = &gStatusBar;
 
-    if (!gGameStatusPtr->isBattle) {
+    if (!gGameStatusPtr->context) {
         statusBar->starpointsBlinkTimer = 120;
     }
 
