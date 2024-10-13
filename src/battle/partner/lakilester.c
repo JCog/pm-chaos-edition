@@ -416,6 +416,11 @@ API_CALLABLE(N(SpinyFlipActionCommand)) {
         SPINY_FLIP_AIMING   = 2, // player is aiming
     };
 
+    if (gBattleStatus.actionCommandMode == ACTION_COMMAND_MODE_NOT_LEARNED) {
+        script->varTable[15] = rand_int(100) < 30;
+        return ApiStatus_DONE2;
+    }
+
     partnerState = &partner->state;
     playerState = &battleStatus->playerActor->state;
 

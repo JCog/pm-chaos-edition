@@ -76,68 +76,71 @@ API_CALLABLE(N(ShellShotActionCommand)) {
 
     switch (script->functionTemp[0]) {
         case 0:
-            hudMarkers[0] = hudID = hud_element_create(&HES_AimMarkerF);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_set_render_pos(hudID, -100, -100);
 
-            hudMarkers[1] = hudID = hud_element_create(&HES_AimMarkerE);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_set_render_pos(hudID, -100, -100);
+            if (gBattleStatus.actionCommandMode == ACTION_COMMAND_MODE_LEARNED) {
+                hudMarkers[0] = hudID = hud_element_create(&HES_AimMarkerF);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudMarkers[2] = hudID = hud_element_create(&HES_AimMarkerD);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudMarkers[1] = hudID = hud_element_create(&HES_AimMarkerE);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudMarkers[3] = hudID = hud_element_create(&HES_AimMarkerC);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudMarkers[2] = hudID = hud_element_create(&HES_AimMarkerD);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudMarkers[4] = hudID = hud_element_create(&HES_AimMarkerB);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudMarkers[3] = hudID = hud_element_create(&HES_AimMarkerC);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudMarkers[5] = hudID = hud_element_create(&HES_AimMarkerA);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudMarkers[4] = hudID = hud_element_create(&HES_AimMarkerB);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudMarkers[6] = hudID = hud_element_create(&HES_AimReticle);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudMarkers[5] = hudID = hud_element_create(&HES_AimMarkerA);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudShimmers[0] = hudID = hud_element_create(&HES_AimShimmerF);
-            hud_element_set_render_depth(hudID, 9);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudMarkers[6] = hudID = hud_element_create(&HES_AimReticle);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudShimmers[1] = hudID = hud_element_create(&HES_AimShimmerE);
-            hud_element_set_render_depth(hudID, 9);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudShimmers[0] = hudID = hud_element_create(&HES_AimShimmerF);
+                hud_element_set_render_depth(hudID, 9);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudShimmers[2] = hudID = hud_element_create(&HES_AimShimmerD);
-            hud_element_set_render_depth(hudID, 9);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudShimmers[1] = hudID = hud_element_create(&HES_AimShimmerE);
+                hud_element_set_render_depth(hudID, 9);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudShimmers[3] = hudID = hud_element_create(&HES_AimShimmerC);
-            hud_element_set_render_depth(hudID, 9);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudShimmers[2] = hudID = hud_element_create(&HES_AimShimmerD);
+                hud_element_set_render_depth(hudID, 9);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudShimmers[4] = hudID = hud_element_create(&HES_AimShimmerB);
-            hud_element_set_render_depth(hudID, 9);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudShimmers[3] = hudID = hud_element_create(&HES_AimShimmerC);
+                hud_element_set_render_depth(hudID, 9);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudShimmers[5] = hudID = hud_element_create(&HES_AimShimmerA);
-            hud_element_set_render_depth(hudID, 9);
-            hud_element_set_render_pos(hudID, -100, -100);
+                hudShimmers[4] = hudID = hud_element_create(&HES_AimShimmerB);
+                hud_element_set_render_depth(hudID, 9);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudTarget = hudID = hud_element_create(&HES_AimTarget);
-            hud_element_set_render_depth(hudID, 10);
-            hud_element_create_transform_A(hudTarget);
-            hud_element_set_render_pos(hudID, -100, -100);
-            hudStickPosX = -48;
-            hudStickPosY = 80;
+                hudShimmers[5] = hudID = hud_element_create(&HES_AimShimmerA);
+                hud_element_set_render_depth(hudID, 9);
+                hud_element_set_render_pos(hudID, -100, -100);
 
-            hudStick = hudID = hud_element_create(&HES_StickHoldLeft);
-            hud_element_set_render_pos(hudID, hudStickPosX, hudStickPosY);
-            hud_element_set_render_depth(hudID, 0);
+                hudTarget = hudID = hud_element_create(&HES_AimTarget);
+                hud_element_set_render_depth(hudID, 10);
+                hud_element_create_transform_A(hudTarget);
+                hud_element_set_render_pos(hudID, -100, -100);
+                hudStickPosX = -48;
+                hudStickPosY = 80;
+
+                hudStick = hudID = hud_element_create(&HES_StickHoldLeft);
+                hud_element_set_render_pos(hudID, hudStickPosX, hudStickPosY);
+                hud_element_set_render_depth(hudID, 0);
+            }
 
             set_goal_pos_to_part(state, parakarry->targetActorID, parakarry->targetPartID);
             targetActor = get_actor(parakarry->targetActorID);
@@ -202,7 +205,10 @@ API_CALLABLE(N(ShellShotActionCommand)) {
             script->functionTemp[0] = 1;
             break;
         case 1:
-            if (gActionCommandStatus.autoSucceed || battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]) {
+            if (gActionCommandStatus.autoSucceed
+                    || battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS]
+                    || gBattleStatus.actionCommandMode == ACTION_COMMAND_MODE_NOT_LEARNED)
+            {
                 shellShotTimer = 0;
             }
 
@@ -224,6 +230,10 @@ API_CALLABLE(N(ShellShotActionCommand)) {
             script->functionTemp[0] = 2;
             break;
         case 2:
+            if (gBattleStatus.actionCommandMode == ACTION_COMMAND_MODE_NOT_LEARNED) {
+                script->functionTemp[0] = 3;
+                break;
+            }
             if (!(gActionCommandStatus.autoSucceed)) {
                 if (!(battleStatus->curButtonsDown & buttonChoices[actionCommandStatus->buttonIdxS])) {
                     script->functionTemp[0] = 3;
@@ -281,38 +291,42 @@ API_CALLABLE(N(ShellShotActionCommand)) {
                 battleStatus->actionQuality = -1;
             }
 
-            for (i = 0; i < ARRAY_COUNT(hudMarkers); i++) {
-                hud_element_free(hudMarkers[i]);
-            }
+            if (gBattleStatus.actionCommandMode == ACTION_COMMAND_MODE_LEARNED) {
+                for (i = 0; i < ARRAY_COUNT(hudMarkers); i++) {
+                    hud_element_free(hudMarkers[i]);
+                }
 
-            for (i = 0; i < ARRAY_COUNT(hudShimmers); i++) {
-                hud_element_free(hudShimmers[i]);
-            }
+                for (i = 0; i < ARRAY_COUNT(hudShimmers); i++) {
+                    hud_element_free(hudShimmers[i]);
+                }
 
-            hud_element_free(hudTarget);
-            hud_element_free(hudStick);
-            btl_set_popup_duration(0);
+                hud_element_free(hudTarget);
+                hud_element_free(hudStick);
+                btl_set_popup_duration(0);
+            }
             return ApiStatus_DONE2;
     }
 
     if (script->functionTemp[0] < 3) {
         if (script->functionTemp[0] > 0) {
-            hudID = hudStick;
             targetActor = get_actor(parakarry->targetActorID);
             clampedAngleDiff = get_clamped_angle_diff(state->angle, state->bounceDivisor);
             aimAngle = fabsf(clampedAngleDiff) / state->unk_24 * targetActor->scalingFactor;
-
-            if (aimAngle < 7.0f) {
-                hud_element_set_script(hudID, buttonHudsUp[actionCommandStatus->buttonIdxS]);
-            } else {
-                hud_element_set_script(hudID, buttonHudsDown[actionCommandStatus->buttonIdxS]);
-            }
 
             hudStickPosX += 20;
             if (hudStickPosX >= 51) {
                 hudStickPosX = 50;
             }
-            hud_element_set_render_pos(hudID, hudStickPosX, hudStickPosY);
+
+            if (gBattleStatus.actionCommandMode == ACTION_COMMAND_MODE_LEARNED) {
+                hudID = hudStick;
+                if (aimAngle < 7.0f) {
+                    hud_element_set_script(hudID, buttonHudsUp[actionCommandStatus->buttonIdxS]);
+                } else {
+                    hud_element_set_script(hudID, buttonHudsDown[actionCommandStatus->buttonIdxS]);
+                }
+                hud_element_set_render_pos(hudID, hudStickPosX, hudStickPosY);
+            }
         }
     }
 

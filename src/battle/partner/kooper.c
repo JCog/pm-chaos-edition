@@ -610,28 +610,29 @@ EvtScript N(shellToss) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
-    Wait(1)
-    SetF(LVarA, Float(8.0))
-    Switch(LVar9)
-        CaseLt(20 * DT)
-            SetF(LVarA, Float(10.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlowest)
-        CaseLt(30 * DT)
-            SetF(LVarA, Float(12.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlower)
-        CaseLt(40 * DT)
-            SetF(LVarA, Float(14.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFaster)
-        CaseLt(50 * DT)
-            SetF(LVarA, Float(16.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFastest)
-    EndSwitch
-    Add(LVar9, 1)
-    Call(GetActionSuccess, LVar0)
-    IfEq(LVar0, 0)
-        Goto(0)
-    EndIf
+    Loop(60)
+        Wait(1)
+        SetF(LVarA, Float(8.0))
+        Switch(LVar9)
+            CaseLt(20 * DT)
+                SetF(LVarA, Float(10.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlowest)
+            CaseLt(30 * DT)
+                SetF(LVarA, Float(12.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlower)
+            CaseLt(40 * DT)
+                SetF(LVarA, Float(14.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFaster)
+            CaseLt(50 * DT)
+                SetF(LVarA, Float(16.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFastest)
+        EndSwitch
+        Add(LVar9, 1)
+        Call(GetActionSuccess, LVar0)
+        IfEq(LVar0, 1)
+            BreakLoop
+        EndIf
+    EndLoop
     Call(PlaySoundAtActor, ACTOR_PARTNER, SOUND_PARAKARRY_AIR_RAID_1)
     Call(UseBattleCamPreset, BTL_CAM_VIEW_ENEMIES)
     Call(MoveBattleCamOver, 15)
@@ -780,28 +781,29 @@ EvtScript N(powerShell) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
-    Wait(1)
-    Set(LVarA, Float(8.0))
-    Switch(LVar9)
-        CaseLt(20)
-            Set(LVarA, Float(10.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlowest)
-        CaseLt(30)
-            Set(LVarA, Float(12.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlower)
-        CaseLt(40)
-            Set(LVarA, Float(14.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFaster)
-        CaseLt(50)
-            Set(LVarA, Float(16.0))
-            Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFastest)
-    EndSwitch
-    Add(LVar9, 1)
-    Call(GetActionSuccess, LVar0)
-    IfEq(LVar0, 0)
-        Goto(0)
-    EndIf
+    Loop(60)
+        Wait(1)
+        Set(LVarA, Float(8.0))
+        Switch(LVar9)
+            CaseLt(20)
+                Set(LVarA, Float(10.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlowest)
+            CaseLt(30)
+                Set(LVarA, Float(12.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinSlower)
+            CaseLt(40)
+                Set(LVarA, Float(14.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFaster)
+            CaseLt(50)
+                Set(LVarA, Float(16.0))
+                Call(SetAnimation, ACTOR_PARTNER, -1, ANIM_BattleKooper_ShellSpinFastest)
+        EndSwitch
+        Add(LVar9, 1)
+        Call(GetActionSuccess, LVar0)
+        IfEq(LVar0, 1)
+            BreakLoop
+        EndIf
+    EndLoop
     Call(SetActorVar, ACTOR_SELF, AVAR_Unk_0, 0)
     Call(PlaySoundAtActor, ACTOR_PARTNER, SOUND_PARAKARRY_AIR_RAID_2)
     Call(UseBattleCamPreset, BTL_CAM_VIEW_ENEMIES)

@@ -487,12 +487,13 @@ EvtScript N(EVS_Hammer_UseBasicQuake) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
+    Loop(60)
         Wait(1)
         Call(GetActionSuccess, LVar0)
-        IfEq(LVar0, 0)
-            Goto(0)
+        IfEq(LVar0, 1)
+            BreakLoop
         EndIf
+    EndLoop
     Call(PlaySoundAtActor, ACTOR_PLAYER, SOUND_HAMMER_SWING_1)
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB1_Smash1_PreSwing)
     Wait(3)
@@ -536,12 +537,13 @@ EvtScript N(EVS_Hammer_UseSuperQuake) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
+    Loop(60)
         Wait(1)
         Call(GetActionSuccess, LVar0)
-        IfEq(LVar0, 0)
-            Goto(0)
+        IfEq(LVar0, 1)
+            BreakLoop
         EndIf
+    EndLoop
     Call(PlaySoundAtActor, ACTOR_PLAYER, SOUND_HAMMER_SWING_2)
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB1_Smash2_PreSwing)
     Wait(3)
@@ -585,12 +587,13 @@ EvtScript N(EVS_Hammer_UseUltraQuake) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
+    Loop(60)
         Wait(1)
         Call(GetActionSuccess, LVar0)
-        IfEq(LVar0, 0)
-            Goto(0)
+        IfEq(LVar0, 1)
+            BreakLoop
         EndIf
+    EndLoop
     Call(PlaySoundAtActor, ACTOR_PLAYER, SOUND_HAMMER_SWING_3)
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB1_Smash3_PreSwing)
     Wait(3)

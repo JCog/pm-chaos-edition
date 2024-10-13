@@ -124,12 +124,13 @@ EvtScript N(EVS_UseMoveBasic_Impl) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
-    Wait(1)
-    Call(GetActionSuccess, LVar0)
-    IfEq(LVar0, 0)
-        Goto(0)
-    EndIf
+    Loop(60)
+        Wait(1)
+        Call(GetActionSuccess, LVar0)
+        IfEq(LVar0, 1)
+            BreakLoop
+        EndIf
+    EndLoop
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB2_SpinSmash1_PreSwing)
     Wait(3)
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB2_SpinSmash1_Swing)
@@ -246,12 +247,13 @@ EvtScript N(EVS_UseMoveSuper_Impl) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
-    Wait(1)
-    Call(GetActionSuccess, LVar0)
-    IfEq(LVar0, 0)
-        Goto(0)
-    EndIf
+    Loop(60)
+        Wait(1)
+        Call(GetActionSuccess, LVar0)
+        IfEq(LVar0, 1)
+            BreakLoop
+        EndIf
+    EndLoop
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB2_SpinSmash2_PreSwing)
     Wait(3)
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB2_SpinSmash2_Swing)
@@ -366,12 +368,13 @@ EvtScript N(EVS_UseMoveUltra_Impl) = {
             BreakLoop
         EndIf
     EndLoop
-    Label(0)
+    Loop(60)
         Wait(1)
         Call(GetActionSuccess, LVar0)
-        IfEq(LVar0, 0)
-            Goto(0)
+        IfEq(LVar0, 1)
+            BreakLoop
         EndIf
+    EndLoop
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB2_SpinSmash3_PreSwing)
     Wait(3)
     Call(SetAnimation, ACTOR_PLAYER, 0, ANIM_MarioB2_SpinSmash3_Swing)

@@ -238,21 +238,21 @@ void N(draw)(void) {
 
     if (gBattleStatus.actionCommandMode != ACTION_COMMAND_MODE_NOT_LEARNED) {
         hud_element_draw_clipped(actionCommandStatus->hudElements[0]);
+
+        hudElement1 = actionCommandStatus->hudElements[1];
+        hud_element_draw_clipped(hudElement1);
+        hud_element_get_render_pos(hudElement1, &hudX, &hudY);
+
+        if (air_lift_bss_0 == 0) {
+            draw_mash_meter_multicolor_with_divisor(hudX, hudY, actionCommandStatus->barFillLevel / 100, 1);
+        } else if (!actionCommandStatus->isBarFilled) {
+            draw_mash_meter_multicolor_with_divisor(hudX, hudY, actionCommandStatus->barFillLevel / 100, 4);
+        } else {
+            draw_mash_meter_blink_with_divisor(hudX, hudY, actionCommandStatus->barFillLevel / 100, 4);
+        }
+
+        hud_element_draw_clipped(actionCommandStatus->hudElements[2]);
     }
-
-    hudElement1 = actionCommandStatus->hudElements[1];
-    hud_element_draw_clipped(hudElement1);
-    hud_element_get_render_pos(hudElement1, &hudX, &hudY);
-
-    if (air_lift_bss_0 == 0) {
-        draw_mash_meter_multicolor_with_divisor(hudX, hudY, actionCommandStatus->barFillLevel / 100, 1);
-    } else if (!actionCommandStatus->isBarFilled) {
-        draw_mash_meter_multicolor_with_divisor(hudX, hudY, actionCommandStatus->barFillLevel / 100, 4);
-    } else {
-        draw_mash_meter_blink_with_divisor(hudX, hudY, actionCommandStatus->barFillLevel / 100, 4);
-    }
-
-    hud_element_draw_clipped(actionCommandStatus->hudElements[2]);
 }
 
 #include "common/free_hud_elements.inc.c"
